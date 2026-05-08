@@ -1,4 +1,5 @@
-:root {
+﻿:root {
+  --stage-scale: 1;
   --ink: #8b4a2d;
   --deep-ink: #431b25;
   --paper: rgba(255, 246, 218, 0.86);
@@ -9,19 +10,37 @@
   --shadow: rgba(105, 45, 8, 0.28);
 }
 
-* {
-  box-sizing: border-box;
+@font-face {
+  font-family: "ShangShouQingCheng";
+  src: url("../public/fonts/shangshou-qingcheng.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
 }
 
+@font-face {
+  font-family: "ShangShouHeFeng";
+  src: url("../public/fonts/shangshou-hefeng.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+
+* {
+  box-sizing: border-box;
+  font-synthesis: none;
+}
+
+html,
 body {
+  width: 100%;
+  height: 100%;
   margin: 0;
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
   overflow: hidden;
-  background: #f4e5c4;
+  background: #e8d2a5;
   color: var(--ink);
-  font-family: "STXingkai", "华文行楷", "KaiTi", "Microsoft YaHei", cursive;
+  font-family: "ShangShouHeFeng", "ShangShouQingCheng", serif;
+  font-weight: 400;
 }
 
 button,
@@ -34,15 +53,26 @@ button {
   border: 0;
   cursor: pointer;
   background: transparent;
+  font-weight: 400;
 }
 
+#app {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #e8d2a5;
+}
 .stage {
-  position: relative;
-  width: min(100vw, calc(100vh * 1.5384615));
-  aspect-ratio: 1280 / 832;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1280px;
+  height: 800px;
+  transform: translate(-50%, -50%) scale(var(--stage-scale));
+  transform-origin: center center;
   overflow: hidden;
   background: #f8eac8;
-  box-shadow: 0 22px 70px rgba(78, 41, 16, 0.26);
+  box-shadow: none;
   isolation: isolate;
 }
 
@@ -54,7 +84,7 @@ button {
   background-image: url("../Assets/背景.jpg");
   background-size: cover;
   background-position: center;
-  transform: scale(1.08);
+  transform: scale(1.08) translateY(-8px);
 }
 
 .stage::after {
@@ -106,11 +136,11 @@ button {
   left: 10.8%;
   margin: 0;
   color: var(--deep-ink);
-  font-size: clamp(2rem, 5.4vw, 4.7rem);
-  font-weight: 900;
+  font-family: "ShangShouQingCheng", "ShangShouHeFeng", serif;
+  font-size: 70px;
+  font-weight: 400;
   letter-spacing: 0;
   line-height: .9;
-  text-shadow: 0 2px 1px rgba(255, 240, 200, .6);
 }
 
 .round-btn {
@@ -124,12 +154,11 @@ button {
     radial-gradient(circle at 47% 44%, rgba(255, 230, 137, .96), rgba(199, 121, 38, .72) 55%, rgba(121, 80, 57, .62) 70%),
     url("../Assets/操作按钮.jpg");
   background-size: cover;
-  box-shadow: 0 4px 12px var(--shadow), inset 0 0 0 .28vw rgba(113, 69, 38, .34);
+  box-shadow: 0 4px 12px var(--shadow), inset 0 0 0 4px rgba(113, 69, 38, .34);
   color: #fff1ba;
-  font-family: Georgia, serif;
-  font-size: clamp(1.8rem, 4.2vw, 4.4rem);
+  font-family: "ShangShouQingCheng", "ShangShouHeFeng", serif;
+  font-size: 56px;
   line-height: 1;
-  text-shadow: 0 2px 0 #9e4d18;
 }
 
 .back-btn {
@@ -142,8 +171,8 @@ button {
   min-width: 12%;
   padding: .72em 1.8em .62em;
   border-radius: 999px;
-  font-size: clamp(1rem, 2.4vw, 2rem);
-  font-weight: 900;
+  font-size: 28px;
+  font-weight: 400;
   letter-spacing: .05em;
   box-shadow: 0 8px 16px rgba(129, 68, 17, .18), inset 0 2px 8px rgba(255,255,255,.45);
 }
@@ -155,21 +184,21 @@ button {
 
 .ui-btn.paper {
   background: var(--paper-solid);
-  box-shadow: inset 0 0 0 .18vw rgba(206, 152, 66, .7), 0 8px 18px var(--shadow);
+  box-shadow: inset 0 0 0 2px rgba(206, 152, 66, .7), 0 8px 18px var(--shadow);
 }
 
 .home-menu {
   position: absolute;
-  left: -1.4%;
-  top: 8.8%;
-  width: 31%;
-  height: 82.4%;
+  left: -8px;
+  top: 70px;
+  width: 394px;
+  height: 690px;
   border-radius: 0 8% 8% 0;
   background:
     linear-gradient(90deg, rgba(252, 246, 221, .96), rgba(255, 247, 221, .82)),
     url("../Assets/弹窗底图.webp");
   background-size: cover;
-  box-shadow: inset 0 0 0 .34vw rgba(197, 159, 68, .45), 0 16px 40px rgba(81, 41, 16, .22);
+  box-shadow: inset 0 0 0 4px rgba(197, 159, 68, .45), 0 16px 40px rgba(81, 41, 16, .22);
   transition: transform .35s ease;
 }
 
@@ -180,8 +209,8 @@ button {
 .menu-inner {
   display: flex;
   flex-direction: column;
-  gap: 5.5%;
-  padding: 14.6% 8% 8% 7%;
+  gap: 34px;
+  padding: 98px 62px 56px 30px;
   height: 100%;
 }
 
@@ -194,45 +223,45 @@ button {
   background-size: cover;
   border-radius: 18px;
   box-shadow:
-    inset 0 0 0 .22vw rgba(211, 159, 64, .72),
-    inset 0 0 0 .45vw rgba(255, 249, 224, .78),
+    inset 0 0 0 3px rgba(211, 159, 64, .72),
+    inset 0 0 0 6px rgba(255, 249, 224, .78),
     0 8px 16px rgba(122, 57, 22, .18);
   color: var(--ink);
-  font-size: clamp(1.45rem, 3.7vw, 3.7rem);
-  font-weight: 900;
+  font-size: 50px;
+  font-weight: 400;
   letter-spacing: .05em;
   min-height: 12.2%;
 }
 
 .menu-toggle {
   position: absolute;
-  top: 49%;
-  right: -8.5%;
-  width: 14%;
+  top: 330px;
+  right: -30px;
+  width: 54px;
   aspect-ratio: 1.16;
   border-radius: 22%;
   background: #fff4d8;
-  box-shadow: inset 0 0 0 .18vw rgba(213, 147, 61, .78), 0 6px 18px rgba(109, 52, 22, .2);
-  font-family: Georgia, serif;
-  font-size: clamp(1.6rem, 3vw, 3.4rem);
+  box-shadow: inset 0 0 0 2px rgba(213, 147, 61, .78), 0 6px 18px rgba(109, 52, 22, .2);
+  font-family: "ShangShouQingCheng", "ShangShouHeFeng", serif;
+  font-size: 40px;
   color: var(--ink);
-  font-weight: 900;
+  font-weight: 400;
 }
 
 .profile-card {
   position: absolute;
-  top: 3.8%;
-  right: 3.2%;
+  top: 30px;
+  right: 42px;
   z-index: 6;
-  width: 26.2%;
-  height: 15.2%;
+  width: 292px;
+  height: 126px;
   display: flex;
   align-items: center;
   gap: 6%;
   padding: 1.8% 3%;
   background: rgba(255, 247, 219, .82);
   border-radius: 9%;
-  box-shadow: inset 0 0 0 .2vw rgba(209, 162, 81, .55), 0 8px 16px rgba(91, 48, 19, .14);
+  box-shadow: inset 0 0 0 3px rgba(209, 162, 81, .55), 0 8px 16px rgba(91, 48, 19, .14);
 }
 
 .avatar-orb {
@@ -240,7 +269,7 @@ button {
   aspect-ratio: 1;
   border-radius: 50%;
   background: radial-gradient(circle at 42% 38%, #fffaf0, #e2d4b6 58%, #b27d3a 100%);
-  box-shadow: inset 0 0 0 .24vw rgba(139, 94, 40, .32);
+  box-shadow: inset 0 0 0 3px rgba(139, 94, 40, .32);
 }
 
 .profile-text {
@@ -250,34 +279,34 @@ button {
 }
 
 .profile-text b {
-  font-size: clamp(1.2rem, 2.4vw, 2.5rem);
+  font-size: 30px;
 }
 
 .profile-text small {
-  font-family: "Comic Sans MS", "KaiTi", cursive;
-  font-size: clamp(.75rem, 1.7vw, 1.55rem);
-  font-weight: 800;
+  font-family: "ShangShouHeFeng", "ShangShouQingCheng", serif;
+  font-size: 20px;
+  font-weight: 400;
 }
 
 .floating-tools {
   position: absolute;
-  right: 2.3%;
-  top: 33.7%;
+  right: 18px;
+  top: 280px;
   display: grid;
-  gap: 29%;
+  gap: 34px;
   z-index: 7;
 }
 
 .tool-btn {
-  width: 4.9vw;
+  width: 63px;
   max-width: 64px;
   min-width: 34px;
   aspect-ratio: 1;
   border-radius: 50%;
   background: rgba(255, 247, 219, .88);
-  box-shadow: inset 0 0 0 .18vw rgba(186, 135, 63, .68), 0 6px 14px var(--shadow);
-  font-family: Georgia, serif;
-  font-size: clamp(1.2rem, 2.4vw, 2.3rem);
+  box-shadow: inset 0 0 0 2px rgba(186, 135, 63, .68), 0 6px 14px var(--shadow);
+  font-family: "ShangShouQingCheng", "ShangShouHeFeng", serif;
+  font-size: 30px;
 }
 
 .home-cloud,
@@ -288,31 +317,31 @@ button {
 }
 
 .home-cloud {
-  right: 13.2%;
-  bottom: 25.5%;
-  width: 16.8%;
-  height: 15.8%;
+  right: 206px;
+  bottom: 225px;
+  width: 164px;
+  height: 104px;
   border-radius: 48% 55% 50% 45% / 58% 44% 54% 48%;
   box-shadow:
-    2.8vw -1.5vw 0 rgba(255, 253, 235, .82),
-    5.3vw .4vw 0 rgba(255, 253, 235, .82),
-    1.2vw 2.2vw 0 rgba(255, 253, 235, .82),
-    inset 0 0 0 .18vw rgba(210, 171, 79, .44);
+    36px -19px 0 rgba(255, 253, 235, .82),
+    54px 1px 0 rgba(255, 253, 235, .82),
+    15px 28px 0 rgba(255, 253, 235, .82),
+    inset 0 0 0 2px rgba(210, 171, 79, .44);
 }
 
 .king-cloud {
-  right: -1.4%;
-  bottom: -2.8%;
-  width: 16.8%;
-  height: 22%;
+  right: -26px;
+  bottom: -24px;
+  width: 210px;
+  height: 190px;
   border-radius: 54% 45% 40% 55% / 54% 48% 55% 45%;
 }
 
 .king-cloud img {
   position: absolute;
-  right: 7%;
-  bottom: 3%;
-  width: 76%;
+  right: 26px;
+  bottom: 12px;
+  width: 142px;
   height: auto;
   object-fit: contain;
 }
@@ -330,7 +359,7 @@ button {
     radial-gradient(circle at 28% 70%, rgba(255,251,226,.9) 0 21%, transparent 22%),
     rgba(255, 247, 209, .93);
   border-radius: 48% 52% 47% 53% / 44% 46% 54% 56%;
-  box-shadow: inset 0 0 0 .18vw rgba(218, 180, 82, .58), 0 10px 22px rgba(108, 51, 12, .16);
+  box-shadow: inset 0 0 0 2px rgba(218, 180, 82, .58), 0 10px 22px rgba(108, 51, 12, .16);
 }
 
 .ai-cloud-prompt {
@@ -339,8 +368,8 @@ button {
   left: 13%;
   width: 24.5%;
   height: 27%;
-  font-size: clamp(2rem, 4vw, 4.4rem);
-  font-weight: 900;
+  font-size: 58px;
+  font-weight: 400;
   line-height: 1.28;
 }
 
@@ -355,9 +384,8 @@ button {
   background:
     radial-gradient(circle at 45% 37%, rgba(255, 205, 192, .95), rgba(170, 91, 62, .8) 58%, rgba(88, 49, 36, .8) 100%);
   color: white;
-  font-family: "Comic Sans MS", cursive;
-  font-size: clamp(2.4rem, 5vw, 5.5rem);
-  text-shadow: 0 3px 0 rgba(107, 55, 40, .32);
+  font-family: "ShangShouHeFeng", "ShangShouQingCheng", serif;
+  font-size: 70px;
 }
 
 .ai-orbit {
@@ -371,8 +399,8 @@ button {
   height: 19%;
   display: grid;
   place-items: center;
-  font-size: clamp(2.8rem, 6vw, 6.5rem);
-  font-weight: 900;
+  font-size: 76px;
+  font-weight: 400;
 }
 
 .choice-a { left: 35%; top: 5.4%; }
@@ -392,7 +420,7 @@ button {
 .paper-step {
   min-height: 104px;
   padding: .6em .4em;
-  font-size: clamp(1.5rem, 3vw, 3.5rem);
+  font-size: 42px;
 }
 
 .ai-core {
@@ -400,8 +428,8 @@ button {
   left: 37%;
   top: 58%;
   color: white;
-  font-family: "Comic Sans MS", cursive;
-  font-size: clamp(2.8rem, 5vw, 5.6rem);
+  font-family: "ShangShouHeFeng", "ShangShouQingCheng", serif;
+  font-size: 72px;
   transform: rotate(-2deg);
 }
 
@@ -414,8 +442,8 @@ button {
   border-radius: 50%;
   color: white;
   background: linear-gradient(135deg, rgba(195, 82, 98, .85), rgba(224, 114, 93, .85));
-  font-family: Arial, sans-serif;
-  font-size: clamp(2rem, 5vw, 5rem);
+  font-family: "ShangShouHeFeng", "ShangShouQingCheng", serif;
+  font-size: 58px;
 }
 
 .status-pill {
@@ -429,8 +457,8 @@ button {
   border-radius: 999px;
   background: linear-gradient(90deg, rgba(197, 114, 29, .58), rgba(238, 177, 76, .62), rgba(198, 113, 28, .58));
   color: #874326;
-  font-size: clamp(1.7rem, 3.5vw, 3.8rem);
-  font-weight: 900;
+  font-size: 46px;
+  font-weight: 400;
 }
 
 .timer-row {
@@ -450,15 +478,15 @@ button {
   place-items: center;
   border-radius: 14%;
   background: rgba(255, 249, 222, .9);
-  box-shadow: inset 0 0 0 .2vw rgba(211, 159, 70, .72), 0 10px 22px var(--shadow);
-  font-size: clamp(3rem, 7vw, 7rem);
-  font-weight: 900;
+  box-shadow: inset 0 0 0 3px rgba(211, 159, 70, .72), 0 10px 22px var(--shadow);
+  font-size: 74px;
+  font-weight: 400;
 }
 
 .colon {
-  font-family: Georgia, serif;
-  font-size: clamp(4rem, 8vw, 8rem);
-  font-weight: 900;
+  font-family: "ShangShouQingCheng", "ShangShouHeFeng", serif;
+  font-size: 86px;
+  font-weight: 400;
 }
 
 .execute-actions {
@@ -476,7 +504,7 @@ button {
   width: 18%;
   height: auto;
   object-fit: contain;
-  filter: drop-shadow(0 1.6vw .8vw rgba(49, 37, 28, .35));
+  filter: drop-shadow(0 20px 10px rgba(49, 37, 28, .35));
 }
 
 .todo-board {
@@ -487,9 +515,9 @@ button {
   height: 75.5%;
   display: grid;
   grid-template-columns: 63% 1px 37%;
-  border-radius: 1.4vw;
+  border-radius: 18px;
   background: rgba(255, 224, 118, .54);
-  box-shadow: inset 0 0 3vw rgba(202, 117, 29, .65);
+  box-shadow: inset 0 0 38px rgba(202, 117, 29, .65);
   overflow: hidden;
 }
 
@@ -500,7 +528,7 @@ button {
 .todo-left h1 {
   margin: 0 0 4%;
   color: var(--ink);
-  font-size: clamp(3rem, 6vw, 6.6rem);
+  font-size: 82px;
   line-height: .9;
 }
 
@@ -513,15 +541,15 @@ button {
   display: flex;
   align-items: center;
   gap: 5%;
-  font-size: clamp(1.7rem, 3vw, 3.3rem);
-  font-weight: 900;
+  font-size: 42px;
+  font-weight: 400;
 }
 
 .todo-item input {
   appearance: none;
   width: 8%;
   aspect-ratio: 1;
-  border: .25vw solid var(--ink);
+  border: 3px solid var(--ink);
   border-radius: 50%;
   background: transparent;
 }
@@ -532,7 +560,7 @@ button {
 
 .todo-item span {
   flex: 1;
-  border-bottom: .28vw solid var(--ink);
+  border-bottom: 4px solid var(--ink);
   padding-bottom: .15em;
 }
 
@@ -554,8 +582,8 @@ button {
   aspect-ratio: 1;
   border-radius: 50%;
   background: rgba(255, 244, 207, .84);
-  box-shadow: inset 0 0 0 .22vw rgba(222, 137, 47, .7);
-  font-size: clamp(2.3rem, 5vw, 5rem);
+  box-shadow: inset 0 0 0 3px rgba(222, 137, 47, .7);
+  font-size: 62px;
 }
 
 .circle-plus { top: 12%; }
@@ -573,9 +601,9 @@ button {
   background:
     linear-gradient(180deg, transparent 0 22%, rgba(255, 242, 205, .94) 22% 100%);
   border-radius: 0 0 44% 44% / 0 0 12% 12%;
-  box-shadow: inset 0 0 0 .18vw rgba(158, 83, 35, .55), 0 8px 16px var(--shadow);
-  font-size: clamp(.9rem, 1.7vw, 1.6rem);
-  font-weight: 900;
+  box-shadow: inset 0 0 0 2px rgba(158, 83, 35, .55), 0 8px 16px var(--shadow);
+  font-size: 20px;
+  font-weight: 400;
 }
 
 .acorn-card::before {
@@ -584,7 +612,7 @@ button {
   inset: -11% -8% 72% -8%;
   border-radius: 55% 55% 30% 30%;
   background: linear-gradient(135deg, #855128, #d0a15e 45%, #81502c);
-  box-shadow: inset 0 0 0 .18vw rgba(83, 44, 25, .35);
+  box-shadow: inset 0 0 0 2px rgba(83, 44, 25, .35);
 }
 
 .side-tools {
@@ -592,19 +620,19 @@ button {
   right: 1.1%;
   top: 38%;
   display: grid;
-  gap: .8vw;
+  gap: 10px;
 }
 
 .side-tools button,
 .mini-cards {
-  width: 6.4vw;
+  width: 82px;
   max-width: 86px;
   aspect-ratio: 2.15;
   border-radius: 18%;
   background: rgba(255, 246, 219, .86);
-  box-shadow: inset 0 0 0 .16vw rgba(219, 142, 55, .75), 0 4px 12px rgba(106, 53, 16, .14);
-  font-family: Arial, sans-serif;
-  font-weight: 800;
+  box-shadow: inset 0 0 0 2px rgba(219, 142, 55, .75), 0 4px 12px rgba(106, 53, 16, .14);
+  font-family: "ShangShouHeFeng", "ShangShouQingCheng", serif;
+  font-weight: 400;
   color: #7c442a;
 }
 
@@ -613,7 +641,7 @@ button {
   right: 1.2%;
   top: 2.5%;
   height: 10%;
-  font-size: clamp(1.3rem, 3vw, 3rem);
+  font-size: 38px;
   transform: rotate(14deg);
 }
 
@@ -623,8 +651,8 @@ button {
   bottom: 16.8%;
   width: 11.8%;
   height: 15%;
-  font-size: clamp(1.6rem, 3.8vw, 4rem);
-  font-weight: 900;
+  font-size: 54px;
+  font-weight: 400;
   transform: rotate(-8deg);
 }
 
@@ -637,11 +665,11 @@ button {
 }
 
 .tab {
-  width: 13vw;
+  width: 164px;
   max-width: 164px;
   min-width: 94px;
   min-height: 78px;
-  font-size: clamp(1.6rem, 3vw, 3.2rem);
+  font-size: 40px;
 }
 
 .tab.active {
@@ -655,9 +683,9 @@ button {
   top: 17.2%;
   width: 78%;
   height: 79.4%;
-  border-radius: 1.4vw;
+  border-radius: 18px;
   background: rgba(245, 179, 77, .34);
-  box-shadow: inset 0 0 2.7vw rgba(172, 85, 18, .62);
+  box-shadow: inset 0 0 34px rgba(172, 85, 18, .62);
 }
 
 .library-panel {
@@ -675,9 +703,9 @@ button {
   align-content: start;
   gap: 2%;
   color: var(--ink);
-  font-size: clamp(1.4rem, 2.4vw, 2.6rem);
-  font-family: "Comic Sans MS", "KaiTi", cursive;
-  font-weight: 800;
+  font-size: 32px;
+  font-family: "ShangShouHeFeng", "ShangShouQingCheng", serif;
+  font-weight: 400;
 }
 
 .card-tile img {
@@ -700,8 +728,8 @@ button {
   border-radius: 999px;
   background: rgba(181, 125, 42, .62);
   color: var(--ink);
-  font-size: clamp(1.1rem, 2.3vw, 2.4rem);
-  font-weight: 900;
+  font-size: 30px;
+  font-weight: 400;
 }
 
 .achievement-panel {
@@ -718,8 +746,8 @@ button {
   padding: .7% 3%;
   border-radius: 999px;
   background: rgba(255, 249, 225, .78);
-  box-shadow: inset 0 0 0 .2vw rgba(210, 163, 72, .5), 0 6px 12px rgba(120, 65, 20, .12);
-  font-size: clamp(1rem, 2vw, 2rem);
+  box-shadow: inset 0 0 0 3px rgba(210, 163, 72, .5), 0 6px 12px rgba(120, 65, 20, .12);
+  font-size: 24px;
 }
 
 .achievement-row b,
@@ -728,7 +756,7 @@ button {
 }
 
 .achievement-row strong {
-  font-size: clamp(1.1rem, 2.2vw, 2.3rem);
+  font-size: 30px;
 }
 
 .seal {
@@ -736,15 +764,15 @@ button {
   aspect-ratio: 1;
   border-radius: 50%;
   background: #fff3c9;
-  box-shadow: inset 0 0 0 .22vw rgba(226, 144, 49, .58);
+  box-shadow: inset 0 0 0 3px rgba(226, 144, 49, .58);
 }
 
 .achievement-total {
   position: absolute;
   right: 3.2%;
   bottom: 1.5%;
-  font-size: clamp(2.2rem, 4vw, 4.6rem);
-  font-weight: 900;
+  font-size: 56px;
+  font-weight: 400;
 }
 
 .review-book {
@@ -756,7 +784,7 @@ button {
   padding: 3.5% 5.2%;
   border-radius: 3%;
   background: rgba(255, 250, 232, .86);
-  box-shadow: inset 0 0 0 .18vw rgba(178, 126, 54, .25), 12px 10px 0 rgba(181, 128, 58, .32), 0 10px 24px rgba(90, 52, 19, .16);
+  box-shadow: inset 0 0 0 2px rgba(178, 126, 54, .25), 12px 10px 0 rgba(181, 128, 58, .32), 0 10px 24px rgba(90, 52, 19, .16);
 }
 
 .date-pill {
@@ -766,8 +794,8 @@ button {
   place-items: center;
   border-radius: 999px;
   background: linear-gradient(180deg, rgba(226, 153, 69, .76), rgba(204, 115, 37, .62));
-  font-size: clamp(1.1rem, 2.1vw, 2.2rem);
-  font-weight: 900;
+  font-size: 26px;
+  font-weight: 400;
 }
 
 .review-book p {
@@ -776,14 +804,14 @@ button {
   gap: 3%;
   margin: 3.6% 0;
   color: #5b290c;
-  font-size: clamp(2rem, 3vw, 3.2rem);
-  font-family: Arial, sans-serif;
-  font-weight: 900;
+  font-size: 40px;
+  font-family: "ShangShouHeFeng", "ShangShouQingCheng", serif;
+  font-weight: 400;
 }
 
 .review-book p span {
   flex: 1;
-  height: .3vw;
+  height: 4px;
   background: var(--ink);
   border-radius: 50%;
 }
@@ -794,8 +822,8 @@ button {
   left: 53%;
   width: 15%;
   height: 14%;
-  font-size: clamp(1.3rem, 2.7vw, 3rem);
-  font-weight: 900;
+  font-size: 36px;
+  font-weight: 400;
 }
 
 .review-character {
@@ -811,26 +839,26 @@ button {
   right: 5%;
   top: 40%;
   display: grid;
-  gap: 2.6vw;
+  gap: 33px;
 }
 
 .review-actions button {
-  width: 9vw;
+  width: 115px;
   max-width: 130px;
   aspect-ratio: 1;
   display: grid;
   place-items: center;
   border-radius: 50%;
   background: rgba(255, 244, 211, .9);
-  box-shadow: inset 0 0 0 .22vw rgba(206, 123, 39, .68);
-  font-family: Arial, sans-serif;
-  font-size: clamp(2rem, 3.6vw, 4rem);
+  box-shadow: inset 0 0 0 3px rgba(206, 123, 39, .68);
+  font-family: "ShangShouHeFeng", "ShangShouQingCheng", serif;
+  font-size: 46px;
   color: var(--deep-ink);
 }
 
 .review-actions span {
   font-family: inherit;
-  font-size: clamp(.8rem, 1.5vw, 1.55rem);
+  font-size: 18px;
 }
 
 .profile-grid {
@@ -848,7 +876,7 @@ button {
   padding: 5% 6%;
   border-radius: 4%;
   background: rgba(232, 151, 54, .42);
-  box-shadow: inset 0 0 3vw rgba(203, 105, 25, .6);
+  box-shadow: inset 0 0 38px rgba(203, 105, 25, .6);
 }
 
 .profile-head {
@@ -866,23 +894,23 @@ button {
 
 .name-strip {
   flex: 1;
-  height: 4vw;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 4%;
   background: rgba(255, 250, 225, .76);
   border-radius: 999px;
-  box-shadow: inset 0 0 0 .16vw rgba(168, 104, 37, .4);
-  font-size: clamp(1.6rem, 3vw, 3.5rem);
-  font-weight: 900;
+  box-shadow: inset 0 0 0 2px rgba(168, 104, 37, .4);
+  font-size: 42px;
+  font-weight: 400;
 }
 
 .name-strip span {
   padding: .1em .5em;
   border-radius: 999px;
   background: rgba(224, 143, 51, .75);
-  font-size: clamp(.8rem, 1.5vw, 1.6rem);
+  font-size: 18px;
 }
 
 .setting-row,
@@ -892,15 +920,15 @@ button {
   grid-template-columns: 1fr auto auto;
   align-items: center;
   gap: 2%;
-  border-bottom: .12vw solid rgba(135, 72, 35, .38);
-  font-size: clamp(1.2rem, 2.35vw, 2.4rem);
-  font-weight: 900;
+  border-bottom: 1px solid rgba(135, 72, 35, .38);
+  font-size: 30px;
+  font-weight: 400;
 }
 
 .setting-row em,
 .code-input em {
   font-style: normal;
-  font-family: Georgia, serif;
+  font-family: "ShangShouQingCheng", "ShangShouHeFeng", serif;
   font-size: 1.5em;
 }
 
@@ -909,8 +937,8 @@ button {
   align-items: center;
   justify-content: space-between;
   margin-top: 5%;
-  font-size: clamp(1.1rem, 2.2vw, 2.3rem);
-  font-weight: 900;
+  font-size: 30px;
+  font-weight: 400;
 }
 
 .volume-row {
@@ -919,8 +947,8 @@ button {
   align-items: center;
   gap: 4%;
   height: 9%;
-  font-family: Arial, sans-serif;
-  font-size: clamp(1.4rem, 2.6vw, 2.8rem);
+  font-family: "ShangShouHeFeng", "ShangShouQingCheng", serif;
+  font-size: 34px;
   color: #4b2214;
 }
 
@@ -928,14 +956,14 @@ button {
   height: 42%;
   border-radius: 999px;
   background: linear-gradient(90deg, #9c5c34 0 75%, transparent 75%);
-  box-shadow: inset 0 0 0 .12vw #8f512e;
+  box-shadow: inset 0 0 0 1px #8f512e;
 }
 
 .code-input {
   margin-top: 4.5%;
   padding: 0 3%;
-  border: .12vw solid #6e391f;
-  border-radius: .6vw;
+  border: 1px solid #6e391f;
+  border-radius: 8px;
   min-height: 8%;
 }
 
@@ -943,8 +971,8 @@ button {
   position: absolute;
   bottom: 3%;
   right: 4%;
-  font-size: clamp(1.3rem, 2.6vw, 2.8rem);
-  font-weight: 900;
+  font-size: 34px;
+  font-weight: 400;
 }
 
 .draw-king {
@@ -960,9 +988,9 @@ button {
   left: 57%;
   top: 14%;
   color: #612b22;
-  font-family: "Comic Sans MS", cursive;
-  font-size: clamp(2rem, 4vw, 4.7rem);
-  font-weight: 900;
+  font-family: "ShangShouHeFeng", "ShangShouQingCheng", serif;
+  font-size: 58px;
+  font-weight: 400;
   transform: rotate(7deg);
   z-index: 2;
 }
@@ -1013,7 +1041,7 @@ button {
   border-radius: 999px;
   background: linear-gradient(180deg, rgba(177, 103, 46, .8), rgba(149, 73, 28, .74));
   color: white;
-  font-size: clamp(1rem, 1.8vw, 1.9rem);
+  font-size: 24px;
   letter-spacing: .1em;
 }
 
@@ -1035,8 +1063,8 @@ button {
   border-radius: 3%;
   background: url("../Assets/透明卡牌底图.png") center / cover no-repeat;
   filter: drop-shadow(0 0 24px rgba(241, 182, 75, .95));
-  font-size: clamp(1.5rem, 3vw, 3.3rem);
-  font-weight: 900;
+  font-size: 42px;
+  font-weight: 400;
 }
 
 .result-card img {
@@ -1050,7 +1078,7 @@ button {
   left: 7%;
   top: 20%;
   display: grid;
-  gap: 4vw;
+  gap: 50px;
 }
 
 .modal-layer {
@@ -1081,11 +1109,11 @@ button {
 
 .message-modal h2 {
   margin: 0 0 10%;
-  font-size: clamp(3rem, 6vw, 6.8rem);
+  font-size: 84px;
 }
 
 .message-modal p {
-  font-size: clamp(1.5rem, 3vw, 3.2rem);
+  font-size: 40px;
   text-align: center;
 }
 
@@ -1103,7 +1131,7 @@ button {
 .cloud-modal h2 {
   margin: 0;
   text-align: center;
-  font-size: clamp(3rem, 5.7vw, 6.3rem);
+  font-size: 78px;
   line-height: 1.35;
 }
 
@@ -1129,8 +1157,8 @@ button {
 }
 
 .text-choice {
-  font-size: clamp(1.5rem, 2.8vw, 3rem);
-  font-weight: 900;
+  font-size: 38px;
+  font-weight: 400;
 }
 
 .paper-dialog {
@@ -1138,27 +1166,27 @@ button {
   min-height: 28%;
   display: grid;
   align-content: center;
-  gap: 1.5vw;
+  gap: 19px;
   padding: 3%;
-  border-radius: 1.2vw;
+  border-radius: 15px;
   background: rgba(255, 247, 220, .96);
-  box-shadow: inset 0 0 0 .18vw rgba(205, 148, 58, .65), 0 20px 50px rgba(50, 24, 8, .26);
+  box-shadow: inset 0 0 0 2px rgba(205, 148, 58, .65), 0 20px 50px rgba(50, 24, 8, .26);
 }
 
 .paper-dialog h2 {
   margin: 0;
-  font-size: clamp(1.8rem, 3.4vw, 3.7rem);
+  font-size: 46px;
 }
 
 .paper-dialog input {
   width: 100%;
-  min-height: 3.5vw;
-  border: .14vw solid rgba(139, 74, 45, .55);
-  border-radius: .5vw;
-  padding: 0 1vw;
+  min-height: 44px;
+  border: 2px solid rgba(139, 74, 45, .55);
+  border-radius: 6px;
+  padding: 0 13px;
   color: var(--ink);
   background: rgba(255, 255, 245, .75);
-  font-size: clamp(1rem, 1.8vw, 1.9rem);
+  font-size: 24px;
 }
 
 .card-modal-layer {
@@ -1177,7 +1205,7 @@ button {
 .collected-card,
 .card-info {
   height: 100%;
-  border-radius: 1vw;
+  border-radius: 13px;
 }
 
 .collected-card {
@@ -1186,8 +1214,8 @@ button {
   align-content: center;
   gap: 2%;
   background: url("../Assets/透明卡牌底图.png") center / cover no-repeat;
-  font-size: clamp(1.8rem, 3.2vw, 3.5rem);
-  font-weight: 900;
+  font-size: 42px;
+  font-weight: 400;
 }
 
 .collected-card img {
@@ -1200,9 +1228,9 @@ button {
   padding: 5% 7%;
   background: rgba(67, 42, 31, .82);
   color: #f6dca9;
-  box-shadow: inset 0 0 0 .2vw rgba(239, 192, 102, .56), 0 0 22px rgba(255, 211, 100, .28);
-  font-family: "Microsoft YaHei", sans-serif;
-  font-size: clamp(.85rem, 1.5vw, 1.45rem);
+  box-shadow: inset 0 0 0 3px rgba(239, 192, 102, .56), 0 0 22px rgba(255, 211, 100, .28);
+  font-family: "ShangShouHeFeng", "ShangShouQingCheng", serif;
+  font-size: 18px;
   line-height: 1.55;
 }
 
@@ -1212,8 +1240,6 @@ button {
   border-bottom: 1px solid rgba(237, 201, 130, .5);
 }
 
-@media (max-aspect-ratio: 1280/832) {
-  .stage {
-    width: 100vw;
-  }
-}
+
+
+

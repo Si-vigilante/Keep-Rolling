@@ -15,6 +15,11 @@ const app = document.querySelector("#app");
 
 const routeClass = () => `route-${state.route}`;
 
+function updateStageScale() {
+  const scale = Math.max(window.innerWidth / 1280, window.innerHeight / 800);
+  document.documentElement.style.setProperty("--stage-scale", scale.toString());
+}
+
 function setRoute(route) {
   state.route = route;
   state.modal = null;
@@ -480,4 +485,6 @@ app.addEventListener("change", (event) => {
   render();
 });
 
+window.addEventListener("resize", updateStageScale);
+updateStageScale();
 render();
