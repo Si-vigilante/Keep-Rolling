@@ -1,5 +1,5 @@
 import { achievements, asset, beetles, cards, navItems, profileRows, tasks, todos as todoSeed } from "./data.js";
-import { createAiTaskBreakdown, createTodosFromAi, makeTodo, resolveTask, rewardCardForTask } from "./mockServices.js";
+import { createAiTaskBreakdown, createTodosFromAi, makeTodo, rewardCardForTask, taskFromTodo } from "./mockServices.js";
 
 const ROUTES = {
   HOME: "home",
@@ -21,6 +21,7 @@ const state = {
   modal: null,
   toast: null,
   selectedTask: tasks[0],
+  selectedTodoId: todoSeed[0].id,
   selectedCard: cards[0],
   todos: structuredClone(todoSeed),
   aiPhase: "input",
@@ -34,6 +35,18 @@ const state = {
 
 const app = document.querySelector("#app");
 let toastTimer;
+let pendingTimer;
+
+const routeMeta = {
+  [ROUTES.HOME]: { resetOnEnter: true },
+  [ROUTES.AI]: { resetOnFreshEnter: true },
+  [ROUTES.TODO]: {},
+  [ROUTES.EXECUTE]: {},
+  [ROUTES.REVIEW]: {},
+  [ROUTES.CARDS]: {},
+  [ROUTES.PROFILE]: {},
+  [ROUTES.DRAW]: { resetOnFreshEnter: true },
+};
 
 function updateStageScale() {
   const scale = Math.max(window.innerWidth / 1280, window.innerHeight / 800);
@@ -44,31 +57,104 @@ function routeClass() {
   return `route-${state.route} nav-${state.transition}`;
 }
 
-function navigate(route, direction = "forward") {
+function resetFlowState(destination = ROUTES.HOME) {
+  clearTimeout(pendingTimer);
+  state.modal = null;
+  state.toast = null;
+  if ([ROUTES.HOME, ROUTES.CARDS, ROUTES.REVIEW].includes(destination)) {
+    state.aiPhase = "input";
+    state.aiSteps = [];
+    state.drawnCard = null;
+    state.drawPhase = "selecting";
+    state.executeStatus = "idle";
+  }
+}
+
+function syncRouteState(route, options = {}) {
+  if (route === ROUTES.HOME && routeMeta[route].resetOnEnter) {
+    resetFlowState(route);
+  }
+
+  if (route === ROUTES.AI && routeMeta[route].resetOnFreshEnter && options.fresh) {
+    state.aiPhase = "input";
+    state.aiSteps = [];
+  }
+
+  if (route === ROUTES.DRAW && routeMeta[route].resetOnFreshEnter && options.fresh) {
+    state.drawnCard = null;
+    state.drawPhase = "selecting";
+  }
+
+  if (route === ROUTES.TODO && !state.todos.some((todo) => todo.id === state.selectedTodoId)) {
+    state.selectedTodoId = state.todos[0]?.id ?? null;
+  }
+
+  if (route === ROUTES.TODO) normalizeTodoSelection();
+
+  if (route === ROUTES.EXECUTE && state.executeStatus === "idle") {
+    state.executeStatus = "running";
+  }
+}
+
+function setHistory(route, mode) {
+  if (mode === "reset") {
+    state.history = [route];
+    return;
+  }
+
+  if (mode === "replace") {
+    state.history = [...state.history.slice(0, -1), route];
+    if (!state.history.length) state.history = [route];
+    return;
+  }
+
+  if (mode === "push") {
+    if (state.history[state.history.length - 1] !== route) {
+      state.history = [...state.history, route];
+    }
+  }
+}
+
+function navigate(route, options = {}) {
+  const mode = options.mode || "push";
+  const direction = options.direction || (mode === "back" ? "back" : "forward");
   if (!route || route === state.route) return;
+  if (!options.fromPending) clearTimeout(pendingTimer);
   state.previousRoute = state.route;
   state.route = route;
   state.transition = direction;
   state.modal = null;
-  if (direction === "forward") {
-    state.history.push(route);
-  }
-  if (route === ROUTES.EXECUTE && state.executeStatus === "idle") {
-    state.executeStatus = "running";
-  }
-  if (route === ROUTES.DRAW && state.drawPhase !== "revealed") {
-    state.drawnCard = null;
-    state.drawPhase = "selecting";
-  }
+  if (mode !== "back") setHistory(route, mode);
+  syncRouteState(route, { fresh: options.fresh ?? (mode === "push" && state.previousRoute === ROUTES.HOME) });
   render();
+}
+
+function navigateFlowEnd(route) {
+  resetFlowState(route);
+  if (route === ROUTES.HOME) {
+    navigate(ROUTES.HOME, { mode: "reset", direction: "back" });
+    return;
+  }
+  state.history = [ROUTES.HOME];
+  navigate(route, { mode: "push", direction: "forward", fresh: false });
 }
 
 function goBack() {
   if (state.route === ROUTES.HOME) return;
+  clearTimeout(pendingTimer);
   const previous = state.history.length > 1 ? state.history[state.history.length - 2] : ROUTES.HOME;
   state.history = state.history.slice(0, -1);
-  navigate(previous, "back");
+  state.previousRoute = state.route;
+  state.route = previous;
+  state.transition = "back";
+  state.modal = null;
   state.history = state.history.length ? state.history : [ROUTES.HOME];
+  syncRouteState(previous, { fresh: false });
+  render();
+}
+
+function finishToHome() {
+  navigate(ROUTES.HOME, { mode: "reset", direction: "back" });
 }
 
 function setModal(modal) {
@@ -89,6 +175,30 @@ function showToast(message) {
     state.toast = null;
     render();
   }, 1800);
+}
+
+function selectedTodo() {
+  return state.todos.find((todo) => todo.id === state.selectedTodoId) || state.todos[0];
+}
+
+function selectTodo(todoId) {
+  const todo = state.todos.find((item) => item.id === Number(todoId));
+  if (!todo) return;
+  state.selectedTodoId = todo.id;
+  state.selectedTask = taskFromTodo(todo);
+}
+
+function normalizeTodoSelection() {
+  if (!state.todos.length) {
+    state.selectedTodoId = null;
+    state.selectedTask = tasks[0];
+    return;
+  }
+
+  if (!state.todos.some((todo) => todo.id === state.selectedTodoId)) {
+    state.selectedTodoId = state.todos[0].id;
+  }
+  selectTodo(state.selectedTodoId);
 }
 
 function button(label, className = "", attrs = "") {
@@ -165,7 +275,7 @@ function renderAi() {
         <div class="task-steps">
           ${state.aiSteps.map((step) => `<button class="paper-step" data-action="toast" data-toast="${step.detail}">${step.title}</button>`).join("")}
         </div>
-        <button class="ai-core" data-action="confirm-ai">${state.aiPhase === "confirmed" ? "Added!" : "Go For It!"}</button>
+        <button class="ai-core ${state.aiPhase === "confirmed" ? "is-confirmed" : ""}" data-action="confirm-ai">${state.aiPhase === "confirmed" ? "Added!" : "Go For It!"}</button>
         <button class="sync-btn" data-action="reset-ai" aria-label="重新拆解">↻</button>
       </section>
     `;
@@ -204,6 +314,8 @@ function renderExecute() {
 }
 
 function renderTodo() {
+  const currentTodo = selectedTodo();
+  const currentTask = currentTodo ? taskFromTodo(currentTodo) : state.selectedTask;
   return `
     <section class="page todo-page">
       ${backButton()}
@@ -215,9 +327,9 @@ function renderTodo() {
             ${state.todos
               .map(
                 (todo) => `
-                  <label class="todo-item ${state.selectedTask.id === todo.id ? "selected" : ""}">
+                  <label class="todo-item ${state.selectedTodoId === todo.id ? "selected" : ""}">
                     <input type="checkbox" data-todo="${todo.id}" ${todo.done ? "checked" : ""} />
-                    <button data-action="select-todo" data-task="${todo.id}">${todo.name}</button>
+                    <button data-action="select-todo" data-todo-id="${todo.id}">${todo.name}</button>
                   </label>
                 `,
               )
@@ -229,9 +341,10 @@ function renderTodo() {
           <button class="circle-plus" data-modal="todo-new" aria-label="新增任务">＋</button>
           <button class="circle-minus" data-action="ask-remove-done" aria-label="删除已完成">－</button>
           <button class="acorn-card" data-modal="todo-detail">
-            <strong>${state.selectedTask.name}</strong>
-            ${state.selectedTask.detail.map((line) => `<span>${line}</span>`).join("")}
+            <strong>${currentTask.name}</strong>
+            ${currentTask.detail.map((line) => `<span>${line}</span>`).join("")}
           </button>
+          ${button("开始执行", "todo-execute", 'data-action="execute-selected"')}
         </div>
       </div>
       <div class="side-tools">
@@ -350,11 +463,11 @@ function renderDraw() {
     <section class="page draw-page">
       ${backButton()}
       <h1 class="page-title">抽卡</h1>
-      <button class="history-btn" data-route="cards">历史</button>
+      <button class="history-btn" data-route="cards" data-mode="push">历史</button>
       <img class="draw-king" src="${beetles.king}" alt="螂王" />
       <div class="pick-one">Pick One</div>
       <div class="card-fan ${state.drawPhase === "revealed" ? "has-pick" : ""}">
-        ${cards.slice(0, 6).map((card, index) => `<button class="fan-card fan-${index} ${picked?.id === card.id ? "picked" : ""}" data-draw="${card.id}"><img src="${asset("透明卡牌背面.png")}" alt="抽卡" /></button>`).join("")}
+        ${cards.slice(0, 6).map((card, index) => `<button class="fan-card fan-${index} ${picked?.id === card.id ? "picked" : ""}" data-draw="${card.id}" ${picked ? "disabled" : ""}><img src="${asset("透明卡牌背面.png")}" alt="抽卡" /></button>`).join("")}
       </div>
       <div class="draw-tip">选择一张卡片，开启你的任务之旅吧!</div>
       ${
@@ -373,8 +486,9 @@ function toastMarkup() {
   return state.toast ? `<div class="toast" role="status">${state.toast}</div>` : "";
 }
 
-function modalShell(content, className = "") {
-  return `<div class="modal-layer ${className}" data-action="close-modal">${content}</div>`;
+function modalShell(content, className = "", options = {}) {
+  const dismiss = options.dismissible === false ? "false" : "true";
+  return `<div class="modal-layer ${className}" data-dismissible="${dismiss}">${content}</div>`;
 }
 
 function modalMarkup() {
@@ -398,12 +512,13 @@ function modalMarkup() {
       <div class="cloud-modal">
         <h2>我就知道<br />你可以的</h2>
         <p class="reward-line">获得：${reward.title}</p>
-        ${button("查看卡牌", "orange", 'data-route="cards" data-tab="cards"')}
-        ${button("任务回顾", "orange", 'data-route="review"')}
+        ${button("查看卡牌", "orange", 'data-action="finish-to-cards"')}
+        ${button("任务回顾", "orange", 'data-action="finish-to-review"')}
+        ${button("返回首页", "paper", 'data-action="finish-home"')}
         <img src="${beetles.worker}" alt="小二螂" />
         <img class="gold-ball" src="${asset("Golden Dung Ball.jpg")}" alt="奖励金球" />
       </div>
-    `, "golden");
+    `, "golden", { dismissible: false });
   }
 
   if (state.modal === "cancel" || state.modal === "logout" || state.modal === "remove-done") {
@@ -419,7 +534,7 @@ function modalMarkup() {
         ${button(copy[1], "orange", 'data-action="close-modal"')}
         <button class="text-choice" data-action="${copy[3]}">${copy[2]}</button>
       </div>
-    `, "dark");
+    `, "dark", { dismissible: false });
   }
 
   if (state.modal === "todo-new" || state.modal === "todo-detail") {
@@ -429,7 +544,7 @@ function modalMarkup() {
         <h2>${isDetail ? "任务详情" : "新增任务"}</h2>
         <input id="newTaskName" value="${isDetail ? state.selectedTask.name : ""}" placeholder="任务名：请输入" />
         ${button(isDetail ? "保存" : "加入待办", "orange", `data-action="${isDetail ? "save-task" : "add-todo"}"`)}
-        ${isDetail ? button("开始执行", "paper", 'data-route="execute"') : ""}
+        ${isDetail ? button("开始执行", "paper", 'data-action="execute-selected"') : ""}
       </div>
     `);
   }
@@ -483,9 +598,10 @@ function render() {
 function handleRoute(target) {
   const tab = target.dataset.tab;
   const profileTab = target.dataset.profileTab;
+  const mode = target.dataset.mode || "push";
   if (tab) state.cardTab = tab;
   if (profileTab) state.profileTab = profileTab;
-  navigate(target.dataset.route);
+  navigate(target.dataset.route, { mode, fresh: true });
 }
 
 function handleAction(action, target) {
@@ -500,10 +616,14 @@ function handleAction(action, target) {
     render();
   }
   if (action === "confirm-ai") {
+    if (state.aiPhase === "confirmed") return;
     state.todos = [...createTodosFromAi(state.aiSteps), ...state.todos];
+    state.selectedTodoId = state.todos[0].id;
+    state.selectedTask = taskFromTodo(state.todos[0]);
     state.aiPhase = "confirmed";
     showToast("已加入任务池");
-    setTimeout(() => navigate(ROUTES.DRAW), 760);
+    clearTimeout(pendingTimer);
+    pendingTimer = setTimeout(() => navigate(ROUTES.TODO, { mode: "replace", direction: "forward", fromPending: true }), 900);
   }
   if (action === "reset-ai") {
     state.aiPhase = "input";
@@ -519,10 +639,11 @@ function handleAction(action, target) {
     setModal("complete");
   }
   if (action === "ask-abandon") setModal("cancel");
-  if (action === "abandon-task") navigate(ROUTES.HOME, "back");
+  if (action === "abandon-task") finishToHome();
   if (action === "ask-remove-done") setModal("remove-done");
   if (action === "remove-done") {
     state.todos = state.todos.filter((todo) => !todo.done);
+    normalizeTodoSelection();
     closeModal();
     showToast("已删除完成项");
   }
@@ -539,20 +660,32 @@ function handleAction(action, target) {
   if (action === "add-todo") {
     const input = document.querySelector("#newTaskName");
     const value = input?.value?.trim() || "新的任务";
-    state.todos.push(makeTodo(value));
+    const todo = makeTodo(value);
+    state.todos.push(todo);
+    selectTodo(todo.id);
     closeModal();
     showToast("已加入待办");
   }
   if (action === "save-task") {
     const input = document.querySelector("#newTaskName");
     const value = input?.value?.trim();
-    if (value) state.selectedTask = { ...state.selectedTask, name: value };
+    if (value) {
+      state.selectedTask = { ...state.selectedTask, name: value.replace(/^任务名：/, "") };
+      state.todos = state.todos.map((todo) => (todo.id === state.selectedTodoId ? { ...todo, name: value.startsWith("任务名：") ? value : `任务名：${value}` } : todo));
+    }
     closeModal();
     showToast("任务已更新");
   }
   if (action === "select-todo") {
-    state.selectedTask = resolveTask(target.dataset.task);
-    setModal("todo-detail");
+    selectTodo(target.dataset.todoId);
+    showToast("已选中任务");
+    render();
+  }
+  if (action === "execute-selected") {
+    const todo = selectedTodo();
+    if (todo) state.selectedTask = taskFromTodo(todo);
+    state.executeStatus = "running";
+    navigate(ROUTES.EXECUTE, { mode: "push", direction: "forward" });
   }
   if (action === "redraw") {
     state.drawnCard = null;
@@ -562,12 +695,18 @@ function handleAction(action, target) {
   if (action === "confirm-draw") {
     state.selectedTask = tasks.find((task) => task.name === state.drawnCard?.title) || tasks[0];
     state.executeStatus = "running";
-    navigate(ROUTES.EXECUTE);
+    navigate(ROUTES.EXECUTE, { mode: "replace", direction: "forward" });
   }
   if (action === "confirm-logout") {
     closeModal();
     showToast("已退出登录");
   }
+  if (action === "finish-to-cards") {
+    state.cardTab = "cards";
+    navigateFlowEnd(ROUTES.CARDS);
+  }
+  if (action === "finish-to-review") navigateFlowEnd(ROUTES.REVIEW);
+  if (action === "finish-home") finishToHome();
   if (action === "toast") showToast(target.dataset.toast || "功能稍后接入");
 }
 
@@ -575,7 +714,7 @@ app.addEventListener("click", (event) => {
   const target = event.target.closest("button");
 
   if (!target && event.target.classList.contains("modal-layer")) {
-    closeModal();
+    if (event.target.dataset.dismissible !== "false") closeModal();
     return;
   }
 

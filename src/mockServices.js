@@ -25,6 +25,22 @@ export function makeTodo(name) {
   };
 }
 
+export function taskFromTodo(todo) {
+  const cleanName = todo.name.replace(/^任务名：/, "");
+  const matchedTask = tasks.find((task) => task.id === Number(todo.id) || task.name === cleanName);
+  if (matchedTask) return matchedTask;
+
+  return {
+    id: todo.id,
+    name: cleanName,
+    owner: "待办任务",
+    time: "待开始",
+    status: todo.done ? "complete" : "pending",
+    detail: ["确认任务目标", "整理所需材料", "专注完成当前步骤"],
+    reward: "今日坚持卡",
+  };
+}
+
 export function resolveTask(taskId) {
   return tasks.find((task) => task.id === Number(taskId)) || tasks[0];
 }

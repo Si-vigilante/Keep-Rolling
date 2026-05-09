@@ -145,7 +145,7 @@ button {
 @keyframes pageIn {
   from {
     opacity: 0;
-    transform: translateY(16px) scale(.992);
+    transform: translateY(18px) scale(.99);
   }
   to {
     opacity: 1;
@@ -156,7 +156,7 @@ button {
 @keyframes pageBackIn {
   from {
     opacity: 0;
-    transform: translateY(-10px) scale(.996);
+    transform: translateY(-14px) scale(.996);
   }
   to {
     opacity: 1;
@@ -169,7 +169,7 @@ button:hover {
 }
 
 button:active {
-  transform: translateY(2px) scale(.985);
+  transform: translateY(1px) scale(.992);
 }
 
 .page-title {
@@ -475,6 +475,10 @@ button:active {
   transform: rotate(-2deg);
 }
 
+.ai-core.is-confirmed {
+  filter: brightness(1.08) saturate(1.1);
+}
+
 .sync-btn {
   position: absolute;
   right: 4.8%;
@@ -600,6 +604,11 @@ button:active {
   filter: saturate(1.2);
 }
 
+.todo-item.selected button {
+  color: var(--deep-ink);
+  text-shadow: 0 1px 0 rgba(255, 244, 203, .45);
+}
+
 .todo-item input {
   appearance: none;
   width: 8%;
@@ -673,6 +682,17 @@ button:active {
   border-radius: 55% 55% 30% 30%;
   background: linear-gradient(135deg, #855128, #d0a15e 45%, #81502c);
   box-shadow: inset 0 0 0 2px rgba(83, 44, 25, .35);
+}
+
+.todo-execute {
+  position: absolute;
+  right: 10%;
+  bottom: 9%;
+  min-width: 42%;
+  padding: .55em .9em .48em;
+  background: rgba(255, 245, 215, .9);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 2px rgba(206, 123, 39, .55), 0 8px 16px rgba(106, 53, 16, .14);
 }
 
 .side-tools {
@@ -1238,6 +1258,10 @@ button:active {
 
 .modal-layer.dark {
   background: rgba(0, 0, 0, .68);
+}
+
+.modal-layer[data-dismissible="false"] {
+  cursor: default;
 }
 
 .modal-layer.golden {
