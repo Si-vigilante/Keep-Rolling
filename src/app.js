@@ -1,5 +1,6 @@
 import { achievements, asset, beetles, cards, navItems, profileRows, tasks, todos as todoSeed } from "./data.js";
 import { createAiTaskBreakdown, createTodosFromAi, makeTodo, rewardCardForTask, taskFromTodo } from "./mockServices.js";
+const design = (name) => `./Page_View/${name}`;
 
 const ROUTES = {
   HOME: "home",
@@ -202,19 +203,23 @@ function normalizeTodoSelection() {
 }
 
 function button(label, className = "", attrs = "") {
-  return `<button class="ui-btn ${className}" ${attrs}>${label}</button>`;
+  return `<button class="ui-btn ${className}" ${attrs}><span>${label}</span></button>`;
+}
+
+function designFrame(name, className = "") {
+  return `<div class="page-design ${className}" style="background-image:url('${design(name)}')"></div>`;
 }
 
 function backButton(extra = "") {
-  return `<button class="round-btn back-btn" data-action="${extra || "back"}" aria-label="返回">←</button>`;
+  return `<button class="round-btn back-btn" data-action="${extra || "back"}" aria-label="返回"><img src="${asset("操作按钮4.png")}" alt="" /><span>返回</span></button>`;
 }
 
 function homeTools() {
   return `
     <div class="floating-tools">
-      <button class="tool-btn" data-route="profile" data-profile-tab="settings" aria-label="设置">⚙</button>
-      <button class="tool-btn" data-modal="message" aria-label="消息">✉</button>
-      <button class="tool-btn" data-modal="notice" aria-label="提醒">♟</button>
+      <button class="tool-btn tool-gear" data-route="profile" data-profile-tab="settings" aria-label="设置"><img src="${asset("操作按钮1.png")}" alt="" /></button>
+      <button class="tool-btn tool-mail" data-modal="message" aria-label="消息"><img src="${asset("操作按钮2.png")}" alt="" /></button>
+      <button class="tool-btn tool-bell" data-modal="notice" aria-label="提醒"><img src="${asset("操作按钮3.png")}" alt="" /></button>
     </div>
   `;
 }
@@ -241,23 +246,27 @@ function kingMascot() {
 }
 
 function renderHome() {
-  const nav = navItems
-    .map((item) => {
-      const target = item.id === "tasks" ? ROUTES.DRAW : item.id;
-      return `<button class="menu-paper" data-route="${target}">${item.label}</button>`;
-    })
-    .join("");
-
   return `
     <section class="page home-page">
-      ${profileCard()}
-      ${homeTools()}
-      <aside class="home-menu ${state.menuOpen ? "open" : "closed"}">
-        <div class="menu-inner">${nav}</div>
-        <button class="menu-toggle" data-action="toggle-menu">«</button>
-      </aside>
-      <div class="home-cloud"></div>
-      ${kingMascot()}
+      ${designFrame(state.menuOpen ? "主页2-王紫涵.png" : "主页1-王紫涵.png", "home-design")}
+      <button class="hotspot home-profile-hotspot" data-route="profile" aria-label="个人中心"></button>
+      <button class="hotspot home-tool-hotspot tool-gear-hotspot" data-route="profile" data-profile-tab="settings" aria-label="设置"></button>
+      <button class="hotspot home-tool-hotspot tool-mail-hotspot" data-modal="message" aria-label="消息"></button>
+      <button class="hotspot home-tool-hotspot tool-bell-hotspot" data-modal="notice" aria-label="提醒"></button>
+      <button class="hotspot home-toggle-hotspot" data-action="toggle-menu" aria-label="${state.menuOpen ? "收起菜单" : "展开菜单"}"></button>
+      ${
+        state.menuOpen
+          ? `
+            <button class="hotspot home-menu-hotspot menu-ai" data-route="ai" aria-label="AI任务拆解"></button>
+            <button class="hotspot home-menu-hotspot menu-draw" data-route="draw" aria-label="任务选择"></button>
+            <button class="hotspot home-menu-hotspot menu-todo" data-route="todo" aria-label="待办管理"></button>
+            <button class="hotspot home-menu-hotspot menu-review" data-route="review" aria-label="任务回顾"></button>
+            <button class="hotspot home-menu-hotspot menu-cards" data-route="cards" aria-label="卡片收藏"></button>
+          `
+          : ""
+      }
+      <button class="hotspot home-cloud-hotspot" data-modal="notice" aria-label="云朵提示"></button>
+      <button class="hotspot home-king-hotspot" data-route="profile" aria-label="螂王"></button>
     </section>
   `;
 }
@@ -266,49 +275,36 @@ function renderAi() {
   if (state.aiPhase === "generated" || state.aiPhase === "confirmed") {
     return `
       <section class="page ai-page">
-        ${backButton()}
-        <div class="ai-orbit">
-          ${state.aiSteps
-            .map((step, index) => `<button class="cloud-choice choice-${String.fromCharCode(97 + index)}" data-action="toast" data-toast="${step.detail}">${String.fromCharCode(65 + index)}</button>`)
-            .join("")}
-        </div>
-        <div class="task-steps">
-          ${state.aiSteps.map((step) => `<button class="paper-step" data-action="toast" data-toast="${step.detail}">${step.title}</button>`).join("")}
-        </div>
-        <button class="ai-core ${state.aiPhase === "confirmed" ? "is-confirmed" : ""}" data-action="confirm-ai">${state.aiPhase === "confirmed" ? "Added!" : "Go For It!"}</button>
-        <button class="sync-btn" data-action="reset-ai" aria-label="重新拆解">↻</button>
+        <div class="page-design ai-design generated" style="background-image:url('${design("AI任务拆解2.2-汪嫣然.png")}')"></div>
+        <button class="hotspot back-hotspot" data-action="back" aria-label="返回"></button>
+        <button class="hotspot ai-choice-hotspot choice-a" data-action="toast" data-toast="${state.aiSteps[0]?.detail || ""}" aria-label="A"></button>
+        <button class="hotspot ai-choice-hotspot choice-b" data-action="toast" data-toast="${state.aiSteps[1]?.detail || ""}" aria-label="B"></button>
+        <button class="hotspot ai-choice-hotspot choice-c" data-action="toast" data-toast="${state.aiSteps[2]?.detail || ""}" aria-label="C"></button>
+        <button class="hotspot ai-choice-hotspot choice-d" data-action="toast" data-toast="${state.aiSteps[3]?.detail || ""}" aria-label="D"></button>
+        <button class="hotspot ai-confirm-hotspot" data-action="confirm-ai" aria-label="确认"></button>
+        <button class="hotspot ai-reset-hotspot" data-action="reset-ai" aria-label="重新拆解"></button>
       </section>
     `;
   }
 
   return `
     <section class="page ai-page">
-      ${backButton()}
-      <button class="ai-cloud-prompt" data-action="start-ai">今天想<br />做些什么？</button>
-      <button class="mud-core" data-action="start-ai">Click Me</button>
+      <div class="page-design ai-design initial" style="background-image:url('${design("AI任务拆解2.0-汪嫣然.png")}')"></div>
+      <button class="hotspot back-hotspot" data-action="back" aria-label="返回"></button>
+      <button class="hotspot ai-cloud-hotspot" data-action="start-ai" aria-label="今天想做些什么"></button>
+      <button class="hotspot ai-core-hotspot" data-action="start-ai" aria-label="Click Me"></button>
     </section>
   `;
 }
 
 function renderExecute() {
-  const task = state.selectedTask;
-  const running = state.executeStatus === "running";
-  const paused = state.executeStatus === "paused";
-  const label = running ? "正在执行：" : paused ? "暂停：" : "准备开始：";
-  const digits = running ? ["0", "1", ":", "2", "3", ":", "4", "6"] : ["0", "0", ":", "0", "0", ":", "0", "0"];
   return `
     <section class="page execute-page">
-      ${backButton("ask-abandon")}
-      <div class="status-pill">${label}&nbsp;&nbsp;${task.owner}</div>
-      <div class="timer-row">
-        ${digits.map((d) => (d === ":" ? `<span class="colon">:</span>` : `<span class="timer-card">${d}</span>`)).join("")}
-      </div>
-      <div class="execute-actions">
-        ${button("完成", "orange", 'data-action="complete-task"')}
-        ${button(running ? "暂停" : "开始", "orange", 'data-action="toggle-execute"')}
-        ${button("取消", "orange", 'data-action="ask-abandon"')}
-      </div>
-      <img class="worker-push ${running ? "is-running" : ""}" src="${beetles.worker}" alt="执行任务的屎壳郎" />
+      ${designFrame(state.executeStatus === "paused" ? "任务执行2.3-汪嫣然.png" : "任务执行2.0-汪嫣然.png", "execute-design")}
+      <button class="hotspot execute-back-hotspot" data-action="ask-abandon" aria-label="返回"></button>
+      <button class="hotspot execute-complete-hotspot" data-action="complete-task" aria-label="完成任务"></button>
+      <button class="hotspot execute-toggle-hotspot" data-action="toggle-execute" aria-label="${state.executeStatus === "paused" ? "继续执行" : "暂停任务"}"></button>
+      <button class="hotspot execute-cancel-hotspot" data-action="ask-abandon" aria-label="取消任务"></button>
     </section>
   `;
 }
@@ -318,43 +314,38 @@ function renderTodo() {
   const currentTask = currentTodo ? taskFromTodo(currentTodo) : state.selectedTask;
   return `
     <section class="page todo-page">
-      ${backButton()}
-      <button class="mini-cards" data-route="draw" aria-label="抽卡">▰▰</button>
-      <div class="todo-board">
-        <div class="todo-left">
-          <h1>我的待办事项</h1>
-          <div class="todo-list">
-            ${state.todos
-              .map(
-                (todo) => `
-                  <label class="todo-item ${state.selectedTodoId === todo.id ? "selected" : ""}">
-                    <input type="checkbox" data-todo="${todo.id}" ${todo.done ? "checked" : ""} />
-                    <button data-action="select-todo" data-todo-id="${todo.id}">${todo.name}</button>
-                  </label>
-                `,
-              )
-              .join("")}
-          </div>
-        </div>
-        <div class="todo-divider"></div>
-        <div class="todo-right">
-          <button class="circle-plus" data-modal="todo-new" aria-label="新增任务">＋</button>
-          <button class="circle-minus" data-action="ask-remove-done" aria-label="删除已完成">－</button>
-          <button class="acorn-card" data-modal="todo-detail">
-            <strong>${currentTask.name}</strong>
-            ${currentTask.detail.map((line) => `<span>${line}</span>`).join("")}
-          </button>
-          ${button("开始执行", "todo-execute", 'data-action="execute-selected"')}
-        </div>
+      ${designFrame("待办事项2-王紫涵.png", "todo-design")}
+      <button class="hotspot todo-back-hotspot" data-action="back" aria-label="返回"></button>
+      <button class="hotspot todo-draw-hotspot" data-route="draw" aria-label="抽卡"></button>
+      <button class="hotspot todo-add-hotspot" data-modal="todo-new" aria-label="新增任务"></button>
+      <button class="hotspot todo-remove-hotspot" data-action="ask-remove-done" aria-label="删除已完成"></button>
+      <button class="hotspot todo-detail-hotspot" data-modal="todo-detail" aria-label="任务详情"></button>
+      <button class="hotspot todo-execute-hotspot" data-action="execute-selected" aria-label="开始执行"></button>
+      <button class="hotspot todo-side-hotspot side-one" data-action="toast" data-toast="已切换卡片视图" aria-label="卡片视图"></button>
+      <button class="hotspot todo-side-hotspot side-two" data-action="toast" data-toast="排序方式已更新" aria-label="排序"></button>
+      <button class="hotspot todo-side-hotspot side-three" data-action="toast" data-toast="插图功能稍后接入" aria-label="图片"></button>
+      <button class="hotspot todo-side-hotspot side-four" data-modal="todo-new" aria-label="编辑"></button>
+      <div class="todo-live-list">
+        ${state.todos
+          .slice(0, 4)
+          .map(
+            (todo) => `
+              <label class="todo-live-row ${state.selectedTodoId === todo.id ? "selected" : ""}">
+                <input type="checkbox" data-todo="${todo.id}" ${todo.done ? "checked" : ""} />
+                <button class="todo-live-label" data-action="select-todo" data-todo-id="${todo.id}">${todo.name.replace(/^任务名：/, "")}</button>
+              </label>
+            `,
+          )
+          .join("")}
       </div>
-      <div class="side-tools">
-        <button data-action="toast" data-toast="已切换卡片视图">□<small>2</small></button>
-        <button data-action="toast" data-toast="排序方式已更新">A↓</button>
-        <button data-action="toast" data-toast="插图功能稍后接入">🖼</button>
-        <button data-modal="todo-new">✎</button>
-      </div>
-      <button class="cheer-cloud" data-route="execute">加油!</button>
-      ${kingMascot()}
+      <button class="todo-detail-copy" data-modal="todo-detail" aria-label="查看任务详情">
+        <strong>${currentTask.name.replace(/^任务名：/, "")}</strong>
+        ${currentTask.detail.slice(0, 4).map((line) => `<span>${line}</span>`).join("")}
+      </button>
+      <button class="todo-cheer-hotspot" data-action="toast" data-toast="加油，准备好了就开始吧" aria-label="加油"></button>
+      <button class="todo-king-hotspot" data-route="profile" aria-label="螂王"></button>
+      <button class="todo-acorn-plus-hotspot" data-modal="todo-new" aria-label="橡果加号"></button>
+      <button class="todo-acorn-minus-hotspot" data-action="ask-remove-done" aria-label="橡果减号"></button>
     </section>
   `;
 }
@@ -417,8 +408,8 @@ function renderReview() {
       <button class="cloud-note" data-action="toast" data-toast="今日回顾已保存">太厉害!</button>
       <img class="review-character" src="${beetles.board}" alt="看板螂" />
       <div class="review-actions">
-        <button data-action="toast" data-toast="分享面板稍后接入">⌯<span>分享</span></button>
-        <button data-action="toast" data-toast="已切换回顾样式">⇄<span>切换</span></button>
+        <button data-action="toast" data-toast="分享面板稍后接入"><img src="${asset("操作按钮1.png")}" alt="" /><span>分享</span></button>
+        <button data-action="toast" data-toast="已切换回顾样式"><img src="${asset("操作按钮2.png")}" alt="" /><span>切换</span></button>
       </div>
     </section>
   `;
@@ -426,16 +417,16 @@ function renderReview() {
 
 function renderProfile() {
   const labels = [
-    ["settings", "⚙"],
-    ["mail", "✉"],
-    ["notice", "♟"],
+    ["settings", "操作按钮1.png"],
+    ["mail", "操作按钮2.png"],
+    ["notice", "操作按钮3.png"],
   ];
   return `
     <section class="page profile-page">
       ${backButton()}
       <h1 class="page-title">个人中心</h1>
       <nav class="profile-tabs">
-        ${labels.map(([tab, icon]) => `<button class="${state.profileTab === tab ? "active" : ""}" data-action="profile-tab" data-tab="${tab}">${icon}</button>`).join("")}
+        ${labels.map(([tab, icon]) => `<button class="${state.profileTab === tab ? "active" : ""}" data-action="profile-tab" data-tab="${tab}"><img src="${asset(icon)}" alt="" /></button>`).join("")}
       </nav>
       <div class="profile-grid tab-panel">
         <div class="profile-panel">
@@ -463,7 +454,7 @@ function renderDraw() {
     <section class="page draw-page">
       ${backButton()}
       <h1 class="page-title">抽卡</h1>
-      <button class="history-btn" data-route="cards" data-mode="push">历史</button>
+      <button class="history-btn" data-route="cards" data-mode="push"><img src="${asset("操作按钮4.png")}" alt="" /><span>历史</span></button>
       <img class="draw-king" src="${beetles.king}" alt="螂王" />
       <div class="pick-one">Pick One</div>
       <div class="card-fan ${state.drawPhase === "revealed" ? "has-pick" : ""}">
