@@ -1558,38 +1558,38 @@ button:active {
 
 .history-btn {
   position: absolute;
-  right: 4%;
-  top: 5%;
-  width: 92px;
-  height: 58px;
+  right: 3.8%;
+  top: 4.6%;
+  width: 96px;
+  height: 62px;
   aspect-ratio: auto;
   z-index: 12;
-  font-size: 28px;
+  font-size: 26px;
 }
 
 .history-btn span {
   position: absolute;
   left: 52%;
-  top: 52%;
+  top: 50%;
   transform: translate(-50%, -50%);
   color: #7c442a;
 }
 
 .draw-king {
   position: absolute;
-  left: 38%;
-  top: 12%;
-  width: 23%;
+  left: 38.1%;
+  top: 11.8%;
+  width: 22.4%;
   z-index: 1;
 }
 
 .pick-one {
   position: absolute;
-  left: 57%;
-  top: 14%;
+  left: 56.8%;
+  top: 14.8%;
   color: #612b22;
   font-family: "ShangShouHeFeng", "ShangShouQingCheng", serif;
-  font-size: 58px;
+  font-size: 56px;
   font-weight: 400;
   transform: rotate(7deg);
   z-index: 2;
@@ -1597,29 +1597,29 @@ button:active {
 
 .card-fan {
   position: absolute;
-  left: 4%;
-  right: 4%;
-  bottom: 4%;
-  height: 52%;
+  left: 3.2%;
+  right: 3.2%;
+  bottom: 6.2%;
+  height: 47%;
   z-index: 3;
 }
 
 .fan-card {
   position: absolute;
-  bottom: 7%;
-  width: 19%;
+  bottom: 2.4%;
+  width: 22.4%;
   transform-origin: 50% 110%;
   transition: transform .24s ease, filter .24s ease, opacity .24s ease;
 }
 
 .fan-card:hover {
   filter: brightness(1.05);
-  transform: translateY(-5%) rotate(var(--r));
+  transform: translateY(-4%) rotate(var(--r));
 }
 
 .fan-card img {
   width: 100%;
-  filter: drop-shadow(0 0 12px rgba(244, 141, 34, .85)) drop-shadow(0 10px 10px rgba(52, 30, 19, .26));
+  filter: drop-shadow(0 0 14px rgba(244, 141, 34, .88)) drop-shadow(0 14px 12px rgba(52, 30, 19, .28));
 }
 
 .card-fan.has-pick .fan-card:not(.picked) {
@@ -1629,30 +1629,31 @@ button:active {
 
 .card-fan.has-pick .fan-card.picked {
   z-index: 5;
-  transform: translateY(-18%) scale(1.08) rotate(var(--r));
+  transform: translateY(-14%) scale(1.06) rotate(var(--r));
 }
 
-.fan-0 { left: 2%; --r: -17deg; transform: rotate(-17deg); }
-.fan-1 { left: 18%; --r: -9deg; transform: rotate(-9deg); }
-.fan-2 { left: 34%; --r: -2deg; transform: rotate(-2deg); }
-.fan-3 { left: 50%; --r: 5deg; transform: rotate(5deg); }
-.fan-4 { left: 66%; --r: 12deg; transform: rotate(12deg); }
-.fan-5 { left: 82%; --r: 19deg; transform: rotate(19deg); }
+.fan-0 { left: -0.6%; --r: -17deg; transform: rotate(-17deg); }
+.fan-1 { left: 16.4%; --r: -10deg; transform: rotate(-10deg); }
+.fan-2 { left: 33.3%; --r: -3deg; transform: rotate(-3deg); }
+.fan-3 { left: 50.1%; --r: 4deg; transform: rotate(4deg); }
+.fan-4 { left: 67%; --r: 11deg; transform: rotate(11deg); }
+.fan-5 { left: 83.8%; --r: 18deg; transform: rotate(18deg); }
 
 .draw-tip {
   position: absolute;
-  left: 30%;
-  bottom: 4.2%;
+  left: 28.6%;
+  bottom: 3.7%;
   z-index: 4;
-  width: 39%;
-  height: 7%;
+  width: 42.8%;
+  height: 7.8%;
   display: grid;
   place-items: center;
   border-radius: 999px;
   background: linear-gradient(180deg, rgba(177, 103, 46, .8), rgba(149, 73, 28, .74));
   color: white;
-  font-size: 24px;
-  letter-spacing: .1em;
+  font-size: 25px;
+  letter-spacing: .08em;
+  box-shadow: 0 10px 18px rgba(104, 53, 22, .18);
 }
 
 .draw-result {
@@ -1666,8 +1667,8 @@ button:active {
 }
 
 .result-card {
-  width: 34%;
-  min-height: 60%;
+  width: 36%;
+  min-height: 62%;
   display: grid;
   place-items: center;
   padding: 3%;
@@ -1698,10 +1699,10 @@ button:active {
 
 .result-actions {
   position: absolute;
-  left: 7%;
-  top: 20%;
+  left: 8.2%;
+  top: 22%;
   display: grid;
-  gap: 50px;
+  gap: 34px;
 }
 
 .modal-layer {
