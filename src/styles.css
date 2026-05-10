@@ -1,5 +1,7 @@
 ﻿:root {
   --stage-scale: 1;
+  --viewport-safe-x: 36px;
+  --viewport-safe-y: 28px;
   --ink: #8b4a2d;
   --deep-ink: #431b25;
   --paper: rgba(255, 246, 218, 0.86);
@@ -37,7 +39,9 @@ body {
   height: 100%;
   margin: 0;
   overflow: hidden;
-  background: #e8d2a5;
+  background:
+    radial-gradient(circle at top, rgba(255, 245, 215, 0.85), transparent 42%),
+    linear-gradient(180deg, #f2dfb8 0%, #e2c893 100%);
   color: var(--ink);
   font-family: "ShangShouHeFeng", "ShangShouQingCheng", serif;
   font-weight: 400;
@@ -73,8 +77,9 @@ button {
   transform-origin: center center;
   overflow: hidden;
   background: #f8eac8;
-  box-shadow: none;
+  box-shadow: 0 22px 46px rgba(88, 52, 23, 0.16);
   isolation: isolate;
+  border-radius: 18px;
 }
 
 .stage::before {

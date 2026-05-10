@@ -50,8 +50,15 @@ const routeMeta = {
 };
 
 function updateStageScale() {
-  const scale = Math.max(window.innerWidth / 1280, window.innerHeight / 800);
-  document.documentElement.style.setProperty("--stage-scale", scale.toString());
+  const safePaddingX = 36;
+  const safePaddingY = 28;
+  const availableWidth = Math.max(window.innerWidth - safePaddingX * 2, 320);
+  const availableHeight = Math.max(window.innerHeight - safePaddingY * 2, 320);
+  const scale = Math.min(availableWidth / 1280, availableHeight / 800);
+
+  document.documentElement.style.setProperty("--stage-scale", Math.max(scale, 0.48).toString());
+  document.documentElement.style.setProperty("--viewport-safe-x", `${safePaddingX}px`);
+  document.documentElement.style.setProperty("--viewport-safe-y", `${safePaddingY}px`);
 }
 
 function routeClass() {
