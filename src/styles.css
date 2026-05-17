@@ -409,6 +409,46 @@ button:active {
   z-index: 0;
 }
 
+.auth-status {
+  position: absolute;
+  right: 3.8%;
+  top: 4.2%;
+  z-index: 12;
+  width: 19.5%;
+  height: 11.6%;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 4px;
+  padding: 1.6% 3.2% 1.2% 7.2%;
+  border-radius: 18px;
+  background: rgba(255, 248, 224, .28);
+  color: #7b4029;
+  text-align: left;
+}
+
+.auth-status span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 30px;
+  line-height: 1;
+}
+
+.auth-status small {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.auth-status.is-authed {
+  background: rgba(255, 248, 224, .18);
+}
+
 .home-profile-hotspot {
   right: 3%;
   top: 3.2%;
@@ -1983,6 +2023,112 @@ button:active {
   align-content: start;
   padding: 9% 9%;
   animation: modalPop .22s ease-out both;
+}
+
+.auth-modal-layer {
+  background: rgba(49, 29, 21, .36);
+}
+
+.auth-dialog {
+  width: 430px;
+  max-width: 84%;
+  display: grid;
+  gap: 14px;
+  padding: 34px 38px 32px;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 250, 229, .98), rgba(255, 236, 193, .96)),
+    url("../Assets/弹窗底图.webp") center / cover no-repeat;
+  box-shadow:
+    inset 0 0 0 3px rgba(207, 157, 68, .68),
+    0 20px 48px rgba(63, 31, 12, .28);
+  color: #7b4029;
+  animation: modalPop .22s ease-out both;
+}
+
+.auth-dialog h2 {
+  margin: 0;
+  font-size: 44px;
+  line-height: 1.05;
+  color: #5c2819;
+}
+
+.auth-dialog p,
+.auth-dialog strong {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.2;
+  font-weight: 400;
+}
+
+.auth-dialog input {
+  width: 100%;
+  height: 48px;
+  border: 2px solid rgba(143, 78, 42, .48);
+  border-radius: 10px;
+  padding: 0 16px;
+  outline: 0;
+  background: rgba(255, 252, 236, .9);
+  color: #6f3723;
+  font-size: 22px;
+}
+
+.auth-dialog input:focus {
+  border-color: rgba(150, 82, 45, .82);
+  box-shadow: 0 0 0 4px rgba(223, 163, 83, .18);
+}
+
+.auth-submit,
+.auth-switch,
+.profile-login-call {
+  min-height: 46px;
+  border-radius: 999px;
+  font-size: 24px;
+}
+
+.auth-submit {
+  background:
+    linear-gradient(180deg, rgba(255, 244, 214, .92), rgba(210, 118, 54, .9)),
+    url("../Assets/操作按钮.jpg") center / cover no-repeat;
+  color: #fff8e8;
+  box-shadow: 0 8px 18px rgba(122, 57, 22, .18);
+}
+
+.auth-submit:disabled {
+  opacity: .7;
+  cursor: wait;
+}
+
+.auth-switch {
+  color: #7b4029;
+  background: rgba(255, 248, 224, .72);
+  box-shadow: inset 0 0 0 2px rgba(193, 133, 50, .42);
+}
+
+.auth-error {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(169, 63, 47, .12);
+  color: #8e3427;
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+.account-dialog strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-login-call {
+  position: absolute;
+  right: 18.4%;
+  top: 6.2%;
+  z-index: 12;
+  padding: 0 24px;
+  background: rgba(255, 244, 210, .84);
+  box-shadow: inset 0 0 0 2px rgba(190, 127, 44, .54), 0 8px 18px rgba(94, 48, 18, .16);
+  color: #7b4029;
 }
 
 .message-modal h2 {

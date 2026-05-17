@@ -1,4 +1,5 @@
 import { achievements, asset, beetles, cards, navItems, profileRows, tasks, todos as todoSeed } from "./data.js";
+import { authEmail, authErrorMessage, authName, initializeAuth, loginWithEmail, logoutCurrentUser, signupWithEmail } from "./authService.js";
 import { decomposeTaskWithDeepSeek } from "./deepseekService.js";
 import { createAiTaskBreakdown, createTodosFromAi, makeTodo, rewardCardForTask, taskFromTodo } from "./mockServices.js";
 const ASSET_VERSION = "20260517-ai21-todo-fix";
@@ -22,6 +23,12 @@ const state = {
   history: [ROUTES.HOME],
   menuOpen: true,
   modal: null,
+  authMode: "login",
+  authLoading: true,
+  authSubmitting: false,
+  authError: "",
+  authUser: null,
+  pendingRoute: null,
   toast: null,
   selectedTask: tasks[0],
   selectedTodoId: todoSeed[0].id,
@@ -244,13 +251,15 @@ function homeTools() {
 }
 
 function profileCard() {
+  const name = authName(state.authUser);
+  const email = authEmail(state.authUser);
   return `
     <button class="profile-card" data-route="profile">
       <span class="avatar-orb"></span>
       <span class="profile-text">
-        <b>金螂XXX</b>
+        <b>${state.authUser ? name : "点击登录"}</b>
         <small>Lv.3</small>
-        <small>2024.10.27</small>
+        <small>${state.authUser ? email : "注册 / 登录"}</small>
       </span>
     </button>
   `;
@@ -268,6 +277,7 @@ function renderHome() {
   return `
     <section class="page home-page">
       ${designFrame(state.menuOpen ? "主页2-王紫涵.png" : "主页1-王紫涵.png", "home-design")}
+      ${authStatus()}
       <button class="hotspot home-profile-hotspot" data-route="profile" aria-label="个人中心"></button>
       <button class="hotspot home-tool-hotspot tool-gear-hotspot" data-route="profile" data-profile-tab="settings" aria-label="设置"></button>
       <button class="hotspot home-tool-hotspot tool-mail-hotspot" data-modal="message" aria-label="消息"></button>
@@ -287,6 +297,15 @@ function renderHome() {
       <button class="hotspot home-cloud-hotspot" data-modal="notice" aria-label="云朵提示"></button>
       <button class="hotspot home-king-hotspot" data-route="profile" aria-label="螂王"></button>
     </section>
+  `;
+}
+
+function authStatus() {
+  return `
+    <button class="auth-status ${state.authUser ? "is-authed" : ""}" data-modal="${state.authUser ? "account" : "auth"}">
+      <span>${state.authLoading ? "账号同步中" : state.authUser ? authName(state.authUser) : "注册 / 登录"}</span>
+      <small>${state.authUser ? authEmail(state.authUser) : "开启你的王国档案"}</small>
+    </button>
   `;
 }
 
@@ -479,6 +498,7 @@ function renderProfile() {
     <section class="page profile-page">
       ${backButton()}
       <h1 class="page-title">个人中心</h1>
+      ${!state.authUser ? `<button class="profile-login-call" data-modal="auth">注册 / 登录</button>` : ""}
       <nav class="profile-tabs">
         ${labels.map(([tab, icon]) => `<button class="${state.profileTab === tab ? "active" : ""}" data-action="profile-tab" data-tab="${tab}"><img src="${asset(icon)}" alt="" /></button>`).join("")}
       </nav>
@@ -486,7 +506,7 @@ function renderProfile() {
         <div class="profile-panel">
           <div class="profile-head">
             <img src="${beetles.king}" alt="金角大螂" />
-            <div class="name-strip"><b>金角大螂</b><span>Lv.3</span></div>
+            <div class="name-strip"><b>${state.authUser ? authName(state.authUser) : "游客螂"}</b><span>Lv.3</span></div>
           </div>
           ${profileRows.map((row) => `<button class="setting-row" data-action="toast" data-toast="${row[0]}编辑稍后接入"><span>${row[0]}</span><b>${row[1]}</b><em>›</em></button>`).join("")}
           <label class="export-row">一键导出任务记录 <input type="checkbox" /></label>
@@ -495,7 +515,7 @@ function renderProfile() {
           <div class="volume-row"><span>⌕×</span><i></i><b>⌕</b></div>
           ${["帮助与反馈", "内存", "语言", "字体", "桌宠功能", "兑换码"].map((label, idx) => `<button class="setting-row" data-action="toast" data-toast="${label}设置稍后接入"><span>${label}</span><b>${idx === 1 ? "100MB" : idx === 2 ? "中文" : idx === 3 ? "默认" : idx === 4 ? "开启" : ""}</b><em>›</em></button>`).join("")}
           <button class="code-input" data-action="toast" data-toast="兑换入口稍后接入">✎ 输入…… <em>›</em></button>
-          <button class="logout" data-modal="logout">退出登录 ⏻</button>
+          <button class="logout" data-modal="${state.authUser ? "logout" : "auth"}">${state.authUser ? "退出登录 ⏻" : "注册 / 登录"}</button>
         </div>
       </div>
     </section>
@@ -538,6 +558,34 @@ function modalShell(content, className = "", options = {}) {
 
 function modalMarkup() {
   if (!state.modal) return "";
+
+  if (state.modal === "auth") {
+    const isSignup = state.authMode === "signup";
+    return modalShell(`
+      <form class="auth-dialog" data-auth-form="${state.authMode}" role="dialog" aria-modal="true">
+        <h2>${isSignup ? "注册王国账号" : "登录王国账号"}</h2>
+        <p>${isSignup ? "创建账号后，你的任务旅程就能和邮箱身份绑定。" : "登录后继续你的任务拆解、待办与卡牌旅程。"}</p>
+        ${isSignup ? `<input id="authName" name="name" autocomplete="name" placeholder="昵称" />` : ""}
+        <input id="authEmail" name="email" type="email" autocomplete="email" required placeholder="邮箱" />
+        <input id="authPassword" name="password" type="password" autocomplete="${isSignup ? "new-password" : "current-password"}" required placeholder="密码" />
+        ${state.authError ? `<div class="auth-error">${state.authError}</div>` : ""}
+        <button class="auth-submit" type="submit" ${state.authSubmitting ? "disabled" : ""}>${state.authSubmitting ? "处理中..." : isSignup ? "注册" : "登录"}</button>
+        <button class="auth-switch" type="button" data-action="switch-auth">${isSignup ? "已有账号，去登录" : "没有账号，去注册"}</button>
+      </form>
+    `, "auth-modal-layer");
+  }
+
+  if (state.modal === "account") {
+    return modalShell(`
+      <div class="auth-dialog account-dialog" role="dialog" aria-modal="true">
+        <h2>王国档案</h2>
+        <p>${authName(state.authUser)}</p>
+        <strong>${authEmail(state.authUser)}</strong>
+        ${button("进入个人中心", "orange", 'data-route="profile"')}
+        ${button("退出登录", "paper", 'data-modal="logout"')}
+      </div>
+    `, "auth-modal-layer");
+  }
 
   if (state.modal === "message" || state.modal === "notice") {
     const title = state.modal === "message" ? "消息" : "提醒";
@@ -646,13 +694,30 @@ function handleRoute(target) {
   const mode = target.dataset.mode || "push";
   if (tab) state.cardTab = tab;
   if (profileTab) state.profileTab = profileTab;
-  navigate(target.dataset.route, { mode, fresh: true });
+  const route = target.dataset.route;
+  if (requiresAuth(route) && !state.authUser) {
+    state.pendingRoute = route;
+    state.authMode = "login";
+    state.authError = "请先注册或登录，再进入这个功能。";
+    setModal("auth");
+    return;
+  }
+  navigate(route, { mode, fresh: true });
+}
+
+function requiresAuth(route) {
+  return [ROUTES.AI, ROUTES.TODO, ROUTES.EXECUTE, ROUTES.REVIEW, ROUTES.CARDS, ROUTES.DRAW].includes(route);
 }
 
 async function handleAction(action, target) {
   if (action === "back") goBack();
   if (action === "toggle-menu") {
     state.menuOpen = !state.menuOpen;
+    render();
+  }
+  if (action === "switch-auth") {
+    state.authMode = state.authMode === "login" ? "signup" : "login";
+    state.authError = "";
     render();
   }
   if (action === "start-ai") {
@@ -767,8 +832,22 @@ async function handleAction(action, target) {
     navigate(ROUTES.EXECUTE, { mode: "replace", direction: "forward" });
   }
   if (action === "confirm-logout") {
-    closeModal();
-    showToast("已退出登录");
+    state.authSubmitting = true;
+    render();
+    try {
+      await logoutCurrentUser();
+      state.authUser = null;
+      state.pendingRoute = null;
+      closeModal();
+      showToast("已退出登录");
+      if (requiresAuth(state.route)) finishToHome();
+    } catch (error) {
+      state.authError = authErrorMessage(error);
+      state.modal = "auth";
+      render();
+    } finally {
+      state.authSubmitting = false;
+    }
   }
   if (action === "finish-to-cards") {
     state.cardTab = "cards";
@@ -814,6 +893,36 @@ app.addEventListener("click", (event) => {
 
   const action = target.dataset.action;
   if (action) handleAction(action, target);
+});
+
+app.addEventListener("submit", async (event) => {
+  const form = event.target.closest("[data-auth-form]");
+  if (!form) return;
+  event.preventDefault();
+
+  const email = form.email?.value?.trim();
+  const password = form.password?.value || "";
+  const name = form.name?.value?.trim() || "";
+  state.authSubmitting = true;
+  state.authError = "";
+  render();
+
+  try {
+    const user = state.authMode === "signup" ? await signupWithEmail(email, password, name) : await loginWithEmail(email, password);
+    state.authUser = user;
+    state.modal = null;
+    showToast(user.emailVerified === false ? "注册成功，请前往邮箱确认账号。" : "登录成功");
+    if (state.pendingRoute) {
+      const route = state.pendingRoute;
+      state.pendingRoute = null;
+      navigate(route, { mode: "push", fresh: true });
+    }
+  } catch (error) {
+    state.authError = authErrorMessage(error);
+    render();
+  } finally {
+    state.authSubmitting = false;
+  }
 });
 
 app.addEventListener("change", (event) => {
@@ -866,3 +975,19 @@ app.addEventListener("change", async (event) => {
 window.addEventListener("resize", updateStageScale);
 updateStageScale();
 render();
+
+initializeAuth({
+  onChange(user) {
+    state.authUser = user || null;
+    state.authLoading = false;
+    render();
+  },
+  onMessage(message) {
+    state.authLoading = false;
+    showToast(message);
+  },
+}).catch((error) => {
+  state.authLoading = false;
+  state.authError = authErrorMessage(error);
+  render();
+});

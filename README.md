@@ -184,6 +184,25 @@ npm run dev:netlify
 
 如果只运行 `npm run dev`，页面仍可预览，AI 请求会因为没有 Netlify Function 或没有环境变量而自动回退到本地 mock 拆解，便于继续调试视觉与交互。
 
+## 用户注册与登录
+
+项目已接入 Netlify Identity，支持邮箱注册、登录、邮箱确认回调和退出登录。前端不会保存用户密码，登录状态由 Netlify Identity 维护。
+
+部署到 Netlify 后，请在站点后台启用：
+
+1. 进入 `Project configuration > Identity`
+2. 启用 Identity
+3. 根据需要设置 `Registration` 为开放注册或邀请注册
+4. 开发测试阶段可开启 `Autoconfirm`，正式环境建议保持邮箱确认
+
+当前站点地址：
+
+```text
+https://done-beetle-kingdom.netlify.app
+```
+
+说明：Netlify Identity 需要在线部署环境才能完整测试，本地 `npm run dev` 主要用于页面样式和交互预览。
+
 ## 适合在 GitHub 上如何理解这个仓库
 
 这个仓库当前更接近：
