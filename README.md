@@ -142,6 +142,12 @@
 - `src/mockServices.js`  
   mock 任务拆解、待办生成、任务映射与奖励逻辑
 
+- `src/deepseekService.js`  
+  前端 AI 拆解适配层，调用站内 `/api/decompose-task` 代理接口
+
+- `netlify/functions/decompose-task.mjs`  
+  Netlify Functions 后端代理，负责安全读取 DeepSeek API Key 并转发拆解请求
+
 - `Assets/`  
   项目使用的美术素材资源
 
@@ -161,6 +167,23 @@ npm run dev
 ```text
 http://127.0.0.1:4173
 ```
+
+## DeepSeek AI 配置
+
+项目已经接入 DeepSeek 任务拆解代理。API Key 不会出现在前端代码、浏览器 localStorage 或 GitHub 仓库中，正式部署时请在 Netlify 环境变量里配置：
+
+- `DEEPSEEK_API_KEY`：必填，你的 DeepSeek API Key
+- `DEEPSEEK_MODEL`：可选，默认 `deepseek-v4-pro`
+- `DEEPSEEK_BASE_URL`：可选，默认 `https://api.deepseek.com`
+
+本地如需完整测试 AI 接口，建议使用 Netlify CLI：
+
+```bash
+netlify env:set DEEPSEEK_API_KEY sk-your-deepseek-api-key
+npm run dev:netlify
+```
+
+如果只运行 `npm run dev`，页面仍可预览，AI 请求会因为没有 Netlify Function 或没有环境变量而自动回退到本地 mock 拆解，便于继续调试视觉与交互。
 
 ## 适合在 GitHub 上如何理解这个仓库
 

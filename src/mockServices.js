@@ -1,11 +1,12 @@
 import { cards, tasks } from "./data.js";
 
-export function createAiTaskBreakdown() {
+export function createAiTaskBreakdown(taskText = "今天的任务") {
+  const taskName = String(taskText).trim() || "今天的任务";
   return [
-    { id: "ai-1", title: "整理目标", detail: "把今天最想完成的事情写成一句话" },
+    { id: "ai-1", title: "整理目标", detail: `明确「${taskName}」的最终交付物` },
     { id: "ai-2", title: "拆成小步", detail: "挑出 3 个可以马上开始的动作" },
-    { id: "ai-3", title: "放进任务池", detail: "确认优先级和预计时间" },
-    { id: "ai-4", title: "开始滚动", detail: "选择一张任务卡进入执行" },
+    { id: "ai-3", title: "安排顺序", detail: "按难度和截止时间排好优先级" },
+    { id: "ai-4", title: "开始滚动", detail: "选择第一步进入执行页面" },
   ];
 }
 

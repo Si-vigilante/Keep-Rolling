@@ -1,6 +1,8 @@
 import { achievements, asset, beetles, cards, navItems, profileRows, tasks, todos as todoSeed } from "./data.js";
+import { decomposeTaskWithDeepSeek } from "./deepseekService.js";
 import { createAiTaskBreakdown, createTodosFromAi, makeTodo, rewardCardForTask, taskFromTodo } from "./mockServices.js";
-const design = (name) => `./Page_View/${name}`;
+const ASSET_VERSION = "20260517-ai21-todo-fix";
+const design = (name) => `./Page_View/${name}?v=${ASSET_VERSION}`;
 
 const ROUTES = {
   HOME: "home",
@@ -26,6 +28,10 @@ const state = {
   selectedCard: cards[0],
   todos: structuredClone(todoSeed),
   aiPhase: "input",
+  aiInput: "",
+  aiAttachment: null,
+  aiLoading: false,
+  aiError: "",
   aiSteps: [],
   cardTab: "cards",
   profileTab: "settings",
@@ -71,6 +77,9 @@ function resetFlowState(destination = ROUTES.HOME) {
   state.toast = null;
   if ([ROUTES.HOME, ROUTES.CARDS, ROUTES.REVIEW].includes(destination)) {
     state.aiPhase = "input";
+    state.aiAttachment = null;
+    state.aiLoading = false;
+    state.aiError = "";
     state.aiSteps = [];
     state.drawnCard = null;
     state.drawPhase = "selecting";
@@ -85,6 +94,9 @@ function syncRouteState(route, options = {}) {
 
   if (route === ROUTES.AI && routeMeta[route].resetOnFreshEnter && options.fresh) {
     state.aiPhase = "input";
+    state.aiAttachment = null;
+    state.aiLoading = false;
+    state.aiError = "";
     state.aiSteps = [];
   }
 
@@ -260,7 +272,7 @@ function renderHome() {
       <button class="hotspot home-tool-hotspot tool-gear-hotspot" data-route="profile" data-profile-tab="settings" aria-label="设置"></button>
       <button class="hotspot home-tool-hotspot tool-mail-hotspot" data-modal="message" aria-label="消息"></button>
       <button class="hotspot home-tool-hotspot tool-bell-hotspot" data-modal="notice" aria-label="提醒"></button>
-      <button class="hotspot home-toggle-hotspot" data-action="toggle-menu" aria-label="${state.menuOpen ? "收起菜单" : "展开菜单"}"></button>
+      <button class="hotspot home-toggle-hotspot ${state.menuOpen ? "is-open" : "is-closed"}" data-action="toggle-menu" aria-label="${state.menuOpen ? "收起菜单" : "展开菜单"}"></button>
       ${
         state.menuOpen
           ? `
@@ -284,6 +296,19 @@ function renderAi() {
       <section class="page ai-page">
         <div class="page-design ai-design generated" style="background-image:url('${design("AI任务拆解2.2-汪嫣然.png")}')"></div>
         <button class="hotspot back-hotspot" data-action="back" aria-label="返回"></button>
+        <div class="ai-result-live" aria-live="polite">
+          ${state.aiSteps
+            .slice(0, 4)
+            .map(
+              (step, index) => `
+                <section class="ai-result-card result-${index + 1}">
+                  <strong>${step.title}</strong>
+                  <span>${step.detail}</span>
+                </section>
+              `,
+            )
+            .join("")}
+        </div>
         <button class="hotspot ai-choice-hotspot choice-a" data-action="toast" data-toast="${state.aiSteps[0]?.detail || ""}" aria-label="A"></button>
         <button class="hotspot ai-choice-hotspot choice-b" data-action="toast" data-toast="${state.aiSteps[1]?.detail || ""}" aria-label="B"></button>
         <button class="hotspot ai-choice-hotspot choice-c" data-action="toast" data-toast="${state.aiSteps[2]?.detail || ""}" aria-label="C"></button>
@@ -296,12 +321,32 @@ function renderAi() {
 
   return `
     <section class="page ai-page">
-      <div class="page-design ai-design initial" style="background-image:url('${design("AI任务拆解2.0-汪嫣然.png")}')"></div>
+      <div class="page-design ai-design initial" style="background-image:url('${design("AI任务拆解2.1-汪嫣然.png")}')"></div>
       <button class="hotspot back-hotspot" data-action="back" aria-label="返回"></button>
+      <textarea class="ai-task-input" aria-label="输入要拆解的大任务" placeholder="请输入文本（支持文件上传）">${state.aiInput}</textarea>
+      <label class="ai-file-button" aria-label="上传任务文件">
+        <input class="ai-file-input" type="file" accept=".txt,.md,.csv,.json,.doc,.docx,.pdf" />
+        <span>＋</span>
+      </label>
+      <button class="ai-submit-button" data-action="start-ai" ${state.aiLoading ? "disabled" : ""}>
+        ${state.aiLoading ? "拆解中" : "开始拆解"}
+      </button>
+      <div class="ai-file-name">${state.aiAttachment ? state.aiAttachment.name : "支持 .txt / .md / .csv / .json 文件正文读取"}</div>
+      ${state.aiError ? `<div class="ai-error-note">${state.aiError}</div>` : ""}
+      ${state.aiLoading ? `<div class="ai-loading-note">正在请读书螂拆解任务...</div>` : ""}
       <button class="hotspot ai-cloud-hotspot" data-action="start-ai" aria-label="今天想做些什么"></button>
       <button class="hotspot ai-core-hotspot" data-action="start-ai" aria-label="Click Me"></button>
     </section>
   `;
+}
+
+function readFileAsText(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("文件读取失败"));
+    reader.readAsText(file, "utf-8");
+  });
 }
 
 function renderExecute() {
@@ -332,6 +377,8 @@ function renderTodo() {
       <button class="hotspot todo-side-hotspot side-two" data-action="toast" data-toast="排序方式已更新" aria-label="排序"></button>
       <button class="hotspot todo-side-hotspot side-three" data-action="toast" data-toast="插图功能稍后接入" aria-label="图片"></button>
       <button class="hotspot todo-side-hotspot side-four" data-modal="todo-new" aria-label="编辑"></button>
+      <div class="todo-clean-list-panel" aria-hidden="true"></div>
+      <div class="todo-clean-detail-panel" aria-hidden="true"></div>
       <div class="todo-live-list">
         ${state.todos
           .slice(0, 4)
@@ -602,16 +649,37 @@ function handleRoute(target) {
   navigate(target.dataset.route, { mode, fresh: true });
 }
 
-function handleAction(action, target) {
+async function handleAction(action, target) {
   if (action === "back") goBack();
   if (action === "toggle-menu") {
     state.menuOpen = !state.menuOpen;
     render();
   }
   if (action === "start-ai") {
-    state.aiSteps = createAiTaskBreakdown();
-    state.aiPhase = "generated";
+    const input = document.querySelector(".ai-task-input");
+    state.aiInput = input?.value?.trim() || state.aiInput;
+    if (!state.aiInput && !state.aiAttachment) {
+      state.aiError = "请先输入任务内容，或上传一个任务文件。";
+      render();
+      return;
+    }
+    state.aiLoading = true;
+    state.aiError = "";
     render();
+
+    try {
+      state.aiSteps = await decomposeTaskWithDeepSeek(state.aiInput, state.aiAttachment);
+      state.aiPhase = "generated";
+      showToast("AI 拆解完成");
+    } catch (error) {
+      state.aiSteps = createAiTaskBreakdown(state.aiInput);
+      state.aiPhase = "generated";
+      state.aiError = error.message.includes("Missing DEEPSEEK_API_KEY") ? "服务端未配置 Key，已使用本地演示拆解。" : "AI 请求失败，已使用本地演示拆解。";
+      showToast(state.aiError);
+    } finally {
+      state.aiLoading = false;
+      render();
+    }
   }
   if (action === "confirm-ai") {
     if (state.aiPhase === "confirmed") return;
@@ -625,6 +693,9 @@ function handleAction(action, target) {
   }
   if (action === "reset-ai") {
     state.aiPhase = "input";
+    state.aiAttachment = null;
+    state.aiLoading = false;
+    state.aiError = "";
     state.aiSteps = [];
     render();
   }
@@ -747,9 +818,48 @@ app.addEventListener("click", (event) => {
 
 app.addEventListener("change", (event) => {
   const checkbox = event.target.closest("[data-todo]");
-  if (!checkbox) return;
+  if (!checkbox) {
+    if (event.target.classList.contains("ai-task-input")) {
+      state.aiInput = event.target.value.trim();
+    }
+    return;
+  }
   const todo = state.todos.find((item) => item.id === Number(checkbox.dataset.todo));
   if (todo) todo.done = checkbox.checked;
+  render();
+});
+
+app.addEventListener("input", (event) => {
+  if (event.target.classList.contains("ai-task-input")) {
+    state.aiInput = event.target.value;
+  }
+});
+
+app.addEventListener("keydown", (event) => {
+  if (!event.target.classList.contains("ai-task-input")) return;
+  if (!(event.ctrlKey || event.metaKey) || event.key !== "Enter") return;
+  event.preventDefault();
+  handleAction("start-ai", event.target);
+});
+
+app.addEventListener("change", async (event) => {
+  if (!event.target.classList.contains("ai-file-input")) return;
+
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  try {
+    const isTextLike = /\.(txt|md|csv|json)$/i.test(file.name);
+    state.aiAttachment = {
+      name: file.name,
+      content: isTextLike ? await readFileAsText(file) : `用户上传了文件：${file.name}。当前前端原型暂未解析该文件正文，请结合文件名和用户输入进行拆解。`,
+    };
+    showToast(`已选择文件：${file.name}`);
+  } catch {
+    state.aiAttachment = null;
+    showToast("文件读取失败");
+  }
+
   render();
 });
 

@@ -1,5 +1,7 @@
 {
+  "type": "module",
   "scripts": {
-    "dev": "python -m http.server 4173 --bind 127.0.0.1"
+    "dev": "python -m http.server 4173 --bind 127.0.0.1",
+    "dev:netlify": "netlify dev"
   }
 }
