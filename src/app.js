@@ -302,10 +302,12 @@ function renderHome() {
 
 function authStatus() {
   return `
-    <button class="auth-status ${state.authUser ? "is-authed" : ""}" data-modal="${state.authUser ? "account" : "auth"}">
-      <span>${state.authLoading ? "账号同步中" : state.authUser ? authName(state.authUser) : "注册 / 登录"}</span>
-      <small>${state.authUser ? authEmail(state.authUser) : "开启你的王国档案"}</small>
-    </button>
+    <button
+      class="auth-status ${state.authUser ? "is-authed" : ""}"
+      data-modal="${state.authUser ? "account" : "auth"}"
+      aria-label="${state.authLoading ? "账号同步中" : state.authUser ? `账号：${authName(state.authUser)}` : "注册或登录"}"
+      title="${state.authLoading ? "账号同步中" : state.authUser ? authEmail(state.authUser) : "注册 / 登录"}"
+    ></button>
   `;
 }
 
