@@ -406,15 +406,19 @@ function renderAi() {
     <section class="page ai-page">
       <div class="page-design ai-design initial" style="background-image:url('${design("AI任务拆解2.1-汪嫣然.png")}')"></div>
       <button class="hotspot back-hotspot" data-action="back" aria-label="返回"></button>
-      <textarea class="ai-task-input" aria-label="输入要拆解的大任务" placeholder="请输入文本（支持文件上传）">${state.aiInput}</textarea>
-      <label class="ai-file-button" aria-label="上传任务文件">
-        <input class="ai-file-input" type="file" accept=".txt,.md,.csv,.json,.doc,.docx,.pdf" />
-        <span>＋</span>
-      </label>
-      <button class="ai-submit-button" data-action="start-ai" ${state.aiLoading ? "disabled" : ""}>
-        ${state.aiLoading ? "拆解中" : "开始拆解"}
-      </button>
-      <div class="ai-file-name">${state.aiAttachment ? state.aiAttachment.name : "支持 .txt / .md / .csv / .json 文件正文读取"}</div>
+      <div class="ai-input-panel">
+        <textarea class="ai-task-input" aria-label="输入要拆解的大任务" placeholder="请输入文本（支持文件上传）">${state.aiInput}</textarea>
+        <div class="ai-input-actions">
+          <label class="ai-file-button" aria-label="上传任务文件">
+            <input class="ai-file-input" type="file" accept=".txt,.md,.csv,.json,.doc,.docx,.pdf" />
+            <span>＋</span>
+          </label>
+          <button class="ai-submit-button" data-action="start-ai" ${state.aiLoading ? "disabled" : ""}>
+            ${state.aiLoading ? "拆解中" : "开始拆解"}
+          </button>
+        </div>
+        <div class="ai-file-name">${state.aiAttachment ? state.aiAttachment.name : "支持 .txt / .md / .csv / .json 文件正文读取"}</div>
+      </div>
       ${state.aiError ? `<div class="ai-error-note">${state.aiError}</div>` : ""}
       ${state.aiLoading ? `<div class="ai-loading-note">正在请读书螂拆解任务...</div>` : ""}
       <button class="hotspot ai-cloud-hotspot" data-action="start-ai" aria-label="今天想做些什么"></button>
