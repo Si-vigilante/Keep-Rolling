@@ -4,6 +4,34 @@ import { decomposeTaskWithDeepSeek } from "./deepseekService.js";
 import { createAiTaskBreakdown, createTodosFromAi, makeTodo, rewardCardForTask, taskFromTodo } from "./mockServices.js";
 const ASSET_VERSION = "20260517-ai21-todo-fix";
 const design = (name) => `./Page_View/${name}?v=${ASSET_VERSION}`;
+const LOCAL_AUTH_STORAGE_KEY = "beetle-kingdom-local-auth";
+const IS_LOCAL_PREVIEW = window.location.protocol === "file:" || ["", "localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+const LOCAL_PREVIEW_USER = {
+  name: "本地测试员",
+  email: "123@local.preview",
+  user_metadata: { full_name: "本地测试员" },
+  emailVerified: true,
+  localPreview: true,
+};
+
+function readLocalPreviewUser() {
+  if (!IS_LOCAL_PREVIEW) return null;
+  try {
+    return sessionStorage.getItem(LOCAL_AUTH_STORAGE_KEY) === "active" ? LOCAL_PREVIEW_USER : null;
+  } catch {
+    return null;
+  }
+}
+
+function setLocalPreviewSession(active) {
+  if (!IS_LOCAL_PREVIEW) return;
+  try {
+    if (active) sessionStorage.setItem(LOCAL_AUTH_STORAGE_KEY, "active");
+    else sessionStorage.removeItem(LOCAL_AUTH_STORAGE_KEY);
+  } catch {
+    // Session storage can be unavailable in strict privacy modes; the in-memory state still works.
+  }
+}
 
 const ROUTES = {
   HOME: "home",
@@ -24,10 +52,10 @@ const state = {
   menuOpen: true,
   modal: null,
   authMode: "login",
-  authLoading: true,
+  authLoading: !IS_LOCAL_PREVIEW,
   authSubmitting: false,
   authError: "",
-  authUser: null,
+  authUser: readLocalPreviewUser(),
   pendingRoute: null,
   toast: null,
   selectedTask: tasks[0],
@@ -311,6 +339,10 @@ function authStatus() {
   `;
 }
 
+function isLocalPreviewAuthReady() {
+  return IS_LOCAL_PREVIEW;
+}
+
 function renderAi() {
   if (state.aiPhase === "generated" || state.aiPhase === "confirmed") {
     return `
@@ -563,17 +595,20 @@ function modalMarkup() {
 
   if (state.modal === "auth") {
     const isSignup = state.authMode === "signup";
+    const accountPlaceholder = "账号或邮箱";
+    const passwordPlaceholder = "密码";
+    const authHint = "测试账号：账号和密码都输入 123。其他账号仍走 Netlify Identity。";
     return modalShell(`
-      <form class="auth-dialog" data-auth-form="${state.authMode}" role="dialog" aria-modal="true">
-        <h2>${isSignup ? "注册事克郎账号" : "登录事克郎账号"}</h2>
-        <p>${isSignup ? "创建账号后，你的任务旅程就能和邮箱身份绑定。" : "登录后继续你的任务拆解、待办与卡牌旅程。"}</p>
+      <form class="auth-dialog" data-auth-form="${state.authMode}" role="dialog" aria-modal="true" novalidate>
+        <h2>${IS_LOCAL_PREVIEW ? "本地预览登录" : isSignup ? "注册事克郎账号" : "登录事克郎账号"}</h2>
+        <p>${IS_LOCAL_PREVIEW ? "输入本地测试账号即可预览完整功能。" : isSignup ? "创建账号后，你的任务旅程就能和邮箱身份绑定。" : "登录后继续你的任务拆解、待办与卡牌旅程。"}</p>
         ${isSignup ? `<input id="authName" name="name" autocomplete="name" placeholder="昵称" />` : ""}
-        <input id="authEmail" name="email" type="email" autocomplete="email" required placeholder="邮箱" />
-        <input id="authPassword" name="password" type="password" autocomplete="${isSignup ? "new-password" : "current-password"}" required placeholder="密码" />
+        <input id="authEmail" name="email" type="text" inputmode="email" autocomplete="username email" autocapitalize="off" spellcheck="false" required placeholder="${accountPlaceholder}" />
+        <input id="authPassword" name="password" type="password" autocomplete="${isSignup ? "new-password" : "current-password"}" required placeholder="${passwordPlaceholder}" />
         ${state.authError ? `<div class="auth-error">${state.authError}</div>` : ""}
-        <small class="auth-hint">首次部署后需在 Netlify 后台启用 Identity；测试时建议开启 Autoconfirm。</small>
+        <small class="auth-hint">${authHint}</small>
         <button class="auth-submit" type="submit" ${state.authSubmitting ? "disabled" : ""}>${state.authSubmitting ? "处理中..." : isSignup ? "注册" : "登录"}</button>
-        <button class="auth-switch" type="button" data-action="switch-auth">${isSignup ? "已有账号，去登录" : "没有账号，去注册"}</button>
+        ${IS_LOCAL_PREVIEW ? "" : `<button class="auth-switch" type="button" data-action="switch-auth">${isSignup ? "已有账号，去登录" : "没有账号，去注册"}</button>`}
       </form>
     `, "auth-modal-layer");
   }
@@ -701,7 +736,7 @@ function handleRoute(target) {
   if (requiresAuth(route) && !state.authUser) {
     state.pendingRoute = route;
     state.authMode = "login";
-    state.authError = "请先注册或登录，再进入这个功能。";
+    state.authError = IS_LOCAL_PREVIEW ? "请输入 123 / 123 进入本地预览。" : "请先注册或登录，再进入这个功能。";
     setModal("auth");
     return;
   }
@@ -709,6 +744,7 @@ function handleRoute(target) {
 }
 
 function requiresAuth(route) {
+  if (IS_LOCAL_PREVIEW) return false;
   return [ROUTES.AI, ROUTES.TODO, ROUTES.EXECUTE, ROUTES.REVIEW, ROUTES.CARDS, ROUTES.DRAW].includes(route);
 }
 
@@ -838,7 +874,11 @@ async function handleAction(action, target) {
     state.authSubmitting = true;
     render();
     try {
-      await logoutCurrentUser();
+      if (IS_LOCAL_PREVIEW) {
+        setLocalPreviewSession(false);
+      } else {
+        await logoutCurrentUser();
+      }
       state.authUser = null;
       state.pendingRoute = null;
       closeModal();
@@ -911,7 +951,7 @@ app.addEventListener("submit", async (event) => {
   render();
 
   try {
-    const user = state.authMode === "signup" ? await signupWithEmail(email, password, name) : await loginWithEmail(email, password);
+    const user = await authenticateForm(email, password, name);
     state.authUser = user;
     state.modal = null;
     showToast(user.emailVerified === false ? "注册成功，请前往邮箱确认账号。" : "登录成功");
@@ -927,6 +967,27 @@ app.addEventListener("submit", async (event) => {
     render();
   }
 });
+
+async function authenticateForm(email, password, name) {
+  if (email === "123" && password === "123") {
+    setLocalPreviewSession(true);
+    return { ...LOCAL_PREVIEW_USER, name: name || LOCAL_PREVIEW_USER.name };
+  }
+
+  if (IS_LOCAL_PREVIEW) {
+    const error = new Error("本地预览账号或密码不正确，请输入 123 / 123。");
+    error.status = 401;
+    throw error;
+  }
+
+  if (!email.includes("@")) {
+    const error = new Error("正式登录请填写邮箱地址；测试可直接输入 123 / 123。");
+    error.status = 422;
+    throw error;
+  }
+
+  return state.authMode === "signup" ? signupWithEmail(email, password, name) : loginWithEmail(email, password);
+}
 
 app.addEventListener("change", (event) => {
   const checkbox = event.target.closest("[data-todo]");
@@ -979,19 +1040,24 @@ window.addEventListener("resize", updateStageScale);
 updateStageScale();
 render();
 
-initializeAuth({
-  onChange(user) {
-    state.authUser = user || null;
-    state.authLoading = false;
-    render();
-  },
-  onMessage(message) {
-    state.authLoading = false;
-    showToast(message);
-  },
-}).catch((error) => {
+if (isLocalPreviewAuthReady()) {
   state.authLoading = false;
-  state.authError = authErrorMessage(error);
-  if (state.modal === "auth") state.authSubmitting = false;
   render();
-});
+} else {
+  initializeAuth({
+    onChange(user) {
+      state.authUser = user || null;
+      state.authLoading = false;
+      render();
+    },
+    onMessage(message) {
+      state.authLoading = false;
+      showToast(message);
+    },
+  }).catch((error) => {
+    state.authLoading = false;
+    state.authError = authErrorMessage(error);
+    if (state.modal === "auth") state.authSubmitting = false;
+    render();
+  });
+}
