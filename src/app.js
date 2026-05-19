@@ -78,6 +78,7 @@ const state = {
 const app = document.querySelector("#app");
 let toastTimer;
 let pendingTimer;
+let clockTimer;
 
 const routeMeta = {
   [ROUTES.HOME]: { resetOnEnter: true },
@@ -268,6 +269,34 @@ function backButton(extra = "") {
   return `<button class="round-btn back-btn" data-action="${extra || "back"}" aria-label="返回"><img src="${asset("操作按钮4.png")}" alt="" /><span>返回</span></button>`;
 }
 
+function formatUserDate(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}.${month}.${day}`;
+}
+
+function formatUserTime(date = new Date()) {
+  const hour = String(date.getHours()).padStart(2, "0");
+  const minute = String(date.getMinutes()).padStart(2, "0");
+  return `${hour}:${minute}`;
+}
+
+function userPanel() {
+  const name = state.authUser ? authName(state.authUser) : "游客螂";
+  const date = new Date();
+  return `
+    <button class="home-user-panel ${state.authUser ? "is-authed" : "is-guest"}" data-modal="${state.authUser ? "account" : "auth"}" aria-label="${state.authUser ? `账号：${name}` : "注册或登录"}">
+      <span class="home-user-avatar" aria-hidden="true"></span>
+      <span class="home-user-copy">
+        <b>${name}</b>
+        <span>Lv.3</span>
+        <time datetime="${date.toISOString()}">${formatUserDate(date)} ${formatUserTime(date)}</time>
+      </span>
+    </button>
+  `;
+}
+
 function homeTools() {
   return `
     <div class="floating-tools">
@@ -305,6 +334,7 @@ function renderHome() {
   return `
     <section class="page home-page">
       ${designFrame(state.menuOpen ? "主页2-王紫涵.png" : "主页1-王紫涵.png", "home-design")}
+      ${userPanel()}
       ${authStatus()}
       <button class="hotspot home-profile-hotspot" data-route="profile" aria-label="个人中心"></button>
       <button class="hotspot home-tool-hotspot tool-gear-hotspot" data-route="profile" data-profile-tab="settings" aria-label="设置"></button>
@@ -1037,6 +1067,9 @@ app.addEventListener("change", async (event) => {
 });
 
 window.addEventListener("resize", updateStageScale);
+clockTimer = setInterval(() => {
+  if (state.route === ROUTES.HOME) render();
+}, 60000);
 updateStageScale();
 render();
 
