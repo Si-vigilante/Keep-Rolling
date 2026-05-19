@@ -2089,6 +2089,12 @@ button:active {
   line-height: 1.15;
 }
 
+.auth-hint {
+  color: rgba(111, 55, 35, .72);
+  font-size: 17px;
+  line-height: 1.16;
+}
+
 .account-dialog strong {
   overflow: hidden;
   text-overflow: ellipsis;

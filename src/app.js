@@ -565,12 +565,13 @@ function modalMarkup() {
     const isSignup = state.authMode === "signup";
     return modalShell(`
       <form class="auth-dialog" data-auth-form="${state.authMode}" role="dialog" aria-modal="true">
-        <h2>${isSignup ? "注册王国账号" : "登录王国账号"}</h2>
+        <h2>${isSignup ? "注册事克郎账号" : "登录事克郎账号"}</h2>
         <p>${isSignup ? "创建账号后，你的任务旅程就能和邮箱身份绑定。" : "登录后继续你的任务拆解、待办与卡牌旅程。"}</p>
         ${isSignup ? `<input id="authName" name="name" autocomplete="name" placeholder="昵称" />` : ""}
         <input id="authEmail" name="email" type="email" autocomplete="email" required placeholder="邮箱" />
         <input id="authPassword" name="password" type="password" autocomplete="${isSignup ? "new-password" : "current-password"}" required placeholder="密码" />
         ${state.authError ? `<div class="auth-error">${state.authError}</div>` : ""}
+        <small class="auth-hint">首次部署后需在 Netlify 后台启用 Identity；测试时建议开启 Autoconfirm。</small>
         <button class="auth-submit" type="submit" ${state.authSubmitting ? "disabled" : ""}>${state.authSubmitting ? "处理中..." : isSignup ? "注册" : "登录"}</button>
         <button class="auth-switch" type="button" data-action="switch-auth">${isSignup ? "已有账号，去登录" : "没有账号，去注册"}</button>
       </form>
@@ -580,7 +581,7 @@ function modalMarkup() {
   if (state.modal === "account") {
     return modalShell(`
       <div class="auth-dialog account-dialog" role="dialog" aria-modal="true">
-        <h2>王国档案</h2>
+        <h2>事克郎档案</h2>
         <p>${authName(state.authUser)}</p>
         <strong>${authEmail(state.authUser)}</strong>
         ${button("进入个人中心", "orange", 'data-route="profile"')}
@@ -921,9 +922,9 @@ app.addEventListener("submit", async (event) => {
     }
   } catch (error) {
     state.authError = authErrorMessage(error);
-    render();
   } finally {
     state.authSubmitting = false;
+    render();
   }
 });
 
@@ -991,5 +992,6 @@ initializeAuth({
 }).catch((error) => {
   state.authLoading = false;
   state.authError = authErrorMessage(error);
+  if (state.modal === "auth") state.authSubmitting = false;
   render();
 });
