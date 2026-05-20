@@ -334,7 +334,7 @@ function showToast(message) {
 }
 
 // ================================================================
-//  新手引导函数（三阶段状态机）
+//  新手引导函数（三阶段状态机）- 简化版
 // ================================================================
 
 // ---------- 渲染 ----------
@@ -397,38 +397,22 @@ function guideMarkup() {
 
 // ---------- 获取当前要打字的文本 ----------
 
-function guideGetCurrentText() {
-  try {
-    const phase = state.guidePhase;
-
-    if (phase === 2) {
-      const feat = phase2Features[state.guideFeatureIdx];
-      if (!feat) return "";
-      if (state.guideInFeature) {
-        return state.guideSegment === 0 ? feat.explain : "点击左上角返回按钮，回到主页面继续探索下一项功能。";
-      }
-      return feat.tip;
-    }
-
-    if (phase === 1) {
-      const step = phase1Steps[state.guideStep];
-      if (!step) return "";
-      if (step.segments) return step.segments[state.guideSegment] || "";
-      return step.text || "";
-    }
-
-    if (phase === 3) {
-      const step = phase3Steps[state.guideStep];
-      if (!step) return "";
-      if (step.segments) return step.segments[state.guideSegment] || "";
-      if (step.response) return step.response;
-      return step.text || "";
-    }
-
-    return "";
-  } catch (e) {
-    return "";
+function guideGetTextSimple() {
+  const p = state.guidePhase;
+  if (p === 2) {
+    const f = phase2Features[state.guideFeatureIdx];
+    if (!f) return "";
+    return state.guideInFeature ? (state.guideSegment === 0 ? f.explain : "点击左上角返回按钮，回到主页面继续探索下一项功能。") : f.tip;
   }
+  // Phase 1 & 3: use try/catch to prevent silent failure
+  const steps = p === 1 ? phase1Steps : (p === 3 ? phase3Steps : null);
+  if (!steps) return "";
+  const s = steps[state.guideStep];
+  if (!s) return "";
+  if (s.segments) return s.segments[state.guideSegment] || "";
+  if (s.text) return s.text;
+  if (s.response) return s.response;
+  return "";
 }
 
 // ---------- 打字机 ----------
@@ -439,8 +423,11 @@ function guideStartTyping() {
   state.guideTriangle = false;
   state.guideOptions = false;
 
-  const text = guideGetCurrentText();
-  if (!text) { guideShowTriangle(); return; }
+  const text = guideGetTextSimple();
+  if (!text) {
+    guideShowTriangle();
+    return;
+  }
 
   guideFullText = text;
   guideTypedIndex = 0;
@@ -460,6 +447,8 @@ function guideStartTyping() {
     }
   }, 35);
 }
+
+
 
 function guideShowTriangle() {
   // 第二阶段不显示三角标（用户需要点击功能按钮而非推进）
@@ -508,7 +497,7 @@ function guideAdvanceToNextStep(phase) {
     state.guideBranchReturn = false;
     state.guideAfterBranch = false;
     render();
-    Promise.resolve().then(() => guideStartTyping());
+    setTimeout(() => guideStartTyping(), 50);
   } else {
     guideNextPhase();
   }
@@ -771,8 +760,8 @@ function startGuide() {
   state.guideFeatureIdx = 0;
   state.guideInFeature = false;
   render();
-  // 直接调用，避免 setTimeout 被外部干扰
-  Promise.resolve().then(() => guideStartTyping());
+  // 使用 setTimeout 确保 DOM 已渲染后再打字
+  setTimeout(() => guideStartTyping(), 50);
 }
 
 // ---------- 回去重看：重启第二阶段 ----------
@@ -793,7 +782,7 @@ function guideRestartPhase2() {
     navigate(ROUTES.HOME, { mode: "reset", direction: "back", fromGuide: true });
   } else {
     render();
-    Promise.resolve().then(() => guideStartTyping());
+    setTimeout(() => guideStartTyping(), 50);
   }
 }
 
@@ -1529,32 +1518,27 @@ app.addEventListener("click", (event) => {
       return;
     }
 
-    // 第二阶段：拦截功能按钮点击
+    // 第二阶段：功能导览 - 点击功能按钮
     if (state.guidePhase === 2 && !state.guideInFeature && target && target.dataset.route) {
       const feat = phase2Features[state.guideFeatureIdx];
       if (feat && target.dataset.route === feat.route) {
-        // 用户点击了正确的功能按钮 → 进入功能页面
         state.guideInFeature = true;
         state.guideSegment = 0;
         handleRoute(target);
-        // 等待渲染完成后打字
         setTimeout(() => guideStartTyping(), 100);
         return;
       }
-      // 点了其他功能按钮 → 忽略
       return;
     }
 
-    // 第二阶段：在功能页面中，点击返回按钮
+    // 第二阶段：功能导览 - 点击返回按钮
     if (state.guidePhase === 2 && state.guideInFeature && target) {
       const action = target.dataset.action;
       if (action === "back" || target.classList.contains("back-btn") || target.classList.contains("back-hotspot")) {
-        // 使用 goBack 返回主页
         goBack();
-        // 等待返回后推进
-        const checkReturn = setInterval(() => {
+        const checkHome = setInterval(() => {
           if (state.route === ROUTES.HOME) {
-            clearInterval(checkReturn);
+            clearInterval(checkHome);
             state.guideInFeature = false;
             state.guideSegment = 0;
             state.guideFeatureIdx++;
@@ -1568,16 +1552,14 @@ app.addEventListener("click", (event) => {
         }, 50);
         return;
       }
-      // 在功能页面中阻止其他交互
       return;
     }
 
-    // 引导点击层点击
-    if (event.target.closest(".guide-click-overlay") || event.target.closest(".guide-overlay")) {
+    // 引导区域点击 → 推进对话
+    if (event.target.closest(".guide-overlay")) {
       guideAdvance();
       return;
     }
-    // 引导开启时阻止其他交互
     return;
   }
 
@@ -1634,11 +1616,15 @@ app.addEventListener("submit", async (event) => {
     state.authLoading = false;
     showToast(user.emailVerified === false ? "注册成功，请前往邮箱确认账号。" : "登录成功");
     // 登录成功后检查是否需要弹出新手引导
-    checkAutoGuide();
-    if (state.pendingRoute) {
+    if (!state.pendingRoute || localStorage.getItem("beetle-guide-v1-seen")) {
+      checkAutoGuide();
+    } else {
+      // 有 pendingRoute（登录前点击的功能按钮），先进功能再触发引导
       const route = state.pendingRoute;
       state.pendingRoute = null;
       navigate(route, { mode: "push", fresh: true });
+      // 等路由稳定后再触发引导
+      setTimeout(() => checkAutoGuide(), 100);
     }
   } catch (error) {
     state.authError = authErrorMessage(error);
