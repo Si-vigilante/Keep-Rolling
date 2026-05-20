@@ -1,10 +1,25 @@
-let identityApiPromise;
+const LOCAL_STORAGE_KEY = "keep-rolling-users";
 
-async function getIdentityApi() {
-  if (!identityApiPromise) {
-    identityApiPromise = import("https://esm.sh/@netlify/identity");
+function getUsers() {
+  const data = localStorage.getItem(LOCAL_STORAGE_KEY);
+  if (data) {
+    return JSON.parse(data);
   }
-  return identityApiPromise;
+  const defaultUsers = [
+    {
+      id: "user-1234",
+      email: "1234@test.com",
+      password: "1234",
+      user_metadata: { full_name: "测试用户" },
+      emailVerified: true,
+    },
+  ];
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(defaultUsers));
+  return defaultUsers;
+}
+
+function saveUsers(users) {
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(users));
 }
 
 export function authName(user) {
@@ -27,40 +42,63 @@ export function authErrorMessage(error) {
 }
 
 export async function initializeAuth({ onChange, onMessage } = {}) {
-  const api = await getIdentityApi();
-  let callbackResult = null;
-
   try {
-    callbackResult = await api.handleAuthCallback();
+    const currentUser = JSON.parse(localStorage.getItem("keep-rolling-current-user") || "null");
+    onChange?.(currentUser);
+
+    return {
+      callbackResult: null,
+      settings: { allow_signup: true },
+      unsubscribe: () => {},
+    };
   } catch (error) {
     onMessage?.(authErrorMessage(error));
+    return {
+      callbackResult: null,
+      settings: null,
+      unsubscribe: () => {},
+    };
   }
-
-  const currentUser = await api.getUser();
-  onChange?.(currentUser);
-
-  const unsubscribe = api.onAuthChange((event, user) => {
-    onChange?.(user || null, event);
-  });
-
-  return {
-    callbackResult,
-    settings: await api.getSettings().catch(() => null),
-    unsubscribe,
-  };
 }
 
 export async function loginWithEmail(email, password) {
-  const api = await getIdentityApi();
-  return api.login(email, password);
+  const users = getUsers();
+  const user = users.find((u) => u.email === email && u.password === password);
+  
+  if (!user) {
+    const error = new Error("邮箱或密码不正确");
+    error.status = 401;
+    throw error;
+  }
+
+  localStorage.setItem("keep-rolling-current-user", JSON.stringify(user));
+  return user;
 }
 
 export async function signupWithEmail(email, password, name) {
-  const api = await getIdentityApi();
-  return api.signup(email, password, { full_name: name });
+  const users = getUsers();
+  
+  if (users.some((u) => u.email === email)) {
+    const error = new Error("该邮箱已被注册");
+    error.status = 422;
+    throw error;
+  }
+
+  const newUser = {
+    id: `user-${Date.now()}`,
+    email: email,
+    password: password,
+    user_metadata: { full_name: name || "" },
+    emailVerified: false,
+  };
+
+  users.push(newUser);
+  saveUsers(users);
+  
+  localStorage.setItem("keep-rolling-current-user", JSON.stringify(newUser));
+  return newUser;
 }
 
 export async function logoutCurrentUser() {
-  const api = await getIdentityApi();
-  await api.logout();
+  localStorage.removeItem("keep-rolling-current-user");
 }

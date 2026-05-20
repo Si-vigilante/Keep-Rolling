@@ -1631,7 +1631,10 @@ app.addEventListener("submit", async (event) => {
     const user = state.authMode === "signup" ? await signupWithEmail(email, password, name) : await loginWithEmail(email, password);
     state.authUser = user;
     state.modal = null;
+    state.authLoading = false;
     showToast(user.emailVerified === false ? "注册成功，请前往邮箱确认账号。" : "登录成功");
+    // 登录成功后检查是否需要弹出新手引导
+    checkAutoGuide();
     if (state.pendingRoute) {
       const route = state.pendingRoute;
       state.pendingRoute = null;
