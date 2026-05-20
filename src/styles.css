@@ -794,51 +794,66 @@ button:active {
 }
 
 .ai-task-input {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  grid-area: input;
   width: 100%;
   height: 100%;
-  z-index: 9;
-  padding: 20px 28px 78px 30px;
+  z-index: 1;
+  min-height: 0;
+  padding: 12px 14px 10px;
   resize: none;
-  border: 0;
-  border-radius: 20px;
+  border: 1px solid rgba(169, 95, 50, .16);
+  border-radius: 18px;
   outline: 0;
-  background: linear-gradient(180deg, rgba(247, 223, 211, .84), rgba(245, 196, 180, .76));
+  background: rgba(255, 250, 243, .42);
   color: #8b4a2d;
   font-family: "ShangShouHeFeng", "ShangShouQingCheng", serif;
   font-size: 22px;
   line-height: 1.2;
   box-shadow:
-    inset 0 0 0 2px rgba(169, 95, 50, .28),
-    inset 0 10px 24px rgba(255, 246, 234, .34),
-    0 8px 18px rgba(107, 55, 24, .16);
+    inset 0 1px 12px rgba(255, 255, 255, .42),
+    inset 0 -10px 18px rgba(241, 202, 182, .14);
+  pointer-events: auto;
 }
 
 .ai-task-input::placeholder {
-  color: rgba(128, 74, 53, .72);
+  color: rgba(128, 74, 53, .64);
 }
 
 .ai-task-input:focus {
   box-shadow:
-    inset 0 0 0 2px rgba(169, 95, 50, .34),
-    inset 0 10px 24px rgba(255, 246, 234, .34),
-    0 8px 18px rgba(107, 55, 24, .16);
+    inset 0 0 0 1px rgba(169, 95, 50, .24),
+    inset 0 1px 12px rgba(255, 255, 255, .46),
+    inset 0 -10px 18px rgba(241, 202, 182, .14);
 }
 
 .ai-input-panel {
   position: absolute;
-  left: 23.2%;
-  bottom: 2.4%;
-  width: 52.8%;
-  height: 18.2%;
-  z-index: 9;
-  padding: 0;
-  border-radius: 22px;
+  left: 22.6%;
+  bottom: 1.7%;
+  width: 55%;
+  height: 19.2%;
+  z-index: 14;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  grid-template-rows: minmax(0, 1fr) 30px;
+  grid-template-areas:
+    "input actions"
+    "meta actions";
+  gap: 8px 18px;
+  padding: 18px 20px 16px 24px;
+  border: 2px solid rgba(169, 95, 50, .34);
+  border-radius: 24px;
   overflow: hidden;
+  pointer-events: auto;
+  isolation: isolate;
   background:
-    linear-gradient(180deg, rgba(255, 246, 232, .22), rgba(255, 243, 221, .08)),
-    rgba(255, 242, 218, .18);
+    linear-gradient(180deg, rgba(255, 244, 231, .96), rgba(250, 218, 204, .94)),
+    #fbe0cf;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, .52),
+    inset 0 -10px 24px rgba(197, 111, 74, .1),
+    0 12px 28px rgba(107, 55, 24, .22);
 }
 
 .ai-input-panel::before {
@@ -847,69 +862,73 @@ button:active {
   inset: 0;
   z-index: 0;
   background:
-    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, .46), transparent 18%),
-    radial-gradient(circle at 82% 8%, rgba(255, 232, 220, .38), transparent 24%);
+    linear-gradient(90deg, rgba(255, 255, 255, .28), transparent 34%, rgba(226, 151, 120, .08)),
+    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, .42), transparent 22%),
+    radial-gradient(circle at 82% 8%, rgba(255, 232, 220, .34), transparent 26%);
   pointer-events: none;
 }
 
 .ai-input-actions {
-  position: absolute;
-  right: 22px;
-  bottom: 18px;
+  position: relative;
+  grid-area: actions;
+  align-self: center;
+  justify-self: end;
   z-index: 2;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
+  pointer-events: auto;
 }
 
 .ai-file-button {
   position: relative;
-  right: auto;
-  bottom: auto;
-  z-index: 10;
-  width: 72px;
-  height: 72px;
+  z-index: 1;
+  width: 68px;
+  height: 68px;
   display: grid;
   place-items: center;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 32% 28%, rgba(255,255,255,.76), transparent 28%),
-    linear-gradient(160deg, #f1a0ad 0%, #c85f67 100%);
+    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, .78), transparent 28%),
+    linear-gradient(160deg, #ffe7d0 0%, #e0a07e 100%);
   box-shadow:
-    inset 0 0 0 3px rgba(255, 238, 229, .62),
-    0 10px 22px rgba(122, 55, 58, .22);
-  color: #fff7ef;
-  font-size: 50px;
+    inset 0 0 0 2px rgba(157, 87, 49, .28),
+    inset 0 5px 10px rgba(255, 255, 255, .28),
+    0 8px 18px rgba(122, 66, 42, .2);
+  color: #7f442d;
+  font-size: 46px;
   line-height: 1;
   cursor: pointer;
+  pointer-events: auto;
 }
 
 .ai-file-button:hover {
   transform: translateY(-1px);
-  filter: brightness(1.04);
+  filter: brightness(1.03);
 }
 
 .ai-submit-button {
   position: relative;
-  right: auto;
-  bottom: auto;
-  z-index: 10;
-  min-width: 144px;
-  height: 58px;
+  z-index: 1;
+  min-width: 134px;
+  height: 56px;
   display: grid;
   place-items: center;
   padding: 0 24px;
   border-radius: 999px;
   background:
-    linear-gradient(180deg, rgba(255, 239, 218, .96), rgba(222, 127, 98, .92)),
-    rgba(216, 107, 94, .92);
+    linear-gradient(180deg, rgba(255, 237, 211, .98), rgba(228, 159, 124, .94)),
+    rgba(226, 159, 124, .94);
   box-shadow:
-    inset 0 0 0 2px rgba(255, 246, 232, .72),
-    0 10px 22px rgba(122, 55, 58, .22);
-  color: #fffaf1;
-  font-size: 25px;
+    inset 0 0 0 2px rgba(151, 84, 45, .2),
+    inset 0 4px 10px rgba(255, 255, 255, .24),
+    0 8px 18px rgba(122, 66, 42, .2);
+  color: #754029;
+  font-size: 24px;
   line-height: 1;
-  text-shadow: 0 2px 4px rgba(111, 50, 38, .28);
+  text-shadow: 0 1px 0 rgba(255, 249, 238, .5);
+  cursor: pointer;
+  pointer-events: auto;
 }
 
 .ai-submit-button:hover {
@@ -930,13 +949,13 @@ button:active {
 }
 
 .ai-file-name {
-  position: absolute;
-  left: 30px;
-  right: 216px;
-  bottom: 14px;
+  position: relative;
+  grid-area: meta;
+  align-self: end;
   z-index: 2;
-  width: auto;
-  color: rgba(121, 65, 52, .78);
+  width: 100%;
+  min-width: 0;
+  color: rgba(121, 65, 52, .72);
   font-size: 17px;
   line-height: 1;
   text-align: left;
@@ -975,89 +994,159 @@ button:active {
 
 .ai-result-live {
   position: absolute;
-  right: 13.6%;
-  top: 9.2%;
-  width: 21.2%;
-  z-index: 6;
+  right: 8.1%;
+  top: 5.8%;
+  width: 31.4%;
+  height: 86.8%;
+  z-index: 14;
   display: grid;
-  gap: 18px;
+  grid-template-rows: auto repeat(4, minmax(0, 1fr)) auto;
+  gap: 10px;
+  padding: 24px 24px 22px;
+  border: 2px solid rgba(166, 101, 62, .28);
+  border-radius: 30px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255, 242, 220, .97), rgba(246, 211, 196, .96)),
+    #f6d8c9;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, .42),
+    inset 0 -18px 34px rgba(180, 101, 72, .1),
+    0 16px 26px rgba(94, 46, 24, .17);
+  color: #75412c;
+}
+
+.ai-result-live::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% 8%, rgba(255, 255, 255, .32), transparent 24%),
+    radial-gradient(circle at 78% 92%, rgba(213, 136, 112, .12), transparent 30%),
+    linear-gradient(90deg, rgba(255, 255, 255, .15), transparent 42%, rgba(222, 145, 113, .08));
+  pointer-events: none;
+}
+
+.ai-result-header,
+.ai-result-card,
+.ai-result-actions {
+  position: relative;
+  z-index: 1;
+}
+
+.ai-result-header {
+  display: grid;
+  gap: 4px;
+  padding: 0 6px 2px;
+}
+
+.ai-result-header span {
+  font-family: "ShangShouQingCheng", "ShangShouHeFeng", serif;
+  font-size: 33px;
+  line-height: 1;
+  color: #74402c;
+}
+
+.ai-result-header strong {
+  font-size: 16px;
+  line-height: 1.1;
+  font-weight: 400;
+  color: rgba(116, 64, 44, .72);
 }
 
 .ai-result-card {
-  min-height: 86px;
-  padding: 14px 18px 12px;
-  border-radius: 15px;
-  background: rgba(255, 248, 224, .78);
-  box-shadow: inset 0 0 0 2px rgba(207, 158, 71, .44), 0 8px 18px rgba(101, 55, 26, .12);
-  color: #8b4a2d;
-  transform: rotate(-1deg);
+  width: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(161, 95, 58, .14);
+  background:
+    linear-gradient(180deg, rgba(255, 245, 226, .82), rgba(250, 226, 206, .78));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .34),
+    0 5px 11px rgba(116, 60, 34, .08);
+  color: #75412c;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ai-result-card:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+}
+
+.ai-result-card i {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(230, 167, 132, .28);
+  box-shadow: inset 0 0 0 1px rgba(142, 76, 43, .16);
+  font-style: normal;
+  font-size: 20px;
 }
 
 .ai-result-card strong,
-.ai-result-card span {
+.ai-result-card em {
   display: block;
 }
 
-.ai-result-card strong {
-  font-size: 28px;
-  line-height: 1.05;
-}
-
 .ai-result-card span {
+  min-width: 0;
+}
+
+.ai-result-card strong {
+  font-size: 24px;
+  line-height: 1.05;
+  font-weight: 400;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.ai-result-card em {
   margin-top: 4px;
-  font-size: 18px;
+  font-style: normal;
+  font-size: 16px;
   line-height: 1.15;
+  color: rgba(116, 64, 44, .72);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.ai-choice-hotspot {
-  z-index: 7;
-  border-radius: 50%;
+.ai-result-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 12px;
+  padding-top: 4px;
 }
 
-.ai-choice-hotspot.choice-a {
-  left: 47.2%;
-  top: 8.4%;
-  width: 13%;
-  height: 15%;
+.ai-result-reset,
+.ai-result-confirm {
+  min-height: 46px;
+  border-radius: 999px;
+  box-shadow:
+    inset 0 0 0 1px rgba(151, 84, 45, .16),
+    inset 0 3px 8px rgba(255, 255, 255, .2),
+    0 6px 12px rgba(122, 66, 42, .12);
+  color: #74402c;
+  font-size: 20px;
+  line-height: 1;
 }
 
-.ai-choice-hotspot.choice-b {
-  left: 67.3%;
-  top: 25.4%;
-  width: 12.2%;
-  height: 14.4%;
+.ai-result-reset {
+  background: rgba(255, 239, 218, .74);
 }
 
-.ai-choice-hotspot.choice-c {
-  left: 61.1%;
-  top: 53.3%;
-  width: 13.3%;
-  height: 15.7%;
-}
-
-.ai-choice-hotspot.choice-d {
-  left: 38.1%;
-  top: 64.8%;
-  width: 12.8%;
-  height: 15.4%;
-}
-
-.ai-confirm-hotspot {
-  left: 41.7%;
-  top: 35.7%;
-  width: 20.8%;
-  height: 34%;
-  border-radius: 50%;
-  z-index: 8;
-}
-
-.ai-reset-hotspot {
-  right: 4.1%;
-  bottom: 4.8%;
-  width: 7.1%;
-  height: 10.8%;
-  border-radius: 50%;
-  z-index: 8;
+.ai-result-confirm {
+  background: linear-gradient(180deg, rgba(248, 221, 202, .92), rgba(222, 151, 116, .82));
 }
 
 .execute-back-hotspot {
@@ -1960,19 +2049,19 @@ button:active {
 
 .draw-king {
   position: absolute;
-  left: 38.1%;
-  top: 11.8%;
-  width: 22.4%;
+  left: 37.4%;
+  top: 13.2%;
+  width: 24.8%;
   z-index: 1;
 }
 
 .pick-one {
   position: absolute;
-  left: 56.8%;
-  top: 14.8%;
+  left: 55.4%;
+  top: 13.4%;
   color: #612b22;
   font-family: "ShangShouHeFeng", "ShangShouQingCheng", serif;
-  font-size: 56px;
+  font-size: 64px;
   font-weight: 400;
   transform: rotate(7deg);
   z-index: 2;
@@ -1980,29 +2069,48 @@ button:active {
 
 .card-fan {
   position: absolute;
-  left: 3.2%;
-  right: 3.2%;
-  bottom: 6.2%;
-  height: 47%;
-  z-index: 3;
+  left: 0;
+  right: 0;
+  bottom: 4.2%;
+  height: 66%;
+  z-index: 4;
+  pointer-events: auto;
+  overflow-x: auto;
+  overflow-y: visible;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.card-fan::-webkit-scrollbar {
+  display: none;
+}
+
+.card-fan-track {
+  position: relative;
+  width: max(100%, calc(8 * 13.2% + 34%));
+  height: 100%;
+  min-width: 100%;
 }
 
 .fan-card {
   position: absolute;
-  bottom: 2.4%;
-  width: 22.4%;
-  transform-origin: 50% 110%;
+  bottom: 0;
+  width: 31%;
+  transform-origin: 50% 128%;
   transition: transform .24s ease, filter .24s ease, opacity .24s ease;
+  pointer-events: auto;
 }
 
 .fan-card:hover {
   filter: brightness(1.05);
-  transform: translateY(-4%) rotate(var(--r));
+  transform: translateY(calc(var(--y) - 4%)) rotate(var(--r));
 }
 
 .fan-card img {
   width: 100%;
-  filter: drop-shadow(0 0 14px rgba(244, 141, 34, .88)) drop-shadow(0 14px 12px rgba(52, 30, 19, .28));
+  filter:
+    drop-shadow(0 0 16px rgba(235, 137, 61, .9))
+    drop-shadow(0 18px 15px rgba(52, 30, 19, .28));
 }
 
 .card-fan.has-pick .fan-card:not(.picked) {
@@ -2012,23 +2120,23 @@ button:active {
 
 .card-fan.has-pick .fan-card.picked {
   z-index: 5;
-  transform: translateY(-14%) scale(1.06) rotate(var(--r));
+  transform: translateY(calc(var(--y) - 14%)) scale(1.06) rotate(var(--r));
 }
 
-.fan-0 { left: -0.6%; --r: -17deg; transform: rotate(-17deg); }
-.fan-1 { left: 16.4%; --r: -10deg; transform: rotate(-10deg); }
-.fan-2 { left: 33.3%; --r: -3deg; transform: rotate(-3deg); }
-.fan-3 { left: 50.1%; --r: 4deg; transform: rotate(4deg); }
-.fan-4 { left: 67%; --r: 11deg; transform: rotate(11deg); }
-.fan-5 { left: 83.8%; --r: 18deg; transform: rotate(18deg); }
+.fan-0 { left: 1.2%; --r: -22deg; --y: 19%; transform: translateY(19%) rotate(-22deg); z-index: 1; }
+.fan-1 { left: 14.5%; --r: -14deg; --y: 8%; transform: translateY(8%) rotate(-14deg); z-index: 2; }
+.fan-2 { left: 27.8%; --r: -5deg; --y: 0%; transform: translateY(0) rotate(-5deg); z-index: 3; }
+.fan-3 { left: 41.1%; --r: 5deg; --y: 0%; transform: translateY(0) rotate(5deg); z-index: 3; }
+.fan-4 { left: 54.4%; --r: 14deg; --y: 8%; transform: translateY(8%) rotate(14deg); z-index: 2; }
+.fan-5 { left: 67.7%; --r: 22deg; --y: 19%; transform: translateY(19%) rotate(22deg); z-index: 1; }
 
 .draw-tip {
   position: absolute;
-  left: 28.6%;
-  bottom: 3.7%;
-  z-index: 4;
-  width: 42.8%;
-  height: 7.8%;
+  left: 29%;
+  bottom: 3.4%;
+  z-index: 6;
+  width: 42%;
+  height: 7.2%;
   display: grid;
   place-items: center;
   border-radius: 999px;

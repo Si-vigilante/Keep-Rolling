@@ -380,24 +380,29 @@ function renderAi() {
         <div class="page-design ai-design generated" style="background-image:url('${design("AI任务拆解2.2-汪嫣然.png")}')"></div>
         <button class="hotspot back-hotspot" data-action="back" aria-label="返回"></button>
         <div class="ai-result-live" aria-live="polite">
+          <div class="ai-result-header">
+            <span>AI 拆解结果</span>
+            <strong>选择一步查看详情，确认后加入待办</strong>
+          </div>
           ${state.aiSteps
             .slice(0, 4)
             .map(
               (step, index) => `
-                <section class="ai-result-card result-${index + 1}">
-                  <strong>${step.title}</strong>
-                  <span>${step.detail}</span>
-                </section>
+                <button class="ai-result-card result-${index + 1}" data-action="toast" data-toast="${step.detail}">
+                  <i>${index + 1}</i>
+                  <span>
+                    <strong>${step.title}</strong>
+                    <em>${step.detail}</em>
+                  </span>
+                </button>
               `,
             )
             .join("")}
+          <div class="ai-result-actions">
+            <button class="ai-result-reset" data-action="reset-ai">重新拆解</button>
+            <button class="ai-result-confirm" data-action="confirm-ai">${state.aiPhase === "confirmed" ? "已加入待办" : "确认加入待办"}</button>
+          </div>
         </div>
-        <button class="hotspot ai-choice-hotspot choice-a" data-action="toast" data-toast="${state.aiSteps[0]?.detail || ""}" aria-label="A"></button>
-        <button class="hotspot ai-choice-hotspot choice-b" data-action="toast" data-toast="${state.aiSteps[1]?.detail || ""}" aria-label="B"></button>
-        <button class="hotspot ai-choice-hotspot choice-c" data-action="toast" data-toast="${state.aiSteps[2]?.detail || ""}" aria-label="C"></button>
-        <button class="hotspot ai-choice-hotspot choice-d" data-action="toast" data-toast="${state.aiSteps[3]?.detail || ""}" aria-label="D"></button>
-        <button class="hotspot ai-confirm-hotspot" data-action="confirm-ai" aria-label="确认"></button>
-        <button class="hotspot ai-reset-hotspot" data-action="reset-ai" aria-label="重新拆解"></button>
       </section>
     `;
   }
@@ -600,7 +605,9 @@ function renderDraw() {
       <img class="draw-king" src="${beetles.king}" alt="螂王" />
       <div class="pick-one">Pick One</div>
       <div class="card-fan ${state.drawPhase === "revealed" ? "has-pick" : ""}">
-        ${cards.slice(0, 6).map((card, index) => `<button class="fan-card fan-${index} ${picked?.id === card.id ? "picked" : ""}" data-draw="${card.id}" ${picked ? "disabled" : ""}><img src="${asset("透明卡牌背面.png")}" alt="抽卡" /></button>`).join("")}
+        <div class="card-fan-track">
+          ${cards.map((card, index) => `<button class="fan-card fan-${index % 6} ${picked?.id === card.id ? "picked" : ""}" data-draw="${card.id}" ${picked ? "disabled" : ""}><img src="${asset("透明卡牌背面.png")}" alt="抽卡" /></button>`).join("")}
+        </div>
       </div>
       <div class="draw-tip">选择一张卡片，开启你的任务之旅吧!</div>
       ${
@@ -936,7 +943,23 @@ async function handleAction(action, target) {
 }
 
 app.addEventListener("click", (event) => {
-  const target = event.target.closest("button");
+  const target = event.target.closest("button, .ai-file-button");
+
+  const aiPanel = event.target.closest(".ai-input-panel");
+  if (aiPanel && !target) {
+    const rect = aiPanel.getBoundingClientRect();
+    const localX = event.clientX - rect.left;
+    const inActionColumn = localX > rect.width - 244;
+    if (inActionColumn) {
+      event.preventDefault();
+      if (localX < rect.width - 150) {
+        aiPanel.querySelector(".ai-file-input")?.click();
+      } else {
+        handleAction("start-ai", aiPanel);
+      }
+      return;
+    }
+  }
 
   if (!target && event.target.classList.contains("modal-layer")) {
     if (event.target.dataset.dismissible !== "false") closeModal();
