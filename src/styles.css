@@ -2537,7 +2537,7 @@ button:active {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: rgba(40, 28, 18, 0.35);
+  background: rgba(40, 28, 18, 0.32);
   pointer-events: none;
 }
 
@@ -2551,21 +2551,21 @@ button:active {
   justify-content: center;
 }
 
-/* 主页引导气泡（居中偏下） */
+/* 主页引导气泡（左侧菜单旁边） */
 .guide-bubble {
-  left: 50%;
-  bottom: 8%;
-  width: 520px;
-  min-height: 120px;
-  transform: translateX(-50%);
+  left: 27%;
+  top: 50%;
+  width: 440px;
+  min-height: 110px;
+  transform: translateY(-50%);
 }
 
-/* 功能页面内的气泡 */
+/* 功能页面内的气泡（居中） */
 .guide-bubble-feature {
   left: 50%;
   top: 50%;
-  width: 560px;
-  min-height: 140px;
+  width: 520px;
+  min-height: 130px;
   transform: translate(-50%, -50%);
 }
 
@@ -2581,25 +2581,27 @@ button:active {
 .guide-bubble-text {
   position: relative;
   z-index: 1;
-  font-family: 'ShangShouQingCheng', sans-serif;
-  font-size: 26px;
-  color: #2a1a0a;
-  line-height: 1.4;
+  font-family: 'ShangShouHeFeng', 'ShangShouQingCheng', sans-serif;
+  font-size: 30px;
+  color: #5c2e14;
+  line-height: 1.35;
   text-align: center;
-  padding: 20px 30px;
-  max-width: 85%;
+  padding: 22px 32px;
+  max-width: 82%;
   pointer-events: none;
   white-space: pre-line;
+  text-shadow: 0 1px 1px rgba(255,255,240,0.5);
 }
 
-/* 小箭头 */
+/* 小箭头 - 使用项目风格气泡三角 */
 .guide-arrow-overlay {
   position: absolute;
   z-index: 4;
   pointer-events: none;
-  width: 36px;
-  height: 36px;
-  animation: guideArrowBounce 1s ease-in-out infinite;
+  width: 42px;
+  height: 42px;
+  animation: guideArrowBounce 1.2s ease-in-out infinite;
+  filter: drop-shadow(0 2px 3px rgba(60,30,10,0.25));
 }
 
 .guide-arrow-overlay img {
@@ -2611,7 +2613,7 @@ button:active {
 
 @keyframes guideArrowBounce {
   0%, 100% { transform: translateY(0) scale(1); opacity: 1; }
-  50% { transform: translateY(-8px) scale(1.1); opacity: 0.8; }
+  50% { transform: translateY(-6px) scale(1.08); opacity: 0.85; }
 }
 
 

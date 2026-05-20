@@ -50,42 +50,32 @@ const phase2Features = [
   {
     id: 'ai', selector: '.menu-ai', route: 'ai',
     label: 'AI任务拆解',
-    tip: '点击【AI任务拆解】，让读书螂帮你把大任务拆成小步骤',
-    explain: '这里是任务拆解页面。输入你的大任务，读书螂会把它拆解成清晰的小步骤，让执行变得轻松简单。',
-    enterText: '点击【AI任务拆解】按钮，进入任务拆解页面',
-    exitText: '点击左上角返回按钮，回到主页面'
+    tip: '点这里，让螂王的军师帮你把大任务拆成小步骤',
+    explain: '这里是任务拆解台。写上你想做的事，军师螂会帮你理清头绪，拆成一步步的小任务。'
   },
   {
     id: 'draw', selector: '.menu-draw', route: 'draw',
     label: '任务选择',
-    tip: '点击【任务选择】，抽取今日任务卡牌',
-    explain: '这里是抽卡页面。每张卡牌对应不同的冒险挑战，选一张你感兴趣的开始吧。',
-    enterText: '点击【任务选择】按钮，看看今天有哪些任务',
-    exitText: '点击左上角返回按钮，回到主页面'
+    tip: '点这里，抽一张属于你的任务卡牌',
+    explain: '这里是抽卡台。每张卡牌都藏着一份挑战和奖励，选你感兴趣的那张出发吧。'
   },
   {
     id: 'todo', selector: '.menu-todo', route: 'todo',
     label: '待办管理',
-    tip: '点击【待办管理】，查看你的任务清单',
-    explain: '这里是待办管理页面。所有拆解好的任务都会列在这里，勾选即可标记完成。',
-    enterText: '点击【待办管理】按钮，查看你的任务清单',
-    exitText: '点击左上角返回按钮，回到主页面'
+    tip: '点这里，看看待办清单上有哪些任务',
+    explain: '这里是任务看板。所有任务都列在这里，做完一个就勾掉一个，超有成就感。'
   },
   {
     id: 'review', selector: '.menu-review', route: 'review',
     label: '任务回顾',
-    tip: '点击【任务回顾】，查看你的完成记录',
-    explain: '这里是任务回顾页面。完成的任务都会被记录下来，随时回顾你的成长。',
-    enterText: '点击【任务回顾】按钮，查看历史记录',
-    exitText: '点击左上角返回按钮，回到主页面'
+    tip: '点这里，回顾你完成的每一段旅程',
+    explain: '这里是回顾墙。你走过的每一步都会被记下来，随时翻翻看自己有多厉害。'
   },
   {
     id: 'cards', selector: '.menu-cards', route: 'cards',
     label: '卡牌收藏',
-    tip: '点击【卡牌收藏】，查看收集到的角色卡牌',
-    explain: '这里是卡牌收藏页面。完成任务获得的角色卡牌都会存放在这里。',
-    enterText: '点击【卡牌收藏】按钮，查看你的卡牌',
-    exitText: '点击左上角返回按钮，回到主页面'
+    tip: '点这里，看看你收集了哪些螂角色',
+    explain: '这里是图鉴集。完成任务收集角色卡牌，每一张都有它的故事。'
   }
 ];
 
@@ -402,7 +392,7 @@ function guideGetTextSimple() {
   if (p === 2) {
     const f = phase2Features[state.guideFeatureIdx];
     if (!f) return "";
-    return state.guideInFeature ? (state.guideSegment === 0 ? f.explain : "点击左上角返回按钮，回到主页面继续探索下一项功能。") : f.tip;
+    return state.guideInFeature ? (state.guideSegment === 0 ? f.explain : "看完啦，点左上角的返回箭头回去，带你认识下一个功能~") : f.tip;
   }
   // Phase 1 & 3: use try/catch to prevent silent failure
   const steps = p === 1 ? phase1Steps : (p === 3 ? phase3Steps : null);
@@ -805,22 +795,13 @@ function guidePositionArrow() {
   const btnRect = btn.getBoundingClientRect();
   const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--stage-scale")) || 1;
 
-  // 箭头指向按钮（从气泡位置指向按钮）
-  const bubble = document.getElementById("guideBubble");
-  let bx = 640, by = 700; // 默认气泡中心
-  if (bubble) {
-    const bubbleRect = bubble.getBoundingClientRect();
-    bx = (bubbleRect.left + bubbleRect.width / 2 - stageRect.left) / scale;
-    by = (bubbleRect.top - stageRect.top) / scale;
-  }
+  // 箭头放在按钮右侧（气泡在左，按钮在左偏，箭头指向入口）
+  const btnRight = (btnRect.right - stageRect.left) / scale;
+  const btnCenterY = (btnRect.top + btnRect.height / 2 - stageRect.top) / scale;
 
-  const btnCx = (btnRect.left + btnRect.width / 2 - stageRect.left) / scale;
-  const btnCy = (btnRect.top + btnRect.height / 2 - stageRect.top) / scale;
-
-  // 箭头放在按钮正上方偏左
   arrow.style.display = "block";
-  arrow.style.left = (btnCx - 18) + "px";
-  arrow.style.top = (btnCy - 48) + "px";
+  arrow.style.left = (btnRight + 8) + "px";
+  arrow.style.top = (btnCenterY - 21) + "px";
   arrow.style.transform = "rotate(0deg)";
 }
 
