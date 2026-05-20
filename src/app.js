@@ -16,6 +16,116 @@ const ROUTES = {
   DRAW: "draw",
 };
 
+// ================================================================
+//  新手引导 — 三阶段配置
+//  第一阶段：对话介绍（开场→王国介绍→过渡）
+//  第二阶段：功能导览（AI→抽卡→待办→回顾→收藏）
+//  第三阶段：对话收尾（开场→分支选项→完结收尾）
+// ================================================================
+
+// 第一阶段对话（3轮）
+const phase1Steps = [
+  {
+    text: '造物主，你终于来了。我们日夜祈祷，终于等到你降临的这一刻。',
+    options: ['我是谁？', '这里是哪里？', '为何寻我前来']
+  },
+  {
+    segments: [
+      '首先自我介绍一下，我是屎克螂王国的国王。',
+      '我们的王国曾是这片土地上最富饶繁荣的国度，人民安居乐业，资源丰沛，人人都能过上衣食无忧的日子。',
+      '可一场突如其来的灾荒，让一切都变了。资源一夜之间枯竭，我们的人民陷入了绝境。'
+    ],
+    options: ['我帮你们。', '我该怎么做？', '我虽茫然，但愿相助']
+  },
+  {
+    segments: [
+      '感谢您愿意伸出援手！',
+      '请跟我来，我带您认识国家各项职能，教您如何造物、创造资源，帮我们渡过这场危机。'
+    ]
+  }
+];
+
+// 第二阶段功能导览配置
+const phase2Features = [
+  {
+    id: 'ai', selector: '.menu-ai', route: 'ai',
+    label: 'AI任务拆解',
+    tip: '点击【AI任务拆解】，让读书螂帮你把大任务拆成小步骤',
+    explain: '这里是任务拆解页面。输入你的大任务，读书螂会把它拆解成清晰的小步骤，让执行变得轻松简单。',
+    enterText: '点击【AI任务拆解】按钮，进入任务拆解页面',
+    exitText: '点击左上角返回按钮，回到主页面'
+  },
+  {
+    id: 'draw', selector: '.menu-draw', route: 'draw',
+    label: '任务选择',
+    tip: '点击【任务选择】，抽取今日任务卡牌',
+    explain: '这里是抽卡页面。每张卡牌对应不同的冒险挑战，选一张你感兴趣的开始吧。',
+    enterText: '点击【任务选择】按钮，看看今天有哪些任务',
+    exitText: '点击左上角返回按钮，回到主页面'
+  },
+  {
+    id: 'todo', selector: '.menu-todo', route: 'todo',
+    label: '待办管理',
+    tip: '点击【待办管理】，查看你的任务清单',
+    explain: '这里是待办管理页面。所有拆解好的任务都会列在这里，勾选即可标记完成。',
+    enterText: '点击【待办管理】按钮，查看你的任务清单',
+    exitText: '点击左上角返回按钮，回到主页面'
+  },
+  {
+    id: 'review', selector: '.menu-review', route: 'review',
+    label: '任务回顾',
+    tip: '点击【任务回顾】，查看你的完成记录',
+    explain: '这里是任务回顾页面。完成的任务都会被记录下来，随时回顾你的成长。',
+    enterText: '点击【任务回顾】按钮，查看历史记录',
+    exitText: '点击左上角返回按钮，回到主页面'
+  },
+  {
+    id: 'cards', selector: '.menu-cards', route: 'cards',
+    label: '卡牌收藏',
+    tip: '点击【卡牌收藏】，查看收集到的角色卡牌',
+    explain: '这里是卡牌收藏页面。完成任务获得的角色卡牌都会存放在这里。',
+    enterText: '点击【卡牌收藏】按钮，查看你的卡牌',
+    exitText: '点击左上角返回按钮，回到主页面'
+  }
+];
+
+// 第三阶段对话（开场 → 分支 → 完结）
+const phase3Steps = [
+  {
+    text: '造物主，所有功能部署已经全部完成，这座王国已经为您准备就绪。'
+  },
+  {
+    segments: [
+      '这片王国辽阔无边，处处都藏着惊喜与机遇，您大可随心探索。',
+      '除此之外，还有更多功能等待您亲自去发掘，我就不在此一一罗列了。'
+    ],
+    branches: [
+      { label: '好的，我明白了', key: 'A', response: '既然您已明了，那这座王国便交由您了，造物主大人。' },
+      { label: '你退下', key: 'B', response: '臣告退。但臣会在暗处守护，造物主若有需要，随时传召便是。' },
+      { label: '我想再看一遍', key: 'C', response: '第一阶段内容已重温，结束后可再次选择。', loop: true }
+    ]
+  },
+  {
+    text: '造物主，往后之路还长着呢。不过您放心，我屎克螂王国上下，都会陪您走下去。愿您在这片大陆上，玩得尽兴，走得长远。',
+    isEnd: true
+  }
+];
+
+// 当前阶段对应的步骤数组引用
+function guideCurrentSteps() {
+  if (state.guidePhase === 1) return phase1Steps;
+  if (state.guidePhase === 2) return null; // phase2 用 feature 索引
+  if (state.guidePhase === 3) return phase3Steps;
+  return null;
+}
+
+// 获取当前步骤对象
+function guideCurrentStep() {
+  const steps = guideCurrentSteps();
+  if (!steps) return null;
+  return steps[state.guideStep] || null;
+}
+
 const state = {
   route: ROUTES.HOME,
   previousRoute: ROUTES.HOME,
@@ -45,7 +155,23 @@ const state = {
   executeStatus: "idle",
   drawnCard: null,
   drawPhase: "selecting",
+  // ===== 新手引导状态（三阶段） =====
+  guideActive: false,       // 引导是否激活
+  guidePhase: 0,           // 0=未开始, 1=第一阶段, 2=第二阶段, 3=第三阶段, 4=已完成
+  guideStep: 0,            // 当前阶段的步骤索引
+  guideSegment: 0,         // 多段文本中的段落索引
+  guideTriangle: false,    // 三角标是否显示（可点击推进）
+  guideOptions: false,     // 选项浮层是否显示
+  guideBranchReturn: false, // 分支C：返回选项界面
+  guideAfterBranch: false,  // 分支回应打完，推进而非显示选项
+  guideFeatureIdx: 0,      // 第二阶段当前导览的功能索引
+  guideInFeature: false,   // 第二阶段是否正在功能页面中
 };
+
+// 引导打字机相关（模块级）
+let guideTimer = null;
+let guideTypedIndex = 0;
+let guideFullText = "";
 
 const app = document.querySelector("#app");
 let toastTimer;
@@ -146,6 +272,9 @@ function navigate(route, options = {}) {
   const mode = options.mode || "push";
   const direction = options.direction || (mode === "back" ? "back" : "forward");
   if (!route || route === state.route) return;
+  // 引导锁：引导激活时禁止手动导航，仅允许第二阶段内部导航
+  if (state.guideActive && !options.fromGuide) return;
+  if (!options.fromPending) clearTimeout(pendingTimer);
   if (!options.fromPending) clearTimeout(pendingTimer);
   state.previousRoute = state.route;
   state.route = route;
@@ -202,6 +331,522 @@ function showToast(message) {
     state.toast = null;
     render();
   }, 1800);
+}
+
+// ================================================================
+//  新手引导函数（三阶段状态机）
+// ================================================================
+
+// ---------- 渲染 ----------
+
+function guideMarkup() {
+  if (!state.guideActive) return "";
+
+  const phase = state.guidePhase;
+  let overlay = "<div class=\"guide-overlay\" id=\"guideOverlay\">";
+
+  // 第二阶段：使用大气泡 + 箭头，不显示螂王对话框
+  if (phase === 2) {
+    overlay += "<div class=\"guide-bg-layer-subtle\"></div>";
+    if (!state.guideInFeature && state.route === ROUTES.HOME) {
+      overlay += "<div class=\"guide-bubble\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\"></span></div>";
+      overlay += "<div class=\"guide-arrow-overlay\" id=\"guideArrow\"><img src=\"" + asset("三角标.png") + "\" alt=\"\" /></div>";
+    } else if (state.guideInFeature) {
+      overlay += "<div class=\"guide-bubble guide-bubble-feature\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\"></span></div>";
+    }
+  } else {
+    // 第一/三阶段：螂王对话框
+    overlay += "<div class=\"guide-bg-layer\"><img src=\"" + asset("大背景.png") + "\" alt=\"背景\" /></div>"
+      + "<div class=\"guide-character-layer\"><img src=\"" + beetles.king + "\" alt=\"螂王角色\" /></div>"
+      + "<div class=\"guide-dialog-bg\"><img src=\"" + asset("对话框 .png") + "\" alt=\"对话框\" /></div>"
+      + "<div class=\"guide-dialog-text\" id=\"guideDialogText\"></div>"
+      + "<div class=\"guide-character-label\">螂王</div>";
+
+    // 三角标
+    const showTri = state.guideTriangle && !state.guideOptions;
+    overlay += "<div class=\"guide-triangle " + (showTri ? "" : "hidden") + "\"><img src=\"" + asset("三角标.png") + "\" alt=\"提示\" /></div>";
+
+    // 选项按钮
+    const steps = phase === 1 ? phase1Steps : phase3Steps;
+    const step = steps[state.guideStep];
+    if (step) {
+      const hasOptions = step.options && step.options.length > 0;
+      const hasBranches = step.branches && step.branches.length > 0;
+      const showOv = state.guideOptions && (hasOptions || hasBranches);
+      if (hasOptions || hasBranches) {
+        let btns = "";
+        if (hasBranches) {
+          for (let i = 0; i < step.branches.length; i++) {
+            const b = step.branches[i];
+            btns += "<button class=\"guide-option-btn\" data-branch=\"" + b.key + "\">" + b.label + "</button>";
+          }
+        } else {
+          for (let i = 0; i < step.options.length; i++) {
+            btns += "<button class=\"guide-option-btn\" data-idx=\"" + i + "\">" + step.options[i] + "</button>";
+          }
+        }
+        overlay += "<div class=\"guide-options-overlay " + (showOv ? "visible" : "") + "\" id=\"guideOptionsOverlay\"><div class=\"guide-options-container\">" + btns + "</div></div>";
+      }
+    }
+  }
+
+  overlay += "<div class=\"guide-click-overlay\" id=\"guideClickOverlay\"></div>";
+  overlay += "</div>";
+  return overlay;
+}
+
+// ---------- 获取当前要打字的文本 ----------
+
+function guideGetCurrentText() {
+  try {
+    const phase = state.guidePhase;
+
+    if (phase === 2) {
+      const feat = phase2Features[state.guideFeatureIdx];
+      if (!feat) return "";
+      if (state.guideInFeature) {
+        return state.guideSegment === 0 ? feat.explain : "点击左上角返回按钮，回到主页面继续探索下一项功能。";
+      }
+      return feat.tip;
+    }
+
+    if (phase === 1) {
+      const step = phase1Steps[state.guideStep];
+      if (!step) return "";
+      if (step.segments) return step.segments[state.guideSegment] || "";
+      return step.text || "";
+    }
+
+    if (phase === 3) {
+      const step = phase3Steps[state.guideStep];
+      if (!step) return "";
+      if (step.segments) return step.segments[state.guideSegment] || "";
+      if (step.response) return step.response;
+      return step.text || "";
+    }
+
+    return "";
+  } catch (e) {
+    return "";
+  }
+}
+
+// ---------- 打字机 ----------
+
+function guideStartTyping() {
+  clearInterval(guideTimer);
+  guideTimer = null;
+  state.guideTriangle = false;
+  state.guideOptions = false;
+
+  const text = guideGetCurrentText();
+  if (!text) { guideShowTriangle(); return; }
+
+  guideFullText = text;
+  guideTypedIndex = 0;
+  const el = document.getElementById("guideDialogText");
+  if (el) el.textContent = "";
+
+  guideTimer = setInterval(() => {
+    const el2 = document.getElementById("guideDialogText");
+    if (!el2) { clearInterval(guideTimer); guideTimer = null; return; }
+    if (guideTypedIndex < guideFullText.length) {
+      el2.textContent += guideFullText.charAt(guideTypedIndex);
+      guideTypedIndex++;
+    } else {
+      clearInterval(guideTimer);
+      guideTimer = null;
+      guideShowTriangle();
+    }
+  }, 35);
+}
+
+function guideShowTriangle() {
+  // 第二阶段不显示三角标（用户需要点击功能按钮而非推进）
+  if (state.guidePhase === 2 && !state.guideInFeature) {
+    state.guideTriangle = false;
+    guideUpdateUI();
+    return;
+  }
+  state.guideTriangle = true;
+  guideUpdateUI();
+}
+
+function guideUpdateUI() {
+  const tri = document.querySelector(".guide-triangle");
+  if (tri) tri.classList.toggle("hidden", !state.guideTriangle);
+  const ov = document.getElementById("guideOptionsOverlay");
+  if (ov) ov.classList.toggle("visible", state.guideOptions);
+  const co = document.getElementById("guideClickOverlay");
+  if (co) {
+    if (state.guideOptions) {
+      co.style.pointerEvents = "none";
+    } else if (state.guidePhase === 2 && !state.guideInFeature) {
+      co.style.pointerEvents = "none";
+    } else {
+      co.style.pointerEvents = "auto";
+    }
+  }
+  // 第二阶段主页：整个引导层穿透，让用户可点击下方功能按钮
+  const guide = document.getElementById("guideOverlay");
+  if (guide) {
+    guide.style.pointerEvents = (state.guidePhase === 2 && !state.guideInFeature && !state.guideOptions) ? "none" : "auto";
+  }
+  // 定位第二阶段箭头
+  if (state.guidePhase === 2) guidePositionArrow();
+}
+
+// ---------- 推进到下一步（通用） ----------
+
+function guideAdvanceToNextStep(phase) {
+  const _stepsLen = phase === 1 ? phase1Steps.length : (phase === 3 ? phase3Steps.length : 0);
+  if (state.guideStep < _stepsLen - 1) {
+    state.guideStep++;
+    state.guideSegment = 0;
+    state.guideTriangle = false;
+    state.guideOptions = false;
+    state.guideBranchReturn = false;
+    state.guideAfterBranch = false;
+    render();
+    Promise.resolve().then(() => guideStartTyping());
+  } else {
+    guideNextPhase();
+  }
+}
+
+// ---------- 核心：点击推进 ----------
+
+function guideAdvance() {
+  if (state.guideOptions) return; // 选项用按钮点击，不进这里
+
+  // 打字中 → 立即打完
+  if (guideTimer) {
+    clearInterval(guideTimer);
+    guideTimer = null;
+    const el = document.getElementById("guideDialogText");
+    if (el) el.textContent = guideFullText;
+    guideTypedIndex = guideFullText.length;
+    guideShowTriangle();
+    return;
+  }
+
+  // 没有三角标 → 忽略（防御）
+  if (!state.guideTriangle) return;
+
+  // ===== 有三角标，执行推进 =====
+  state.guideTriangle = false;
+  guideUpdateUI();
+
+  const phase = state.guidePhase;
+
+  // --- 第二阶段：功能导览 ---
+  if (phase === 2) {
+    const feat = phase2Features[state.guideFeatureIdx];
+    if (!feat) { guideNextPhase(); return; }
+
+    if (state.guideInFeature) {
+      // 已在功能页面：提示返回主页
+      if (state.guideSegment === 0) {
+        // 刚讲解完功能
+        state.guideSegment = 1;
+        guideStartTyping();
+        return;
+      } else {
+        // 用户应该已点击返回，检查路由
+        if (state.route === ROUTES.HOME) {
+          state.guideInFeature = false;
+          state.guideSegment = 0;
+          // 下一个功能
+          state.guideFeatureIdx++;
+          if (state.guideFeatureIdx >= phase2Features.length) {
+            // 第二阶段完成 → 进入第三阶段
+            guideNextPhase();
+          } else {
+            guideStartTyping();
+          }
+        }
+        // 如果还没回主页，不做任何事（等待用户点击返回）
+        return;
+      }
+    } else {
+      // 在主页面，提示点击功能按钮
+      // 用户应该已通过 handleRoute 进入功能页面
+      // 这里不做处理，等待 handleRoute 触发
+    }
+    return;
+  }
+
+  // --- 第一/三阶段：对话推进 ---
+  const stepsArr = phase === 1 ? phase1Steps : (phase === 3 ? phase3Steps : null);
+  const step = stepsArr ? stepsArr[state.guideStep] : null;
+  if (!step) { guideNextPhase(); return; }
+
+  // 结束步骤 → 完成当前阶段
+  if (step.isEnd) {
+    guideNextPhase();
+    return;
+  }
+
+// 分支C：返回选项界面（重新开始第二阶段）
+    if (state.guideBranchReturn) {
+      state.guideBranchReturn = false;
+      guideRestartPhase2();
+    return;
+  }
+
+  // 分支回应已打完，下次点击推进到下一步
+  if (state.guideAfterBranch) {
+    state.guideAfterBranch = false;
+    guideAdvanceToNextStep(phase);
+    return;
+  }
+
+  // 多段文本 → 下一段
+  if (step.segments && state.guideSegment < step.segments.length - 1) {
+    state.guideSegment++;
+    guideStartTyping();
+    return;
+  }
+
+  // 有选项/分支 → 显示
+  if (step.branches || step.options) {
+    state.guideOptions = true;
+    guideUpdateUI();
+    return;
+  }
+
+  // 推进到下一步
+  guideAdvanceToNextStep(phase);
+}
+
+// ---------- 处理选项/分支点击 ----------
+
+function guideHandleOption(indexOrKey, isBranch) {
+  const steps = state.guidePhase === 1 ? phase1Steps : (state.guidePhase === 3 ? phase3Steps : null);
+  const step = steps ? steps[state.guideStep] : null;
+  if (!step) return;
+
+  state.guideOptions = false;
+  guideUpdateUI();
+  state.guideSegment = 0;
+
+  if (isBranch) {
+    // ===== 分支选项（第三阶段） =====
+    const branch = step.branches.find(b => b.key === indexOrKey);
+    if (!branch) return;
+
+    // 分支C：「我想再看一遍」→ 标记返回第二阶段
+    if (branch.loop) {
+      state.guideBranchReturn = true;
+    }
+
+    // 打字显示分支回应
+    guideFullText = branch.response;
+    guideTypedIndex = 0;
+    const el = document.getElementById("guideDialogText");
+    if (el) el.textContent = "";
+    guideTimer = setInterval(() => {
+      const el2 = document.getElementById("guideDialogText");
+      if (!el2) { clearInterval(guideTimer); guideTimer = null; return; }
+      if (guideTypedIndex < guideFullText.length) {
+        el2.textContent += guideFullText.charAt(guideTypedIndex);
+        guideTypedIndex++;
+      } else {
+        clearInterval(guideTimer);
+        guideTimer = null;
+        // 分支回应打完显示三角标
+        state.guideTriangle = true;
+        // 非循环分支（A/B）设置标记，下次点击推进而非重新显示选项
+        if (!branch.loop) state.guideAfterBranch = true;
+        guideUpdateUI();
+      }
+    }, 35);
+    return;
+  }
+
+  // ===== 普通选项（第一阶段） =====
+  // 选项出现在所有段落后，点击选项直接推进到下一步
+  guideAdvanceToNextStep(state.guidePhase);
+}
+
+// ---------- 阶段切换 ----------
+
+function guideNextPhase() {
+  clearInterval(guideTimer);
+  guideTimer = null;
+
+  if (state.guidePhase === 1) {
+    // 第一阶段完成 → 进入第二阶段
+    state.guidePhase = 2;
+    state.guideStep = 0;
+    state.guideSegment = 0;
+    state.guideTriangle = false;
+    state.guideOptions = false;
+    state.guideBranchReturn = false;
+    state.guideFeatureIdx = 0;
+    state.guideInFeature = false;
+    // 第二阶段从主页开始
+    if (state.route !== ROUTES.HOME) {
+      navigate(ROUTES.HOME, { mode: "reset", direction: "back", fromGuide: true });
+    } else {
+      render();
+      requestAnimationFrame(() => guideStartTyping());
+    }
+    return;
+  }
+
+  if (state.guidePhase === 2) {
+    // 第二阶段完成 → 进入第三阶段
+    state.guidePhase = 3;
+    state.guideStep = 0;
+    state.guideSegment = 0;
+    state.guideTriangle = false;
+    state.guideOptions = false;
+    state.guideBranchReturn = false;
+    state.guideFeatureIdx = 0;
+    state.guideInFeature = false;
+    if (state.route !== ROUTES.HOME) {
+      navigate(ROUTES.HOME, { mode: "reset", direction: "back", fromGuide: true });
+    } else {
+      render();
+      requestAnimationFrame(() => guideStartTyping());
+    }
+    return;
+  }
+
+  if (state.guidePhase === 3) {
+    // 第三阶段完成 → 引导结束
+    completeGuide();
+    return;
+  }
+}
+
+// ---------- 引导完成 ----------
+
+let _guideFadeTimer = null; // 淡出动画定时器
+
+function completeGuide() {
+  clearInterval(guideTimer);
+  guideTimer = null;
+  clearTimeout(_guideFadeTimer);
+  state.guideActive = false;
+  state.guidePhase = 4; // 已完成
+  state.guideStep = 0;
+  state.guideSegment = 0;
+  state.guideTriangle = false;
+  state.guideOptions = false;
+  state.guideBranchReturn = false;
+  state.guideFeatureIdx = 0;
+  state.guideInFeature = false;
+
+  // 淡出动画
+  const overlay = document.querySelector(".guide-overlay");
+  if (overlay) {
+    overlay.classList.add("fade-out");
+    _guideFadeTimer = setTimeout(() => {
+      if (!state.guideActive) render();
+      _guideFadeTimer = null;
+    }, 800);
+  } else {
+    render();
+  }
+  try { localStorage.setItem("beetle-guide-v1-seen", "1"); } catch (e) { /* ignore */ }
+}
+
+// ---------- 启动引导 ----------
+
+function startGuide() {
+  if (state.guideActive) return;
+  clearInterval(guideTimer);
+  clearTimeout(_guideFadeTimer);
+  guideTimer = null;
+  state.guideActive = true;
+  state.guidePhase = 1;
+  state.guideStep = 0;
+  state.guideSegment = 0;
+  state.guideTriangle = false;
+  state.guideOptions = false;
+  state.guideBranchReturn = false;
+  state.guideAfterBranch = false;
+  state.guideFeatureIdx = 0;
+  state.guideInFeature = false;
+  render();
+  // 直接调用，避免 setTimeout 被外部干扰
+  Promise.resolve().then(() => guideStartTyping());
+}
+
+// ---------- 回去重看：重启第二阶段 ----------
+
+function guideRestartPhase2() {
+  clearInterval(guideTimer);
+  guideTimer = null;
+  state.guidePhase = 2;
+  state.guideStep = 0;
+  state.guideSegment = 0;
+  state.guideTriangle = false;
+  state.guideOptions = false;
+  state.guideBranchReturn = false;
+  state.guideAfterBranch = false;
+  state.guideFeatureIdx = 0;
+  state.guideInFeature = false;
+  if (state.route !== ROUTES.HOME) {
+    navigate(ROUTES.HOME, { mode: "reset", direction: "back", fromGuide: true });
+  } else {
+    render();
+    Promise.resolve().then(() => guideStartTyping());
+  }
+}
+
+// ---------- 定位第二阶段指引箭头 ----------
+
+function guidePositionArrow() {
+  const arrow = document.getElementById("guideArrow");
+  if (!arrow) return;
+  const feat = phase2Features[state.guideFeatureIdx];
+  if (!feat || state.guideInFeature || state.route !== ROUTES.HOME) {
+    arrow.style.display = "none";
+    return;
+  }
+  const btn = document.querySelector(feat.selector);
+  if (!btn) { arrow.style.display = "none"; return; }
+
+  const stage = document.querySelector(".stage");
+  if (!stage) return;
+  const stageRect = stage.getBoundingClientRect();
+  const btnRect = btn.getBoundingClientRect();
+  const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--stage-scale")) || 1;
+
+  // 箭头指向按钮（从气泡位置指向按钮）
+  const bubble = document.getElementById("guideBubble");
+  let bx = 640, by = 700; // 默认气泡中心
+  if (bubble) {
+    const bubbleRect = bubble.getBoundingClientRect();
+    bx = (bubbleRect.left + bubbleRect.width / 2 - stageRect.left) / scale;
+    by = (bubbleRect.top - stageRect.top) / scale;
+  }
+
+  const btnCx = (btnRect.left + btnRect.width / 2 - stageRect.left) / scale;
+  const btnCy = (btnRect.top + btnRect.height / 2 - stageRect.top) / scale;
+
+  // 箭头放在按钮正上方偏左
+  arrow.style.display = "block";
+  arrow.style.left = (btnCx - 18) + "px";
+  arrow.style.top = (btnCy - 48) + "px";
+  arrow.style.transform = "rotate(0deg)";
+}
+
+// ---------- 检查是否自动弹出 ----------
+
+function checkAutoGuide() {
+  if (state.route !== ROUTES.HOME) return;
+  // 硬性规则：仅在用户注册并登录后首次进入时触发
+  // 本地调试时无 auth 也可通过 window.__forceGuide 触发
+  if (!state.authUser && !window.__forceGuide) return;
+  try {
+    const seen = localStorage.getItem("beetle-guide-v1-seen");
+    if (seen) return;
+  } catch (e) { /* ignore */ }
+  setTimeout(() => { if (!state.authLoading) startGuide(); }, 600);
 }
 
 function selectedTodo() {
@@ -684,6 +1329,7 @@ function render() {
       <div class="page-transition" data-route="${state.route}">
         ${pages[state.route]()}
       </div>
+      ${guideMarkup()}
       ${modalMarkup()}
       ${toastMarkup()}
     </main>
@@ -697,6 +1343,13 @@ function handleRoute(target) {
   if (tab) state.cardTab = tab;
   if (profileTab) state.profileTab = profileTab;
   const route = target.dataset.route;
+
+  // 引导期间：第二阶段功能导览需要导航，跳过登录检测
+  if (state.guideActive && state.guidePhase === 2 && route) {
+    navigate(route, { mode: "push", direction: "forward", fromGuide: true });
+    return;
+  }
+
   if (requiresAuth(route) && !state.authUser) {
     state.pendingRoute = route;
     state.authMode = "login";
@@ -863,6 +1516,71 @@ async function handleAction(action, target) {
 app.addEventListener("click", (event) => {
   const target = event.target.closest("button");
 
+  // ===== 新手引导点击处理 =====
+  if (state.guideActive) {
+    // 选项按钮点击
+    if (target && target.classList.contains("guide-option-btn")) {
+      const isBranch = target.dataset.branch !== undefined;
+      if (isBranch) {
+        guideHandleOption(target.dataset.branch, true);
+      } else {
+        guideHandleOption(parseInt(target.dataset.idx), false);
+      }
+      return;
+    }
+
+    // 第二阶段：拦截功能按钮点击
+    if (state.guidePhase === 2 && !state.guideInFeature && target && target.dataset.route) {
+      const feat = phase2Features[state.guideFeatureIdx];
+      if (feat && target.dataset.route === feat.route) {
+        // 用户点击了正确的功能按钮 → 进入功能页面
+        state.guideInFeature = true;
+        state.guideSegment = 0;
+        handleRoute(target);
+        // 等待渲染完成后打字
+        setTimeout(() => guideStartTyping(), 100);
+        return;
+      }
+      // 点了其他功能按钮 → 忽略
+      return;
+    }
+
+    // 第二阶段：在功能页面中，点击返回按钮
+    if (state.guidePhase === 2 && state.guideInFeature && target) {
+      const action = target.dataset.action;
+      if (action === "back" || target.classList.contains("back-btn") || target.classList.contains("back-hotspot")) {
+        // 使用 goBack 返回主页
+        goBack();
+        // 等待返回后推进
+        const checkReturn = setInterval(() => {
+          if (state.route === ROUTES.HOME) {
+            clearInterval(checkReturn);
+            state.guideInFeature = false;
+            state.guideSegment = 0;
+            state.guideFeatureIdx++;
+            if (state.guideFeatureIdx >= phase2Features.length) {
+              guideNextPhase();
+            } else {
+              render();
+              setTimeout(() => guideStartTyping(), 50);
+            }
+          }
+        }, 50);
+        return;
+      }
+      // 在功能页面中阻止其他交互
+      return;
+    }
+
+    // 引导点击层点击
+    if (event.target.closest(".guide-click-overlay") || event.target.closest(".guide-overlay")) {
+      guideAdvance();
+      return;
+    }
+    // 引导开启时阻止其他交互
+    return;
+  }
+
   if (!target && event.target.classList.contains("modal-layer")) {
     if (event.target.dataset.dismissible !== "false") closeModal();
     return;
@@ -978,11 +1696,18 @@ window.addEventListener("resize", updateStageScale);
 updateStageScale();
 render();
 
+// 暴露调试接口
+window.startGuide = typeof startGuide !== 'undefined' ? startGuide : function(){};
+window.completeGuide = typeof completeGuide !== 'undefined' ? completeGuide : function(){};
+window.skipGuide = typeof completeGuide !== 'undefined' ? completeGuide : function(){};
+
 initializeAuth({
   onChange(user) {
     state.authUser = user || null;
     state.authLoading = false;
     render();
+    // 首次加载完成后检查是否需要自动弹出新手引导
+    checkAutoGuide();
   },
   onMessage(message) {
     state.authLoading = false;

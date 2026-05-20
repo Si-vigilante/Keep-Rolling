@@ -2313,6 +2313,305 @@ button:active {
   }
 }
 
+/* ================================================================
+   新手引导 Overlay
+   放在 .stage 内部，跟随 --stage-scale 缩放
+   ================================================================ */
+.guide-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  overflow: hidden;
+  animation: guideFadeIn 0.4s ease-out both;
+}
 
+@keyframes guideFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* z-index 0: 大背景 */
+.guide-bg-layer {
+  position: absolute;
+  left: calc(50% - 0.5px);
+  top: -16px;
+  width: 1331px;
+  height: 832px;
+  transform: translateX(-50%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.guide-bg-layer img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* z-index 1: 螂王角色 */
+.guide-character-layer {
+  position: absolute;
+  left: 360px;
+  top: 202px;
+  width: 560px;
+  height: 396px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.guide-character-layer img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* z-index 2: 对话框背景 */
+.guide-dialog-bg {
+  position: absolute;
+  left: 50%;
+  top: 514px;
+  width: 848px;
+  height: 152px;
+  transform: translateX(-50%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.guide-dialog-bg img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* z-index 2: 对话文字 */
+.guide-dialog-text {
+  position: absolute;
+  left: 269px;
+  top: 564px;
+  width: 737px;
+  z-index: 2;
+  font-family: 'ShangShouQingCheng', sans-serif;
+  font-size: 28px;
+  color: #2a1a0a;
+  line-height: 1.25;
+  text-align: left;
+  pointer-events: none;
+  white-space: pre-line;
+}
+
+/* z-index 2: 角色名字 */
+.guide-character-label {
+  position: absolute;
+  left: 871px;
+  top: 514px;
+  z-index: 2;
+  font-family: 'ShangShouHeFeng', sans-serif;
+  font-size: 40px;
+  color: #2a1a0a;
+  line-height: 1;
+  background: transparent;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* z-index 3: 三角标 */
+.guide-triangle {
+  position: absolute;
+  left: 939px;
+  top: 621px;
+  width: 45px;
+  height: 45px;
+  z-index: 3;
+  animation: guideBounce 0.5s ease-in-out infinite;
+  pointer-events: none;
+  filter: drop-shadow(0px 4px 4px rgba(34,34,34,0.25));
+}
+
+.guide-triangle img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.guide-triangle.hidden {
+  display: none;
+}
+
+@keyframes guideBounce {
+  0%, 100% { transform: translateY(0); opacity: 1; }
+  50% { transform: translateY(-10px); opacity: 0.7; }
+}
+
+/* z-index 4: 选项浮层 */
+.guide-options-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1280px;
+  height: 800px;
+  z-index: 6;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+
+.guide-options-overlay.visible {
+  display: flex;
+}
+
+.guide-options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+  pointer-events: auto;
+  animation: guideFadeIn 0.4s ease-in-out;
+  margin-top: -100px;
+}
+
+.guide-option-btn {
+  position: relative;
+  width: 360px;
+  height: 64px;
+  border: none;
+  cursor: pointer;
+  font-family: 'ShangShouQingCheng', sans-serif;
+  font-size: 26px;
+  color: #2a1a0a;
+  background: transparent;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+  background-image: url('../Assets/用户选项 .png');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  letter-spacing: 4px;
+}
+
+.guide-option-btn:hover {
+  transform: scale(1.05);
+}
+
+.guide-option-btn:active {
+  transform: scale(0.97);
+}
+
+/* z-index 5: 全页面点击层 */
+.guide-click-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1280px;
+  height: 800px;
+  z-index: 5;
+  cursor: pointer;
+  background: transparent;
+}
+
+.guide-overlay .hidden {
+  display: none !important;
+}
+
+/* 引导退场淡出 */
+.guide-overlay.fade-out {
+  animation: guideFadeOut 0.8s ease-in-out forwards;
+}
+
+@keyframes guideFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* ================================================================
+   第二阶段：大气泡 + 指引箭头
+   ================================================================ */
+
+/* 半透明遮罩 */
+.guide-bg-layer-subtle {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: rgba(40, 28, 18, 0.35);
+  pointer-events: none;
+}
+
+/* 大气泡容器 */
+.guide-bubble {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 主页引导气泡（居中偏下） */
+.guide-bubble {
+  left: 50%;
+  bottom: 8%;
+  width: 520px;
+  min-height: 120px;
+  transform: translateX(-50%);
+}
+
+/* 功能页面内的气泡 */
+.guide-bubble-feature {
+  left: 50%;
+  top: 50%;
+  width: 560px;
+  min-height: 140px;
+  transform: translate(-50%, -50%);
+}
+
+.guide-bubble-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+}
+
+.guide-bubble-text {
+  position: relative;
+  z-index: 1;
+  font-family: 'ShangShouQingCheng', sans-serif;
+  font-size: 26px;
+  color: #2a1a0a;
+  line-height: 1.4;
+  text-align: center;
+  padding: 20px 30px;
+  max-width: 85%;
+  pointer-events: none;
+  white-space: pre-line;
+}
+
+/* 小箭头 */
+.guide-arrow-overlay {
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+  width: 36px;
+  height: 36px;
+  animation: guideArrowBounce 1s ease-in-out infinite;
+}
+
+.guide-arrow-overlay img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+@keyframes guideArrowBounce {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 1; }
+  50% { transform: translateY(-8px) scale(1.1); opacity: 0.8; }
+}
 
 
