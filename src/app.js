@@ -5,6 +5,8 @@ import { createAiTaskBreakdown, createTodosFromAi, makeTodo, rewardCardForTask, 
 const ASSET_VERSION = "20260517-ai21-todo-fix";
 const design = (name) => `./Page_View/${name}?v=${ASSET_VERSION}`;
 const LOCAL_AUTH_STORAGE_KEY = "beetle-kingdom-local-auth";
+const BGM_STORAGE_KEY = "beetle-kingdom-bgm";
+const BGM_VOLUME_STORAGE_KEY = "beetle-kingdom-bgm-volume";
 const IS_LOCAL_PREVIEW = window.location.protocol === "file:" || ["", "localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
 const LOCAL_PREVIEW_USER = {
   name: "本地测试员",
@@ -30,6 +32,15 @@ function setLocalPreviewSession(active) {
     else sessionStorage.removeItem(LOCAL_AUTH_STORAGE_KEY);
   } catch {
     // Session storage can be unavailable in strict privacy modes; the in-memory state still works.
+  }
+}
+
+function readStoredBgmVolume() {
+  try {
+    const stored = Number(localStorage.getItem(BGM_VOLUME_STORAGE_KEY));
+    return Number.isFinite(stored) ? Math.min(Math.max(stored, 0), 1) : 0.45;
+  } catch {
+    return 0.45;
   }
 }
 
@@ -62,6 +73,7 @@ const state = {
   selectedTodoId: todoSeed[0].id,
   selectedCard: cards[0],
   todos: structuredClone(todoSeed),
+  todoSortMode: "default",
   aiPhase: "input",
   aiInput: "",
   aiAttachment: null,
@@ -73,9 +85,14 @@ const state = {
   executeStatus: "idle",
   drawnCard: null,
   drawPhase: "selecting",
+  bgmPlaying: false,
+  bgmVolume: readStoredBgmVolume(),
 };
 
 const app = document.querySelector("#app");
+const bgmAudio = new Audio(asset("沙丘慢步.mp3"));
+bgmAudio.loop = true;
+bgmAudio.volume = state.bgmVolume;
 let toastTimer;
 let pendingTimer;
 let clockTimer;
@@ -182,7 +199,7 @@ function navigate(route, options = {}) {
   state.modal = null;
   if (mode !== "back") setHistory(route, mode);
   syncRouteState(route, { fresh: options.fresh ?? (mode === "push" && state.previousRoute === ROUTES.HOME) });
-  render();
+  render({ routeTransition: true });
 }
 
 function navigateFlowEnd(route) {
@@ -206,7 +223,7 @@ function goBack() {
   state.modal = null;
   state.history = state.history.length ? state.history : [ROUTES.HOME];
   syncRouteState(previous, { fresh: false });
-  render();
+  render({ routeTransition: true });
 }
 
 function finishToHome() {
@@ -255,6 +272,27 @@ function normalizeTodoSelection() {
     state.selectedTodoId = state.todos[0].id;
   }
   selectTodo(state.selectedTodoId);
+}
+
+function sortedTodosForView() {
+  const indexedTodos = state.todos.map((todo, index) => ({ todo, index }));
+  const sorted = [...indexedTodos];
+
+  if (state.todoSortMode === "active-first") {
+    sorted.sort((a, b) => Number(a.todo.done) - Number(b.todo.done) || a.index - b.index);
+  }
+
+  if (state.todoSortMode === "done-first") {
+    sorted.sort((a, b) => Number(b.todo.done) - Number(a.todo.done) || a.index - b.index);
+  }
+
+  return sorted.map((item) => item.todo);
+}
+
+function nextTodoSortMode() {
+  const modes = ["default", "active-first", "done-first"];
+  const currentIndex = modes.indexOf(state.todoSortMode);
+  return modes[(currentIndex + 1) % modes.length];
 }
 
 function button(label, className = "", attrs = "") {
@@ -456,6 +494,7 @@ function renderExecute() {
 function renderTodo() {
   const currentTodo = selectedTodo();
   const currentTask = currentTodo ? taskFromTodo(currentTodo) : state.selectedTask;
+  const visibleTodos = sortedTodosForView();
   return `
     <section class="page todo-page">
       ${designFrame("待办事项2-王紫涵.png", "todo-design")}
@@ -466,17 +505,16 @@ function renderTodo() {
       <button class="hotspot todo-detail-hotspot" data-modal="todo-detail" aria-label="任务详情"></button>
       <button class="hotspot todo-execute-hotspot" data-action="execute-selected" aria-label="开始执行"></button>
       <button class="hotspot todo-side-hotspot side-one" data-action="toast" data-toast="已切换卡片视图" aria-label="卡片视图"></button>
-      <button class="hotspot todo-side-hotspot side-two" data-action="toast" data-toast="排序方式已更新" aria-label="排序"></button>
+      <button class="hotspot todo-side-hotspot side-two" data-action="toggle-todo-sort" aria-label="排序"></button>
       <button class="hotspot todo-side-hotspot side-three" data-action="toast" data-toast="插图功能稍后接入" aria-label="图片"></button>
       <button class="hotspot todo-side-hotspot side-four" data-modal="todo-new" aria-label="编辑"></button>
       <div class="todo-clean-list-panel" aria-hidden="true"></div>
       <div class="todo-clean-detail-panel" aria-hidden="true"></div>
       <div class="todo-live-list">
-        ${state.todos
-          .slice(0, 4)
+        ${visibleTodos
           .map(
             (todo) => `
-              <label class="todo-live-row ${state.selectedTodoId === todo.id ? "selected" : ""}">
+              <label class="todo-live-row ${state.selectedTodoId === todo.id ? "selected" : ""} ${todo.done ? "is-done" : ""}">
                 <input type="checkbox" data-todo="${todo.id}" ${todo.done ? "checked" : ""} />
                 <button class="todo-live-label" data-action="select-todo" data-todo-id="${todo.id}">${todo.name.replace(/^任务名：/, "")}</button>
               </label>
@@ -744,7 +782,18 @@ function modalMarkup() {
   return "";
 }
 
-function render() {
+function renderMusicControl() {
+  return `
+    <div class="music-control ${state.bgmPlaying ? "is-playing" : ""}" aria-label="背景音乐控制">
+      <button class="music-toggle" data-action="toggle-bgm" aria-label="${state.bgmPlaying ? "暂停背景音乐" : "播放背景音乐"}" aria-pressed="${state.bgmPlaying}">
+        <span aria-hidden="true">${state.bgmPlaying ? "停" : "乐"}</span>
+      </button>
+      <input class="music-volume-slider" type="range" min="0" max="1" step="0.01" value="${state.bgmVolume}" aria-label="背景音乐音量" />
+    </div>
+  `;
+}
+
+function render(options = {}) {
   const pages = {
     [ROUTES.HOME]: renderHome,
     [ROUTES.AI]: renderAi,
@@ -756,11 +805,14 @@ function render() {
     [ROUTES.DRAW]: renderDraw,
   };
 
+  const transitionClass = options.routeTransition ? " is-route-transition" : "";
+
   app.innerHTML = `
     <main class="stage ${routeClass()}">
-      <div class="page-transition" data-route="${state.route}">
+      <div class="page-transition${transitionClass}" data-route="${state.route}">
         ${pages[state.route]()}
       </div>
+      ${renderMusicControl()}
       ${modalMarkup()}
       ${toastMarkup()}
     </main>
@@ -791,6 +843,31 @@ function requiresAuth(route) {
 
 async function handleAction(action, target) {
   if (action === "back") goBack();
+  if (action === "toggle-bgm") {
+    if (state.bgmPlaying) {
+      bgmAudio.pause();
+      state.bgmPlaying = false;
+      try {
+        localStorage.setItem(BGM_STORAGE_KEY, "paused");
+      } catch {}
+      render();
+      return;
+    }
+
+    try {
+      bgmAudio.volume = state.bgmVolume;
+      await bgmAudio.play();
+      state.bgmPlaying = true;
+      try {
+        localStorage.setItem(BGM_STORAGE_KEY, "playing");
+      } catch {}
+      render();
+    } catch {
+      state.bgmPlaying = false;
+      showToast("音乐暂时无法播放，请再点一次试试");
+    }
+    return;
+  }
   if (action === "toggle-menu") {
     state.menuOpen = !state.menuOpen;
     render();
@@ -870,6 +947,15 @@ async function handleAction(action, target) {
     state.profileTab = target.dataset.tab;
     showToast(target.dataset.tab === "mail" ? "消息设置已打开" : target.dataset.tab === "notice" ? "提醒设置已打开" : "设置已打开");
     render();
+  }
+  if (action === "toggle-todo-sort") {
+    state.todoSortMode = nextTodoSortMode();
+    const sortText = {
+      default: "排序：默认顺序",
+      "active-first": "排序：未完成优先",
+      "done-first": "排序：已完成优先",
+    };
+    showToast(sortText[state.todoSortMode]);
   }
   if (action === "add-todo") {
     const input = document.querySelector("#newTaskName");
@@ -1060,6 +1146,16 @@ app.addEventListener("change", (event) => {
 });
 
 app.addEventListener("input", (event) => {
+  if (event.target.classList.contains("music-volume-slider")) {
+    const volume = Math.min(Math.max(Number(event.target.value), 0), 1);
+    state.bgmVolume = Number.isFinite(volume) ? volume : 0.45;
+    bgmAudio.volume = state.bgmVolume;
+    try {
+      localStorage.setItem(BGM_VOLUME_STORAGE_KEY, String(state.bgmVolume));
+    } catch {}
+    return;
+  }
+
   if (event.target.classList.contains("ai-task-input")) {
     state.aiInput = event.target.value;
   }
