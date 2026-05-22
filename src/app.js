@@ -155,6 +155,7 @@ const state = {
   guideBranchReturn: false, // 分支C：返回选项界面
   guideAfterBranch: false,  // 分支回应打完，推进而非显示选项
   guideMenuHint: false,    // 第二阶段：是否处于"请展开菜单"提示状态
+  guideShowBackArrow: false, // 第二阶段功能页：文字展示完后显示返回箭头
   guideFeatureIdx: 0,      // 第二阶段当前导览的功能索引
   guideInFeature: false,   // 第二阶段是否正在功能页面中
 };
@@ -341,15 +342,19 @@ function guideMarkup() {
     const _gsText2 = guideGetTextSimple();
     if (state.guideMenuHint) {
       // 菜单收起提示：箭头指向切换按钮，气泡在中间偏下
-      overlay += "<div class=\"guide-bubble\" id=\"guideBubble\" style=\"left:50%;top:60%;width:700px;height:240px;transform:translateX(-50%);\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\" style=\"font-size:40px;\">" + _gsText2 + "</span></div>";
+      overlay += "<div class=\"guide-bubble\" id=\"guideBubble\" style=\"left:50%;top:60%;width:420px;height:220px;transform:translateX(-50%);\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\">" + _gsText2 + "</span></div>";
       overlay += "<div class=\"guide-arrow-overlay\" id=\"guideArrow\"><img src=\"" + asset("指引箭头.png") + "\" alt=\"指引箭头\" /></div>";
     } else if (!state.guideInFeature && state.route === ROUTES.HOME) {
       overlay += "<div class=\"guide-bubble\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\">" + _gsText2 + "</span></div>";
       overlay += "<div class=\"guide-arrow-overlay\" id=\"guideArrow\"><img src=\"" + asset("指引箭头.png") + "\" alt=\"指引箭头\" /></div>";
     } else if (state.guideInFeature) {
-      // 功能页面内：气泡 + 箭头指向返回按钮（左上角）
+      // 功能页面内：气泡 + 三角标（可点击推进），箭头在三角标点击后出现
+      const showTri2 = state.guideTriangle && !state.guideShowBackArrow;
       overlay += "<div class=\"guide-bubble guide-bubble-feature\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\">" + _gsText2 + "</span></div>";
-      overlay += "<div class=\"guide-arrow-overlay\" id=\"guideArrow\" style=\"width:70px;height:70px;\"><img src=\"" + asset("指引箭头.png") + "\" alt=\"指引箭头\" /></div>";
+      overlay += "<div class=\"guide-triangle " + (showTri2 ? "" : "hidden") + "\" id=\"guideTri2\"><img src=\"" + asset("三角标.png") + "\" alt=\"提示\" /></div>";
+      if (state.guideShowBackArrow) {
+        overlay += "<div class=\"guide-arrow-overlay\" id=\"guideArrow\" style=\"width:70px;height:70px;\"><img src=\"" + asset("指引箭头.png") + "\" alt=\"指引箭头\" /></div>";
+      }
     }
   } else {
     // 第一/三阶段：螂王对话框
@@ -401,7 +406,11 @@ function guideGetTextSimple() {
     if (state.guideMenuHint) return "请点击右侧「展开菜单」按钮，打开功能面板";
     const f = phase2Features[state.guideFeatureIdx];
     if (!f) return "";
-    return state.guideInFeature ? (state.guideSegment === 0 ? f.explain : "请点击左上角返回按钮，继续下一个功能") : f.tip;
+    if (state.guideInFeature) {
+      if (state.guideShowBackArrow) return "请点击左上角返回按钮，继续下一个功能";
+      return f.explain;
+    }
+    return f.tip;
   }
   const steps = p === 1 ? phase1Steps : (p === 3 ? phase3Steps : null);
   if (!steps) return "";
@@ -446,9 +455,19 @@ function guideShowText() {
 
 
 function guideShowTriangle() {
-  // 第二阶段不显示三角标（用户需要点击功能按钮而非推进）
-  if (state.guidePhase === 2 && !state.guideInFeature) {
-    state.guideTriangle = false;
+  // 第二阶段：主页不显示三角标（用户点击功能按钮推进）
+  if (state.guidePhase === 2) {
+    if (!state.guideInFeature) {
+      state.guideTriangle = false;
+      guideUpdateUI();
+      return;
+    }
+    // 功能页内：只有在箭头模式之前才显示三角标，箭头模式后不显示
+    if (state.guideShowBackArrow) {
+      state.guideTriangle = false;
+    } else {
+      state.guideTriangle = true;
+    }
     guideUpdateUI();
     return;
   }
@@ -459,6 +478,8 @@ function guideShowTriangle() {
 function guideUpdateUI() {
   const tri = document.querySelector(".guide-triangle");
   if (tri) tri.classList.toggle("hidden", !state.guideTriangle);
+  const tri2 = document.getElementById("guideTri2");
+  if (tri2) tri2.classList.toggle("hidden", !state.guideTriangle);
   const ov = document.getElementById("guideOptionsOverlay");
   if (ov) ov.classList.toggle("visible", state.guideOptions);
   const co = document.getElementById("guideClickOverlay");
@@ -487,6 +508,7 @@ function guideAdvanceToNextStep(phase) {
     state.guideOptions = false;
     state.guideBranchReturn = false;
     state.guideAfterBranch = false;
+    state.guideShowBackArrow = false;
     render();
     guideShowText();
   } else {
@@ -519,42 +541,8 @@ function guideAdvance() {
 
   const phase = state.guidePhase;
 
-  // --- 第二阶段：功能导览 ---
-  if (phase === 2) {
-    const feat = phase2Features[state.guideFeatureIdx];
-    if (!feat) { guideNextPhase(); return; }
-
-    if (state.guideInFeature) {
-      // 已在功能页面：提示返回主页
-      if (state.guideSegment === 0) {
-        // 刚讲解完功能
-        state.guideSegment = 1;
-        guideShowText();
-        return;
-      } else {
-        // 用户应该已点击返回，检查路由
-        if (state.route === ROUTES.HOME) {
-          state.guideInFeature = false;
-          state.guideSegment = 0;
-          // 下一个功能
-          state.guideFeatureIdx++;
-          if (state.guideFeatureIdx >= phase2Features.length) {
-            // 第二阶段完成 → 进入第三阶段
-            guideNextPhase();
-          } else {
-            guideShowText();
-          }
-        }
-        // 如果还没回主页，不做任何事（等待用户点击返回）
-        return;
-      }
-    } else {
-      // 在主页面，提示点击功能按钮
-      // 用户应该已通过 handleRoute 进入功能页面
-      // 这里不做处理，等待 handleRoute 触发
-    }
-    return;
-  }
+  // Phase 2 的推进由 click 事件处理器直接管理，这里不处理
+  if (phase === 2) return;
 
   // --- 第一/三阶段：对话推进 ---
   const stepsArr = phase === 1 ? phase1Steps : (phase === 3 ? phase3Steps : null);
@@ -665,10 +653,10 @@ function guideNextPhase() {
     state.guideOptions = false;
     state.guideBranchReturn = false;
     state.guideMenuHint = true;  // 先提示用户展开菜单
+    state.guideShowBackArrow = false;
     state.guideFeatureIdx = 0;
     state.guideInFeature = false;
     state.menuOpen = false; // 菜单收起，让用户自己打开
-    console.log(">>> guideNextPhase: entered Phase 2", {menuOpen: state.menuOpen, guideMenuHint: state.guideMenuHint});
     // 第二阶段从主页开始
     if (state.route !== ROUTES.HOME) {
       navigate(ROUTES.HOME, { mode: "reset", direction: "back", fromGuide: true });
@@ -687,6 +675,7 @@ function guideNextPhase() {
     state.guideTriangle = false;
     state.guideOptions = false;
     state.guideBranchReturn = false;
+    state.guideShowBackArrow = false;
     state.guideFeatureIdx = 0;
     state.guideInFeature = false;
     if (state.route !== ROUTES.HOME) {
@@ -721,6 +710,7 @@ function completeGuide() {
   state.guideOptions = false;
   state.guideBranchReturn = false;
   state.guideMenuHint = false;
+  state.guideShowBackArrow = false;
   state.guideFeatureIdx = 0;
   state.guideInFeature = false;
 
@@ -757,6 +747,7 @@ function startGuide() {
   state.guideOptions = false;
   state.guideBranchReturn = false;
   state.guideAfterBranch = false;
+  state.guideShowBackArrow = false;
   state.guideFeatureIdx = 0;
   state.guideInFeature = false;
   render();
@@ -775,6 +766,7 @@ function guideRestartPhase2() {
   state.guideBranchReturn = false;
   state.guideAfterBranch = false;
   state.guideMenuHint = true;
+  state.guideShowBackArrow = false;
   state.guideFeatureIdx = 0;
   state.guideInFeature = false;
   state.menuOpen = false;
@@ -792,7 +784,7 @@ function guidePositionArrow() {
   const arrow = document.getElementById("guideArrow");
   if (!arrow) return;
 
-  // ---- 菜单提示态：箭头指向切换按钮 ----
+  // ---- 菜单提示态：箭头指向切换按钮（翻转指向按钮） ----
   if (state.guideMenuHint) {
     const toggle = document.querySelector(".home-toggle-hotspot");
     if (!toggle) { arrow.style.display = "none"; return; }
@@ -806,12 +798,13 @@ function guidePositionArrow() {
     arrow.style.display = "block";
     arrow.style.left = (btnR + 8) + "px";
     arrow.style.top = (btnCy - 30) + "px";
-    arrow.classList.remove("point-left");
+    arrow.classList.add("point-left"); // 翻转指向左边的切换按钮
     return;
   }
 
-  // ---- 功能页面内：箭头指向返回按钮 ----
+  // ---- 功能页面内：箭头指向返回按钮（仅在箭头模式下显示） ----
   if (state.guideInFeature) {
+    if (!state.guideShowBackArrow) { arrow.style.display = "none"; return; }
     const backBtn = document.querySelector(".back-btn, .back-hotspot, [data-action=\"back\"]");
     if (!backBtn) { arrow.style.display = "none"; return; }
     const stage = document.querySelector(".stage");
@@ -1254,12 +1247,14 @@ function modalMarkup() {
   }
 
   if (state.modal === "account") {
+    const guideDone = state.guidePhase === 4 || state.guidePhase === 0;
     return modalShell(`
       <div class="auth-dialog account-dialog" role="dialog" aria-modal="true">
         <h2>王国档案</h2>
         <p>${authName(state.authUser)}</p>
         <strong>${authEmail(state.authUser)}</strong>
         ${button("进入个人中心", "orange", 'data-route="profile"')}
+        ${guideDone ? button("看完了", "paper", 'data-action="guide-review"') : ""}
         ${button("退出登录", "paper", 'data-modal="logout"')}
       </div>
     `, "auth-modal-layer");
@@ -1553,6 +1548,29 @@ async function handleAction(action, target) {
   if (action === "finish-to-review") navigateFlowEnd(ROUTES.REVIEW);
   if (action === "finish-home") finishToHome();
   if (action === "toast") showToast(target.dataset.toast || "功能稍后接入");
+  if (action === "guide-review") {
+    closeModal();
+    // 回到第三阶段分支对话
+    clearInterval(guideTimer);
+    guideTimer = null;
+    state.guideActive = true;
+    state.guidePhase = 3;
+    state.guideStep = 1; // 分支步骤
+    state.guideSegment = 1; // 分支之前的最后一段
+    state.guideTriangle = false;
+    state.guideOptions = true;
+    state.guideBranchReturn = false;
+    state.guideAfterBranch = false;
+    state.guideMenuHint = false;
+    state.guideShowBackArrow = false;
+    state.guideFeatureIdx = 0;
+    state.guideInFeature = false;
+    if (state.route !== ROUTES.HOME) {
+      navigate(ROUTES.HOME, { mode: "reset", direction: "back" });
+    } else {
+      render();
+    }
+  }
 }
 
 app.addEventListener("click", (event) => {
@@ -1576,11 +1594,20 @@ app.addEventListener("click", (event) => {
       const feat = phase2Features[state.guideFeatureIdx];
       if (feat && target.dataset.route === feat.route) {
         state.guideInFeature = true;
+        state.guideShowBackArrow = false;
         state.guideSegment = 0;
         handleRoute(target);
         guideShowText();
         return;
       }
+      return;
+    }
+
+    // 第二阶段：功能导览 - 点击三角标（切换到箭头指引模式）
+    if (state.guidePhase === 2 && state.guideInFeature && !state.guideShowBackArrow && event.target.closest(".guide-overlay")) {
+      state.guideShowBackArrow = true;
+      state.guideTriangle = false;
+      render();
       return;
     }
 
@@ -1591,6 +1618,7 @@ app.addEventListener("click", (event) => {
         const isLast = state.guideFeatureIdx >= phase2Features.length - 1;
         // 先标记离开功能页面，防止中间 render 显示旧提示
         state.guideInFeature = false;
+        state.guideShowBackArrow = false;
         state.guideSegment = 0;
         if (isLast) {
           // 最后一个功能：直接进第三阶段，不显示旧的指引文字
