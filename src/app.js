@@ -342,7 +342,7 @@ function guideMarkup() {
     const _gsText2 = guideGetTextSimple();
     if (state.guideMenuHint) {
       // 菜单收起提示：箭头指向切换按钮，气泡在中间偏下
-      overlay += "<div class=\"guide-bubble\" id=\"guideBubble\" style=\"left:50%;top:55%;width:620px;height:300px;transform:translateX(-50%);\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\">" + _gsText2 + "</span></div>";
+      overlay += "<div class=\"guide-bubble\" id=\"guideBubble\" style=\"left:50%;top:50%;width:800px;height:380px;transform:translateX(-50%);\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\">" + _gsText2 + "</span></div>";
       overlay += "<div class=\"guide-arrow-overlay\" id=\"guideArrow\"><img src=\"" + asset("指引箭头.png") + "\" alt=\"指引箭头\" /></div>";
     } else if (!state.guideInFeature && state.route === ROUTES.HOME) {
       overlay += "<div class=\"guide-bubble\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\">" + _gsText2 + "</span></div>";
@@ -431,12 +431,12 @@ function guideShowText() {
   // 第二阶段气泡文字自动适配字号（根据文字长度精细调节）
   if (state.guidePhase === 2 && el && text) {
     const len = text.length;
-    if (len > 35) { el.style.fontSize = "42px"; }
-    else if (len > 25) { el.style.fontSize = "46px"; }
-    else if (len > 18) { el.style.fontSize = "50px"; }
-    else { el.style.fontSize = "54px"; }
-    el.style.lineHeight = "1.35";
-    el.style.padding = "40px 50px";
+    if (len > 35) { el.style.fontSize = "28px"; }
+    else if (len > 25) { el.style.fontSize = "30px"; }
+    else if (len > 18) { el.style.fontSize = "32px"; }
+    else { el.style.fontSize = "34px"; }
+    el.style.lineHeight = "1.3";
+    el.style.padding = "30px 40px";
   }
   if (!text) {
     guideShowTriangle();
@@ -844,10 +844,10 @@ function guidePositionArrow() {
   const bubble = document.getElementById("guideBubble");
   if (bubble) {
     bubble.style.position = "absolute";
-    bubble.style.left = (btnR + 20) + "px";
-    bubble.style.top = (btnCy - 150) + "px";
-    bubble.style.width = "620px";
-    bubble.style.height = "300px";
+    bubble.style.left = (btnR + 10) + "px";
+    bubble.style.top = (btnCy - 190) + "px";
+    bubble.style.width = "800px";
+    bubble.style.height = "380px";
     bubble.style.transform = "none";
   }
 }
