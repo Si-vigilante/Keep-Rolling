@@ -50,32 +50,32 @@ const phase2Features = [
   {
     id: 'ai', selector: '.menu-ai', route: 'ai',
     label: 'AI任务拆解',
-    tip: '点这个，拆任务',
-    explain: '写任务→读书螂帮你拆成小步骤'
+    tip: '点击这里，开始拆解任务',
+    explain: '这是AI任务拆解页，输入任务内容即可自动拆解成小步骤'
   },
   {
     id: 'draw', selector: '.menu-draw', route: 'draw',
     label: '任务选择',
-    tip: '点这个，抽卡牌',
-    explain: '选一张卡牌，开启冒险'
+    tip: '点击这里，抽取任务卡牌',
+    explain: '这是任务选择页，选择一张卡牌即可开启新的冒险'
   },
   {
     id: 'todo', selector: '.menu-todo', route: 'todo',
     label: '待办管理',
-    tip: '点这个，看清单',
-    explain: '勾掉完成的任务，超有成就感'
+    tip: '点击这里，查看待办清单',
+    explain: '这是待办管理页，勾选已完成的任务，进度一目了然'
   },
   {
     id: 'review', selector: '.menu-review', route: 'review',
     label: '任务回顾',
-    tip: '点这个，看记录',
-    explain: '走过的每一步都记在这里'
+    tip: '点击这里，回顾任务记录',
+    explain: '这是任务回顾页，过往每一步都记录在这里可随时查看'
   },
   {
     id: 'cards', selector: '.menu-cards', route: 'cards',
     label: '卡牌收藏',
-    tip: '点这个，看图鉴',
-    explain: '收集角色卡牌，解锁故事'
+    tip: '点击这里，浏览卡牌图鉴',
+    explain: '这是卡牌收藏页，收集各类角色卡牌，解锁精彩故事'
   }
 ];
 
@@ -339,7 +339,7 @@ function guideMarkup() {
   if (phase === 2) {
     if (!state.guideInFeature && state.route === ROUTES.HOME) {
       overlay += "<div class=\"guide-bubble\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\"></span></div>";
-      overlay += "<div class=\"guide-arrow-overlay\" id=\"guideArrow\"><img src=\"" + asset("三角标.png") + "\" alt=\"\" /></div>";
+      overlay += "<div class=\"guide-arrow-overlay\" id=\"guideArrow\"><img src=\"" + asset("指引箭头.png") + "\" alt=\"指引箭头\" /></div>";
     } else if (state.guideInFeature) {
       overlay += "<div class=\"guide-bubble guide-bubble-feature\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\"></span></div>";
     }
@@ -391,7 +391,7 @@ function guideGetTextSimple() {
   if (p === 2) {
     const f = phase2Features[state.guideFeatureIdx];
     if (!f) return "";
-    return state.guideInFeature ? (state.guideSegment === 0 ? f.explain : "好了，点返回去下一个~") : f.tip;
+    return state.guideInFeature ? (state.guideSegment === 0 ? f.explain : "已看完，请点击返回按钮继续下一个功能") : f.tip;
   }
   const steps = p === 1 ? phase1Steps : (p === 3 ? phase3Steps : null);
   if (!steps) return "";
@@ -409,6 +409,17 @@ function guideShowText() {
   const text = guideGetTextSimple();
   const el = document.getElementById("guideDialogText");
   if (el) el.textContent = text || "";
+  // 第二阶段气泡文字自动适配字号（根据文字长度精细调节）
+  if (state.guidePhase === 2 && el && text) {
+    const len = text.length;
+    if (len > 28) { el.style.fontSize = "18px"; }
+    else if (len > 22) { el.style.fontSize = "20px"; }
+    else if (len > 16) { el.style.fontSize = "22px"; }
+    else if (len > 12) { el.style.fontSize = "24px"; }
+    else { el.style.fontSize = "26px"; }
+    // 自适应行高
+    el.style.lineHeight = (len > 20) ? "1.25" : "1.35";
+  }
   if (!text) {
     guideShowTriangle();
   } else {
@@ -442,8 +453,14 @@ function guideUpdateUI() {
   const ov = document.getElementById("guideOptionsOverlay");
   if (ov) ov.classList.toggle("visible", state.guideOptions);
   const co = document.getElementById("guideClickOverlay");
-  if (co) co.style.pointerEvents = state.guideOptions ? "none" : "auto";
-  // 第二阶段：引导层完全穿透，不阻挡任何点击
+  if (co) {
+    // 第二阶段：click-overlay 也要穿透，不阻挡页面交互
+    if (state.guidePhase === 2) {
+      co.style.pointerEvents = "none";
+    } else {
+      co.style.pointerEvents = state.guideOptions ? "none" : "auto";
+    }
+  }
   const guide = document.getElementById("guideOverlay");
   if (guide) guide.style.pointerEvents = "none";
   // 定位第二阶段箭头
@@ -639,6 +656,7 @@ function guideNextPhase() {
     state.guideBranchReturn = false;
     state.guideFeatureIdx = 0;
     state.guideInFeature = false;
+    state.menuOpen = true; // 确保菜单展开，功能按钮可见
     // 第二阶段从主页开始
     if (state.route !== ROUTES.HOME) {
       navigate(ROUTES.HOME, { mode: "reset", direction: "back", fromGuide: true });
@@ -741,6 +759,7 @@ function guideRestartPhase2() {
   state.guideAfterBranch = false;
   state.guideFeatureIdx = 0;
   state.guideInFeature = false;
+  state.menuOpen = true;
   if (state.route !== ROUTES.HOME) {
     navigate(ROUTES.HOME, { mode: "reset", direction: "back", fromGuide: true });
   } else {
@@ -749,7 +768,7 @@ function guideRestartPhase2() {
   }
 }
 
-// ---------- 定位第二阶段指引箭头 ----------
+// ---------- 定位第二阶段指引箭头 & 气泡（动态跟随按钮） ----------
 
 function guidePositionArrow() {
   const arrow = document.getElementById("guideArrow");
@@ -759,7 +778,6 @@ function guidePositionArrow() {
     arrow.style.display = "none";
     return;
   }
-  // 目标：菜单展开时指向功能按钮，菜单收起时指向开关
   const btn = state.menuOpen ? document.querySelector(feat.selector) : document.querySelector(".home-toggle-hotspot");
   if (!btn) { arrow.style.display = "none"; return; }
 
@@ -769,13 +787,29 @@ function guidePositionArrow() {
   const br = btn.getBoundingClientRect();
   const sc = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--stage-scale")) || 1;
 
-  // 箭头放在目标右侧
-  const rx = (br.right - sr.left) / sc;
-  const cy = (br.top + br.height / 2 - sr.top) / sc;
+  // 按钮中心Y坐标（相对于 stage）
+  const btnCy = (br.top + br.height / 2 - sr.top) / sc;
+  // 按钮左边缘、右边缘X坐标
+  const btnL = (br.left - sr.left) / sc;
+  const btnR = (br.right - sr.left) / sc;
 
+  // ===== 箭头定位：放在按钮右侧，翻转指向按钮 =====
+  const arrowW = 60;
   arrow.style.display = "block";
-  arrow.style.left = (rx + 6) + "px";
-  arrow.style.top = (cy - 21) + "px";
+  arrow.style.left = (btnR - 6) + "px";
+  arrow.style.top = (btnCy - arrowW / 2) + "px";
+  arrow.classList.add("point-left");
+
+  // ===== 气泡定位：紧跟箭头右侧，垂直对齐按钮 =====
+  const bubble = document.getElementById("guideBubble");
+  if (bubble) {
+    bubble.style.position = "absolute";
+    bubble.style.left = (btnR + 40) + "px";
+    bubble.style.top = (btnCy - 55) + "px";
+    bubble.style.width = "380px";
+    bubble.style.height = "110px";
+    bubble.style.transform = "none";
+  }
 }
 
 // ---------- 检查是否自动弹出 ----------
@@ -1493,21 +1527,19 @@ app.addEventListener("click", (event) => {
     if (state.guidePhase === 2 && state.guideInFeature && target) {
       const action = target.dataset.action;
       if (action === "back" || target.classList.contains("back-btn") || target.classList.contains("back-hotspot")) {
-        goBack();
-        const checkHome = setInterval(() => {
-          if (state.route === ROUTES.HOME) {
-            clearInterval(checkHome);
-            state.guideInFeature = false;
-            state.guideSegment = 0;
-            state.guideFeatureIdx++;
-            if (state.guideFeatureIdx >= phase2Features.length) {
-              guideNextPhase();
-            } else {
-              render();
-              guideShowText();
-            }
-          }
-        }, 50);
+        const isLast = state.guideFeatureIdx >= phase2Features.length - 1;
+        // 先标记离开功能页面，防止中间 render 显示旧提示
+        state.guideInFeature = false;
+        state.guideSegment = 0;
+        if (isLast) {
+          // 最后一个功能：直接进第三阶段，不显示旧的指引文字
+          goBack();
+          guideNextPhase();
+        } else {
+          // 非最后一个：递增索引后再返回，render 直接显示下一个功能的指引
+          state.guideFeatureIdx++;
+          goBack();
+        }
         return;
       }
       return;
