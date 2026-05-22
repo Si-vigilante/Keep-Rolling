@@ -154,6 +154,7 @@ const state = {
   guideOptions: false,     // 选项浮层是否显示
   guideBranchReturn: false, // 分支C：返回选项界面
   guideAfterBranch: false,  // 分支回应打完，推进而非显示选项
+  guideMenuHint: false,    // 第二阶段：是否处于"请展开菜单"提示状态
   guideFeatureIdx: 0,      // 第二阶段当前导览的功能索引
   guideInFeature: false,   // 第二阶段是否正在功能页面中
 };
@@ -337,18 +338,26 @@ function guideMarkup() {
 
   // 第二阶段：浮动气泡 + 箭头，不遮挡页面交互
   if (phase === 2) {
-    if (!state.guideInFeature && state.route === ROUTES.HOME) {
-      overlay += "<div class=\"guide-bubble\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\"></span></div>";
+    const _gsText2 = guideGetTextSimple();
+    if (state.guideMenuHint) {
+      // 菜单收起提示：箭头指向切换按钮，气泡在中间偏下
+      overlay += "<div class=\"guide-bubble\" id=\"guideBubble\" style=\"left:50%;top:60%;width:700px;height:240px;transform:translateX(-50%);\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\" style=\"font-size:40px;\">" + _gsText2 + "</span></div>";
+      overlay += "<div class=\"guide-arrow-overlay\" id=\"guideArrow\"><img src=\"" + asset("指引箭头.png") + "\" alt=\"指引箭头\" /></div>";
+    } else if (!state.guideInFeature && state.route === ROUTES.HOME) {
+      overlay += "<div class=\"guide-bubble\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\">" + _gsText2 + "</span></div>";
       overlay += "<div class=\"guide-arrow-overlay\" id=\"guideArrow\"><img src=\"" + asset("指引箭头.png") + "\" alt=\"指引箭头\" /></div>";
     } else if (state.guideInFeature) {
-      overlay += "<div class=\"guide-bubble guide-bubble-feature\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\"></span></div>";
+      // 功能页面内：气泡 + 箭头指向返回按钮（左上角）
+      overlay += "<div class=\"guide-bubble guide-bubble-feature\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\">" + _gsText2 + "</span></div>";
+      overlay += "<div class=\"guide-arrow-overlay\" id=\"guideArrow\" style=\"width:70px;height:70px;\"><img src=\"" + asset("指引箭头.png") + "\" alt=\"指引箭头\" /></div>";
     }
   } else {
     // 第一/三阶段：螂王对话框
+    const _gsText = guideGetTextSimple();
     overlay += "<div class=\"guide-bg-layer\"><img src=\"" + asset("大背景.png") + "\" alt=\"背景\" /></div>"
       + "<div class=\"guide-character-layer\"><img src=\"" + beetles.king + "\" alt=\"螂王角色\" /></div>"
       + "<div class=\"guide-dialog-bg\"><img src=\"" + asset("对话框 .png") + "\" alt=\"对话框\" /></div>"
-      + "<div class=\"guide-dialog-text\" id=\"guideDialogText\"></div>"
+      + "<div class=\"guide-dialog-text\" id=\"guideDialogText\">" + _gsText + "</div>"
       + "<div class=\"guide-character-label\">螂王</div>";
 
     // 三角标
@@ -389,9 +398,10 @@ function guideMarkup() {
 function guideGetTextSimple() {
   const p = state.guidePhase;
   if (p === 2) {
+    if (state.guideMenuHint) return "请点击右侧「展开菜单」按钮，打开功能面板";
     const f = phase2Features[state.guideFeatureIdx];
     if (!f) return "";
-    return state.guideInFeature ? (state.guideSegment === 0 ? f.explain : "已看完，请点击返回按钮继续下一个功能") : f.tip;
+    return state.guideInFeature ? (state.guideSegment === 0 ? f.explain : "请点击左上角返回按钮，继续下一个功能") : f.tip;
   }
   const steps = p === 1 ? phase1Steps : (p === 3 ? phase3Steps : null);
   if (!steps) return "";
@@ -412,13 +422,12 @@ function guideShowText() {
   // 第二阶段气泡文字自动适配字号（根据文字长度精细调节）
   if (state.guidePhase === 2 && el && text) {
     const len = text.length;
-    if (len > 28) { el.style.fontSize = "18px"; }
-    else if (len > 22) { el.style.fontSize = "20px"; }
-    else if (len > 16) { el.style.fontSize = "22px"; }
-    else if (len > 12) { el.style.fontSize = "24px"; }
-    else { el.style.fontSize = "26px"; }
-    // 自适应行高
-    el.style.lineHeight = (len > 20) ? "1.25" : "1.35";
+    if (len > 30) { el.style.fontSize = "32px"; }
+    else if (len > 22) { el.style.fontSize = "36px"; }
+    else if (len > 16) { el.style.fontSize = "38px"; }
+    else { el.style.fontSize = "40px"; }
+    el.style.lineHeight = "1.4";
+    el.style.padding = "30px 50px";
   }
   if (!text) {
     guideShowTriangle();
@@ -606,9 +615,10 @@ function guideHandleOption(indexOrKey, isBranch) {
     const branch = step.branches.find(b => b.key === indexOrKey);
     if (!branch) return;
 
-    // 分支C：「我想再看一遍」→ 标记返回第二阶段
+    // 分支C：「我想再看一遍」→ 直接重启第二阶段，不显示回复文字
     if (branch.loop) {
-      state.guideBranchReturn = true;
+      guideRestartPhase2();
+      return;
     }
 
     // 打字显示分支回应
@@ -654,9 +664,11 @@ function guideNextPhase() {
     state.guideTriangle = false;
     state.guideOptions = false;
     state.guideBranchReturn = false;
+    state.guideMenuHint = true;  // 先提示用户展开菜单
     state.guideFeatureIdx = 0;
     state.guideInFeature = false;
-    state.menuOpen = true; // 确保菜单展开，功能按钮可见
+    state.menuOpen = false; // 菜单收起，让用户自己打开
+    console.log(">>> guideNextPhase: entered Phase 2", {menuOpen: state.menuOpen, guideMenuHint: state.guideMenuHint});
     // 第二阶段从主页开始
     if (state.route !== ROUTES.HOME) {
       navigate(ROUTES.HOME, { mode: "reset", direction: "back", fromGuide: true });
@@ -708,15 +720,20 @@ function completeGuide() {
   state.guideTriangle = false;
   state.guideOptions = false;
   state.guideBranchReturn = false;
+  state.guideMenuHint = false;
   state.guideFeatureIdx = 0;
   state.guideInFeature = false;
 
+  // 确保回到主页，引导完全消失
+  if (state.route !== ROUTES.HOME) {
+    navigate(ROUTES.HOME, { mode: "reset", direction: "back" });
+  }
   // 淡出动画
   const overlay = document.querySelector(".guide-overlay");
   if (overlay) {
     overlay.classList.add("fade-out");
     _guideFadeTimer = setTimeout(() => {
-      if (!state.guideActive) render();
+      render();
       _guideFadeTimer = null;
     }, 800);
   } else {
@@ -757,9 +774,10 @@ function guideRestartPhase2() {
   state.guideOptions = false;
   state.guideBranchReturn = false;
   state.guideAfterBranch = false;
+  state.guideMenuHint = true;
   state.guideFeatureIdx = 0;
   state.guideInFeature = false;
-  state.menuOpen = true;
+  state.menuOpen = false;
   if (state.route !== ROUTES.HOME) {
     navigate(ROUTES.HOME, { mode: "reset", direction: "back", fromGuide: true });
   } else {
@@ -773,12 +791,49 @@ function guideRestartPhase2() {
 function guidePositionArrow() {
   const arrow = document.getElementById("guideArrow");
   if (!arrow) return;
+
+  // ---- 菜单提示态：箭头指向切换按钮 ----
+  if (state.guideMenuHint) {
+    const toggle = document.querySelector(".home-toggle-hotspot");
+    if (!toggle) { arrow.style.display = "none"; return; }
+    const stage = document.querySelector(".stage");
+    if (!stage) return;
+    const sr = stage.getBoundingClientRect();
+    const br = toggle.getBoundingClientRect();
+    const sc = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--stage-scale")) || 1;
+    const btnCy = (br.top + br.height / 2 - sr.top) / sc;
+    const btnR = (br.right - sr.left) / sc;
+    arrow.style.display = "block";
+    arrow.style.left = (btnR + 8) + "px";
+    arrow.style.top = (btnCy - 30) + "px";
+    arrow.classList.remove("point-left");
+    return;
+  }
+
+  // ---- 功能页面内：箭头指向返回按钮 ----
+  if (state.guideInFeature) {
+    const backBtn = document.querySelector(".back-btn, .back-hotspot, [data-action=\"back\"]");
+    if (!backBtn) { arrow.style.display = "none"; return; }
+    const stage = document.querySelector(".stage");
+    if (!stage) return;
+    const sr = stage.getBoundingClientRect();
+    const br = backBtn.getBoundingClientRect();
+    const sc = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--stage-scale")) || 1;
+    const btnCy = (br.top + br.height / 2 - sr.top) / sc;
+    const btnR = (br.right - sr.left) / sc;
+    arrow.style.display = "block";
+    arrow.style.left = (btnR + 8) + "px";
+    arrow.style.top = (btnCy - 35) + "px";
+    arrow.classList.add("point-left");
+    return;
+  }
+
   const feat = phase2Features[state.guideFeatureIdx];
-  if (!feat || state.guideInFeature || state.route !== ROUTES.HOME) {
+  if (!feat || state.route !== ROUTES.HOME) {
     arrow.style.display = "none";
     return;
   }
-  const btn = state.menuOpen ? document.querySelector(feat.selector) : document.querySelector(".home-toggle-hotspot");
+  const btn = document.querySelector(feat.selector);
   if (!btn) { arrow.style.display = "none"; return; }
 
   const stage = document.querySelector(".stage");
@@ -789,8 +844,7 @@ function guidePositionArrow() {
 
   // 按钮中心Y坐标（相对于 stage）
   const btnCy = (br.top + br.height / 2 - sr.top) / sc;
-  // 按钮左边缘、右边缘X坐标
-  const btnL = (br.left - sr.left) / sc;
+  // 按钮右边缘X坐标
   const btnR = (br.right - sr.left) / sc;
 
   // ===== 箭头定位：放在按钮右侧，翻转指向按钮 =====
@@ -805,9 +859,9 @@ function guidePositionArrow() {
   if (bubble) {
     bubble.style.position = "absolute";
     bubble.style.left = (btnR + 40) + "px";
-    bubble.style.top = (btnCy - 55) + "px";
-    bubble.style.width = "380px";
-    bubble.style.height = "110px";
+    bubble.style.top = (btnCy - 120) + "px";
+    bubble.style.width = "700px";
+    bubble.style.height = "240px";
     bubble.style.transform = "none";
   }
 }
@@ -1311,7 +1365,7 @@ function render() {
       ${toastMarkup()}
     </main>
   `;
-  // 引导激活时确保文字显示
+  // 引导激活时确保文字显示（文本已直接内联在 HTML 中）
   if (state.guideActive) {
     requestAnimationFrame(() => guideShowText());
   }
@@ -1348,8 +1402,15 @@ function requiresAuth(route) {
 async function handleAction(action, target) {
   if (action === "back") goBack();
   if (action === "toggle-menu") {
+    const wasOpen = state.menuOpen;
     state.menuOpen = !state.menuOpen;
     render();
+    // 第二阶段菜单提示态：用户展开菜单后自动推进到功能指引
+    if (state.guidePhase === 2 && state.guideMenuHint && state.menuOpen && !wasOpen) {
+      state.guideMenuHint = false;
+      state.guideFeatureIdx = 0;
+      guideShowText();
+    }
   }
   if (action === "switch-auth") {
     state.authMode = state.authMode === "login" ? "signup" : "login";
