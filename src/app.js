@@ -781,6 +781,7 @@ function startGuide() {
 function guideRestartPhase2() {
   clearInterval(guideTimer);
   guideTimer = null;
+  state.guideActive = true;
   state.guidePhase = 2;
   state.guideStep = 0;
   state.guideSegment = 0;
