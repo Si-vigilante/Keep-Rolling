@@ -213,10 +213,10 @@ button {
 }
 
 .guide-character-layer {
-  left: 8.8%;
-  bottom: 14.8%;
-  width: 40%;
-  height: 72%;
+  left: 7.2%;
+  bottom: 13.2%;
+  width: 46%;
+  height: 80%;
 }
 
 .guide-dialog-bg {
@@ -241,8 +241,8 @@ button {
 
 .guide-character-label {
   position: absolute;
-  right: 12.7%;
-  bottom: 29.4%;
+  right: 12.2%;
+  bottom: 31%;
   z-index: 3;
   min-width: 148px;
   height: 48px;
@@ -275,7 +275,7 @@ button {
   padding-top: 8.2%;
   opacity: 0;
   transition: opacity .18s ease;
-  z-index: 9;
+  z-index: 12;
   pointer-events: none;
 }
 
@@ -289,6 +289,8 @@ button {
   justify-items: center;
   width: min(44%, 520px);
   pointer-events: auto;
+  position: relative;
+  z-index: 13;
 }
 
 .guide-option-btn {
@@ -321,12 +323,14 @@ button {
 }
 
 .guide-bubble {
-  left: 1.8%;
-  top: 1.8%;
-  width: 70%;
-  height: 64%;
+  left: 50%;
+  top: 6.4%;
+  width: 68%;
+  height: 35%;
+  transform: translateX(-50%);
   z-index: 4;
   pointer-events: none;
+  overflow: hidden;
 }
 
 .guide-bubble-feature {
@@ -340,18 +344,24 @@ button {
 }
 
 .guide-bubble-bg {
+  position: absolute;
+  inset: 0;
   object-fit: fill;
 }
 
 .guide-bubble-text {
   position: absolute;
   inset: 0;
-  padding: 17% 12% 12%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12%;
   color: #4a2a16;
-  font-size: 27px;
-  line-height: 1.44;
+  font-size: 28px;
+  line-height: 1.4;
   white-space: pre-wrap;
-  text-align: left;
+  text-align: center;
+  z-index: 2;
 }
 
 .guide-arrow-overlay {
