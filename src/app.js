@@ -711,7 +711,10 @@ function guideMarkup() {
     }
   }
 
-  markup += `<div class="guide-click-overlay" id="guideClickOverlay"></div></div>`;
+  const clickOverlayClass = state.guidePhase === 2 || state.guideOptions
+    ? "guide-click-overlay is-disabled"
+    : "guide-click-overlay is-active";
+  markup += `<div class="${clickOverlayClass}" id="guideClickOverlay"></div></div>`;
   return markup;
 }
 
@@ -1620,7 +1623,7 @@ app.addEventListener("click", (event) => {
       }
     }
 
-    if (state.guidePhase !== 2 && event.target.closest(".guide-overlay")) {
+    if (state.guidePhase !== 2 && event.target.closest(".guide-click-overlay")) {
       guideAdvance();
       return;
     }
