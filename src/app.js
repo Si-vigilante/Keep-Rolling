@@ -543,11 +543,8 @@ function guideAdvance() {
     const el = document.getElementById("guideDialogText");
     if (el) el.textContent = guideFullText;
     guideTypedIndex = guideFullText.length;
-    // 如果是分支回应文字（Phase 3），打完也要标记 afterBranch
-    if (state.guidePhase === 3) {
-      const _st = phase3Steps[state.guideStep];
-      if (_st && _st.branches) state.guideAfterBranch = true;
-    }
+    // 注意：只有分支回应的打字才标记 afterBranch，段落的打字不标记
+    // （分支回应的打字由 guideHandleOption 中的 setInterval 管理）
     guideShowTriangle();
     return;
   }
