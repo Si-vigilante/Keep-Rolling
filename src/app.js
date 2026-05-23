@@ -988,6 +988,11 @@ function renderHome() {
       }
       <button class="hotspot home-cloud-hotspot" data-modal="notice" aria-label="云朵提示"></button>
       <button class="hotspot home-king-hotspot" data-route="profile" aria-label="螂王"></button>
+      ${
+        (state.guidePhase === 4 || localStorage.getItem("beetle-guide-v1-seen"))
+          ? `<button class="guide-review-btn" data-action="guide-review"><img src="${asset("用户选项 .png")}" alt="" /><span>我看完了</span></button>`
+          : ""
+      }
     </section>
   `;
 }
@@ -1270,14 +1275,12 @@ function modalMarkup() {
   }
 
   if (state.modal === "account") {
-    const guideSeen = state.guidePhase === 4 || state.guidePhase === 0 || localStorage.getItem("beetle-guide-v1-seen");
     return modalShell(`
       <div class="auth-dialog account-dialog" role="dialog" aria-modal="true">
         <h2>王国档案</h2>
         <p>${authName(state.authUser)}</p>
         <strong>${authEmail(state.authUser)}</strong>
         ${button("进入个人中心", "orange", 'data-route="profile"')}
-        ${guideSeen ? button("看完了", "paper", 'data-action="guide-review"') : ""}
         ${button("退出登录", "paper", 'data-modal="logout"')}
       </div>
     `, "auth-modal-layer");
