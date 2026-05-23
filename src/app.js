@@ -355,7 +355,7 @@ function guideMarkup() {
       }
       if (state.guideShowBackArrow) {
         overlay += "<div class=\"guide-arrow-overlay\" id=\"guideArrow\" style=\"width:80px;height:80px;\"><img src=\"" + asset("指引箭头.png") + "\" alt=\"指引箭头\" /></div>";
-        overlay += "<div class=\"guide-bubble guide-bubble-hint\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\" style=\"font-size:36px;padding:30px 35px;\"></span></div>";
+        overlay += "<div class=\"guide-bubble guide-bubble-hint\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\"></span></div>";
       }
     }
   } else {
@@ -1270,14 +1270,14 @@ function modalMarkup() {
   }
 
   if (state.modal === "account") {
-    const guideDone = state.guidePhase === 4 || state.guidePhase === 0;
+    const guideSeen = state.guidePhase === 4 || state.guidePhase === 0 || localStorage.getItem("beetle-guide-v1-seen");
     return modalShell(`
       <div class="auth-dialog account-dialog" role="dialog" aria-modal="true">
         <h2>王国档案</h2>
         <p>${authName(state.authUser)}</p>
         <strong>${authEmail(state.authUser)}</strong>
         ${button("进入个人中心", "orange", 'data-route="profile"')}
-        ${guideDone ? button("看完了", "paper", 'data-action="guide-review"') : ""}
+        ${guideSeen ? button("看完了", "paper", 'data-action="guide-review"') : ""}
         ${button("退出登录", "paper", 'data-modal="logout"')}
       </div>
     `, "auth-modal-layer");
