@@ -5,6 +5,8 @@ import { createAiTaskBreakdown, createTodosFromAi, makeTodo, rewardCardForTask, 
 const ASSET_VERSION = "20260517-ai21-todo-fix";
 const design = (name) => `./Page_View/${name}?v=${ASSET_VERSION}`;
 const LOCAL_AUTH_STORAGE_KEY = "beetle-kingdom-local-auth";
+const BGM_STORAGE_KEY = "beetle-kingdom-bgm";
+const BGM_VOLUME_STORAGE_KEY = "beetle-kingdom-bgm-volume";
 const IS_LOCAL_PREVIEW = window.location.protocol === "file:" || ["", "localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
 const LOCAL_PREVIEW_USER = {
   name: "本地测试员",
@@ -33,6 +35,15 @@ function setLocalPreviewSession(active) {
   }
 }
 
+function readStoredBgmVolume() {
+  try {
+    const stored = Number(localStorage.getItem(BGM_VOLUME_STORAGE_KEY));
+    return Number.isFinite(stored) ? Math.min(Math.max(stored, 0), 1) : 0.45;
+  } catch {
+    return 0.45;
+  }
+}
+
 const ROUTES = {
   HOME: "home",
   AI: "ai",
@@ -43,6 +54,99 @@ const ROUTES = {
   PROFILE: "profile",
   DRAW: "draw",
 };
+
+const GUIDE_SEEN_STORAGE_KEY = "beetle-guide-v1-seen";
+
+const phase1Steps = [
+  {
+    text: "造物主，你终于来了。我们日夜祈祷，终于等到你降临的这一刻。",
+    options: ["我是谁？", "这里是哪里？", "为何寻我前来？"],
+  },
+  {
+    segments: [
+      "先让我自我介绍一下，我是屎克螂王国的国王。",
+      "我们的王国曾经富饶而繁荣，人民安居乐业，资源充沛。",
+      "可一场突如其来的灾荒改变了一切，我们急需你的帮助。 ",
+    ],
+    options: ["我愿意帮你们。", "我该怎么做？", "先带我看看这里。"],
+  },
+  {
+    segments: [
+      "感谢您愿意伸出援手！",
+      "请跟我来，我会带您认识这个王国的各项能力。",
+    ],
+  },
+];
+
+const phase2Features = [
+  {
+    id: "ai",
+    selector: ".menu-ai",
+    route: ROUTES.AI,
+    tip: "点击这里，开始拆解任务。",
+    explain: "这是 AI 任务拆解页。输入任务内容，系统会把大任务拆成可执行的小步骤。",
+  },
+  {
+    id: "draw",
+    selector: ".menu-draw",
+    route: ROUTES.DRAW,
+    tip: "点击这里，抽取一张任务卡牌。",
+    explain: "这是任务选择页。你可以通过抽卡开启一段新的任务流程。",
+  },
+  {
+    id: "todo",
+    selector: ".menu-todo",
+    route: ROUTES.TODO,
+    tip: "点击这里，查看待办清单。",
+    explain: "这是待办管理页。你可以勾选完成项、排序任务，也能继续执行选中的任务。",
+  },
+  {
+    id: "review",
+    selector: ".menu-review",
+    route: ROUTES.REVIEW,
+    tip: "点击这里，回顾你的任务记录。",
+    explain: "这是任务回顾页。完成过的流程会沉淀在这里，方便你回看进展。",
+  },
+  {
+    id: "cards",
+    selector: ".menu-cards",
+    route: ROUTES.CARDS,
+    tip: "点击这里，浏览卡牌收藏。",
+    explain: "这是卡牌收藏页。你收集到的角色与奖励都会展示在这里。",
+  },
+];
+
+const phase3Steps = [
+  {
+    text: "造物主，所有功能都已经准备好了，这座王国现在可以真正为你所用。",
+  },
+  {
+    segments: [
+      "这片王国很大，你可以随时回来继续探索。",
+      "还有一些细节和惊喜，留给你亲自去发现会更有趣。",
+    ],
+    branches: [
+      { label: "好的，我明白了", key: "A", response: "那就把这片王国交给您了，造物主大人。" },
+      { label: "你先退下", key: "B", response: "臣告退。若您有需要，随时可以再唤我出来。" },
+      { label: "我想再看一遍", key: "C", loop: true },
+    ],
+  },
+  {
+    text: "愿你在这片大陆上玩得尽兴，也走得长远。新的旅程，从现在开始。",
+    isEnd: true,
+  },
+];
+
+function guideCurrentSteps() {
+  if (state.guidePhase === 1) return phase1Steps;
+  if (state.guidePhase === 3) return phase3Steps;
+  return null;
+}
+
+function guideCurrentStep() {
+  const steps = guideCurrentSteps();
+  return steps?.[state.guideStep] ?? null;
+}
 
 const state = {
   route: ROUTES.HOME,
@@ -62,6 +166,7 @@ const state = {
   selectedTodoId: todoSeed[0].id,
   selectedCard: cards[0],
   todos: structuredClone(todoSeed),
+  todoSortMode: "default",
   aiPhase: "input",
   aiInput: "",
   aiAttachment: null,
@@ -73,12 +178,36 @@ const state = {
   executeStatus: "idle",
   drawnCard: null,
   drawPhase: "selecting",
+  bgmPlaying: false,
+  bgmVolume: readStoredBgmVolume(),
+  guideActive: false,
+  guidePhase: 0,
+  guideStep: 0,
+  guideSegment: 0,
+  guideTriangle: false,
+  guideOptions: false,
+  guideMenuHint: false,
+  guideReplayMode: false,
+  guideInFeature: false,
+  guideShowBackArrow: false,
+  guideFeatureIdx: 0,
+  guideAfterBranch: false,
+  guideBranchTyping: false,
+  guideNeedsTyping: false,
+  guideDisplayedText: "",
 };
 
 const app = document.querySelector("#app");
+const bgmAudio = new Audio(asset("沙丘慢步.mp3"));
+bgmAudio.loop = true;
+bgmAudio.volume = state.bgmVolume;
 let toastTimer;
 let pendingTimer;
 let clockTimer;
+let guideTimer;
+let guideTypedIndex = 0;
+let guideFullText = "";
+let guideFadeTimer;
 
 const routeMeta = {
   [ROUTES.HOME]: { resetOnEnter: true },
@@ -175,6 +304,7 @@ function navigate(route, options = {}) {
   const mode = options.mode || "push";
   const direction = options.direction || (mode === "back" ? "back" : "forward");
   if (!route || route === state.route) return;
+  if (state.guideActive && state.guidePhase !== 2 && !options.fromGuide) return;
   if (!options.fromPending) clearTimeout(pendingTimer);
   state.previousRoute = state.route;
   state.route = route;
@@ -182,7 +312,7 @@ function navigate(route, options = {}) {
   state.modal = null;
   if (mode !== "back") setHistory(route, mode);
   syncRouteState(route, { fresh: options.fresh ?? (mode === "push" && state.previousRoute === ROUTES.HOME) });
-  render();
+  render({ routeTransition: true });
 }
 
 function navigateFlowEnd(route) {
@@ -197,6 +327,7 @@ function navigateFlowEnd(route) {
 
 function goBack() {
   if (state.route === ROUTES.HOME) return;
+  if (state.guideActive && state.guidePhase !== 2 && !state.guideShowBackArrow) return;
   clearTimeout(pendingTimer);
   const previous = state.history.length > 1 ? state.history[state.history.length - 2] : ROUTES.HOME;
   state.history = state.history.slice(0, -1);
@@ -206,7 +337,7 @@ function goBack() {
   state.modal = null;
   state.history = state.history.length ? state.history : [ROUTES.HOME];
   syncRouteState(previous, { fresh: false });
-  render();
+  render({ routeTransition: true });
 }
 
 function finishToHome() {
@@ -233,6 +364,425 @@ function showToast(message) {
   }, 1800);
 }
 
+function guideResetStepState() {
+  state.guideTriangle = false;
+  state.guideOptions = false;
+  state.guideAfterBranch = false;
+  state.guideBranchTyping = false;
+  state.guideNeedsTyping = false;
+  state.guideDisplayedText = "";
+}
+
+function guideStopTimers() {
+  clearInterval(guideTimer);
+  clearTimeout(guideFadeTimer);
+  guideTimer = null;
+  guideFadeTimer = null;
+}
+
+function guideTextForCurrentState() {
+  if (state.guidePhase === 2) {
+    if (state.guideMenuHint) return "请先点击右侧的展开菜单按钮，打开功能面板。";
+    const feature = phase2Features[state.guideFeatureIdx];
+    if (!feature) return "";
+    if (state.guideInFeature) {
+      return state.guideShowBackArrow ? "请点击左上角返回按钮，继续下一个功能。" : feature.explain;
+    }
+    return feature.tip;
+  }
+
+  const step = guideCurrentStep();
+  if (!step) return "";
+  if (step.segments) return step.segments[state.guideSegment] || "";
+  return step.text || "";
+}
+
+function guideShowTriangle() {
+  if (state.guidePhase === 2) {
+    state.guideTriangle = Boolean(state.guideInFeature && !state.guideShowBackArrow);
+  } else {
+    state.guideTriangle = true;
+  }
+  render();
+}
+
+function guideShowText() {
+  const text = guideTextForCurrentState();
+  if (!text) {
+    guideShowTriangle();
+    return;
+  }
+
+  guideStopTimers();
+  state.guideNeedsTyping = true;
+  state.guideTriangle = false;
+  state.guideDisplayedText = "";
+  guideFullText = text;
+  guideTypedIndex = 0;
+  render();
+
+  guideTimer = setInterval(() => {
+    if (guideTypedIndex < guideFullText.length) {
+      state.guideDisplayedText += guideFullText.charAt(guideTypedIndex);
+      guideTypedIndex += 1;
+      render();
+      return;
+    }
+
+    guideStopTimers();
+    state.guideNeedsTyping = false;
+    guideShowTriangle();
+  }, 26);
+}
+
+function guideAdvanceToNextStep() {
+  const steps = guideCurrentSteps();
+  if (!steps) return;
+  if (state.guideStep < steps.length - 1) {
+    state.guideStep += 1;
+    state.guideSegment = 0;
+    guideResetStepState();
+    render();
+    guideShowText();
+    return;
+  }
+  guideNextPhase();
+}
+
+function guideNextPhase() {
+  guideStopTimers();
+
+  if (state.guidePhase === 1) {
+    state.guidePhase = 2;
+    state.guideStep = 0;
+    state.guideSegment = 0;
+    state.menuOpen = false;
+    state.guideMenuHint = true;
+    state.guideReplayMode = false;
+    state.guideInFeature = false;
+    state.guideShowBackArrow = false;
+    guideResetStepState();
+    if (state.route !== ROUTES.HOME) {
+      navigate(ROUTES.HOME, { mode: "reset", direction: "back", fromGuide: true });
+    } else {
+      render();
+      guideShowText();
+    }
+    return;
+  }
+
+  if (state.guidePhase === 2) {
+    state.guidePhase = 3;
+    state.guideStep = 0;
+    state.guideSegment = 0;
+    state.guideMenuHint = false;
+    state.guideReplayMode = false;
+    state.guideInFeature = false;
+    state.guideShowBackArrow = false;
+    guideResetStepState();
+    if (state.route !== ROUTES.HOME) {
+      navigate(ROUTES.HOME, { mode: "reset", direction: "back", fromGuide: true });
+    } else {
+      render();
+      guideShowText();
+    }
+    return;
+  }
+
+  completeGuide();
+}
+
+function guideRestartPhase2() {
+  guideStopTimers();
+  state.guideActive = true;
+  state.guidePhase = 2;
+  state.guideStep = 0;
+  state.guideSegment = 0;
+  state.menuOpen = false;
+  state.guideMenuHint = true;
+  state.guideReplayMode = true;
+  state.guideInFeature = false;
+  state.guideShowBackArrow = false;
+  guideResetStepState();
+  if (state.route !== ROUTES.HOME) {
+    navigate(ROUTES.HOME, { mode: "reset", direction: "back", fromGuide: true });
+  } else {
+    render();
+    guideShowText();
+  }
+}
+
+function guideHandleOption(indexOrKey, isBranch) {
+  const step = guideCurrentStep();
+  if (!step) return;
+
+  state.guideOptions = false;
+  if (isBranch) {
+    const branch = step.branches?.find((item) => item.key === indexOrKey);
+    if (!branch) return;
+    if (branch.loop) {
+      guideRestartPhase2();
+      return;
+    }
+
+    guideStopTimers();
+    state.guideBranchTyping = true;
+    state.guideDisplayedText = "";
+    guideFullText = branch.response || "";
+    guideTypedIndex = 0;
+    render();
+    guideTimer = setInterval(() => {
+      if (guideTypedIndex < guideFullText.length) {
+        state.guideDisplayedText += guideFullText.charAt(guideTypedIndex);
+        guideTypedIndex += 1;
+        render();
+        return;
+      }
+
+      guideStopTimers();
+      state.guideBranchTyping = false;
+      state.guideAfterBranch = true;
+      state.guideTriangle = true;
+      render();
+    }, 28);
+    return;
+  }
+
+  guideAdvanceToNextStep();
+}
+
+function guideAdvance() {
+  if (state.guideOptions) return;
+  if (state.guideNeedsTyping) {
+    guideStopTimers();
+    state.guideDisplayedText = guideFullText;
+    state.guideNeedsTyping = false;
+    if (state.guideBranchTyping) {
+      state.guideBranchTyping = false;
+      state.guideAfterBranch = true;
+    }
+    guideShowTriangle();
+    return;
+  }
+
+  if (!state.guideTriangle) return;
+
+  state.guideTriangle = false;
+  if (state.guidePhase !== 2) {
+    const step = guideCurrentStep();
+    if (!step) return;
+    if (step.isEnd) {
+      guideNextPhase();
+      return;
+    }
+    if (state.guideAfterBranch) {
+      state.guideAfterBranch = false;
+      guideAdvanceToNextStep();
+      return;
+    }
+    if (step.segments && state.guideSegment < step.segments.length - 1) {
+      state.guideSegment += 1;
+      guideShowText();
+      return;
+    }
+    if (step.branches || step.options) {
+      state.guideOptions = true;
+      render();
+      return;
+    }
+    guideAdvanceToNextStep();
+    return;
+  }
+
+  render();
+}
+
+function guidePositionArrow() {
+  const arrow = document.getElementById("guideArrow");
+  const bubble = document.getElementById("guideBubble");
+  if (!arrow) return;
+
+  const stage = document.querySelector(".stage");
+  if (!stage) return;
+  const stageRect = stage.getBoundingClientRect();
+  const scale = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--stage-scale")) || 1;
+
+  const placeArrow = (element, offsetX = 8, offsetY = -30) => {
+    const rect = element.getBoundingClientRect();
+    const centerY = (rect.top + rect.height / 2 - stageRect.top) / scale;
+    const rightX = (rect.right - stageRect.left) / scale;
+    arrow.style.display = "block";
+    arrow.style.left = `${rightX + offsetX}px`;
+    arrow.style.top = `${centerY + offsetY}px`;
+    arrow.classList.add("point-left");
+  };
+
+  if (state.guideMenuHint) {
+    const toggle = document.querySelector(".home-toggle-hotspot");
+    if (!toggle) {
+      arrow.style.display = "none";
+      return;
+    }
+    placeArrow(toggle, 8, -30);
+    if (bubble) {
+      bubble.classList.remove("guide-bubble-feature");
+      bubble.classList.add("guide-bubble-hint");
+      bubble.style.left = "176px";
+      bubble.style.top = "24px";
+      bubble.style.width = "527px";
+      bubble.style.height = "527px";
+      bubble.style.transform = "none";
+    }
+    return;
+  }
+
+  if (state.guideInFeature) {
+    if (!state.guideShowBackArrow) {
+      arrow.style.display = "none";
+      return;
+    }
+    const backBtn = document.querySelector(".back-btn, .back-hotspot, [data-action='back']");
+    if (!backBtn) {
+      arrow.style.display = "none";
+      return;
+    }
+    placeArrow(backBtn, 8, -35);
+    if (bubble) {
+      bubble.classList.remove("guide-bubble-feature");
+      bubble.classList.add("guide-bubble-hint");
+    }
+    return;
+  }
+
+  const feature = phase2Features[state.guideFeatureIdx];
+  if (!feature || state.route !== ROUTES.HOME) {
+    arrow.style.display = "none";
+    return;
+  }
+  const btn = document.querySelector(feature.selector);
+  if (!btn) {
+    arrow.style.display = "none";
+    return;
+  }
+  placeArrow(btn, -6, -30);
+  if (bubble) {
+    bubble.classList.remove("guide-bubble-hint");
+    bubble.classList.add("guide-bubble-feature");
+  }
+}
+
+function guideMarkup() {
+  if (!state.guideActive) return "";
+
+  const phase = state.guidePhase;
+  let markup = `<div class="guide-overlay${state.guidePhase === 2 ? " guide-overlay-stage2" : ""}" id="guideOverlay">`;
+
+  if (phase === 2) {
+    const bubbleText = state.guideDisplayedText || guideTextForCurrentState();
+    const bubbleClass = `guide-bubble ${state.guideMenuHint ? "guide-bubble-hint" : state.guideInFeature ? "guide-bubble-feature" : ""}`;
+    markup += `
+      <div class="${bubbleClass}" id="guideBubble">
+        <img src="${asset("大气泡.png")}" alt="" class="guide-bubble-bg" />
+        <span class="guide-bubble-text" id="guideDialogText">${bubbleText}</span>
+      </div>
+      <div class="guide-arrow-overlay" id="guideArrow"><img src="${asset("指引箭头.png")}" alt="" /></div>
+    `;
+  } else {
+    const step = guideCurrentStep();
+    const text = state.guideDisplayedText || guideTextForCurrentState();
+    markup += `
+      <div class="guide-bg-layer"><img src="${asset("大背景.png")}" alt="" /></div>
+      <div class="guide-character-layer"><img src="${beetles.king}" alt="" /></div>
+      <div class="guide-dialog-bg"><img src="${asset("对话框.png")}" alt="" /></div>
+      <div class="guide-dialog-text" id="guideDialogText">${text}</div>
+      <div class="guide-character-label">螂王</div>
+      <div class="guide-triangle ${state.guideTriangle ? "" : "hidden"}"><img src="${asset("三角标.png")}" alt="" /></div>
+    `;
+
+    if (step?.options?.length || step?.branches?.length) {
+      const items = step.branches
+        ? step.branches.map((branch) => `<button class="guide-option-btn" data-branch="${branch.key}">${branch.label}</button>`).join("")
+        : step.options.map((option, index) => `<button class="guide-option-btn" data-idx="${index}">${option}</button>`).join("");
+      markup += `
+        <div class="guide-options-overlay ${state.guideOptions ? "visible" : ""}" id="guideOptionsOverlay">
+          <div class="guide-options-container">${items}</div>
+        </div>
+      `;
+    }
+  }
+
+  const clickOverlayClass = state.guidePhase === 2 || state.guideOptions
+    ? "guide-click-overlay is-disabled"
+    : "guide-click-overlay is-active";
+  markup += `<div class="${clickOverlayClass}" id="guideClickOverlay"></div></div>`;
+  return markup;
+}
+
+function completeGuide() {
+  guideStopTimers();
+  const returnHome = state.route !== ROUTES.HOME;
+  state.guideActive = false;
+  state.guidePhase = 4;
+  state.guideStep = 0;
+  state.guideSegment = 0;
+  state.guideTriangle = false;
+  state.guideOptions = false;
+  state.guideMenuHint = false;
+  state.guideReplayMode = false;
+  state.guideInFeature = false;
+  state.guideShowBackArrow = false;
+  state.guideFeatureIdx = 0;
+  state.guideAfterBranch = false;
+  state.guideBranchTyping = false;
+  state.guideNeedsTyping = false;
+  state.guideDisplayedText = "";
+  try {
+    localStorage.setItem(GUIDE_SEEN_STORAGE_KEY, "1");
+  } catch {}
+
+  if (returnHome) {
+    navigate(ROUTES.HOME, { mode: "reset", direction: "back", fromGuide: true });
+  } else {
+    render();
+  }
+}
+
+function startGuide() {
+  if (state.guideActive) return;
+  guideStopTimers();
+  state.guideActive = true;
+  state.guidePhase = 1;
+  state.guideStep = 0;
+  state.guideSegment = 0;
+  state.menuOpen = true;
+  state.guideMenuHint = false;
+  state.guideReplayMode = false;
+  state.guideInFeature = false;
+  state.guideShowBackArrow = false;
+  state.guideFeatureIdx = 0;
+  state.guideAfterBranch = false;
+  state.guideBranchTyping = false;
+  state.guideNeedsTyping = false;
+  state.guideDisplayedText = "";
+
+  if (state.route !== ROUTES.HOME) {
+    navigate(ROUTES.HOME, { mode: "reset", direction: "back", fromGuide: true });
+  } else {
+    render();
+    guideShowText();
+  }
+}
+
+function checkAutoGuide() {
+  if (!state.authUser) return;
+  if (!state.authLoading) {
+    try {
+      if (localStorage.getItem(GUIDE_SEEN_STORAGE_KEY) === "1") return;
+    } catch {}
+    setTimeout(() => startGuide(), 120);
+  }
+}
+
 function selectedTodo() {
   return state.todos.find((todo) => todo.id === state.selectedTodoId) || state.todos[0];
 }
@@ -255,6 +805,27 @@ function normalizeTodoSelection() {
     state.selectedTodoId = state.todos[0].id;
   }
   selectTodo(state.selectedTodoId);
+}
+
+function sortedTodosForView() {
+  const indexedTodos = state.todos.map((todo, index) => ({ todo, index }));
+  const sorted = [...indexedTodos];
+
+  if (state.todoSortMode === "active-first") {
+    sorted.sort((a, b) => Number(a.todo.done) - Number(b.todo.done) || a.index - b.index);
+  }
+
+  if (state.todoSortMode === "done-first") {
+    sorted.sort((a, b) => Number(b.todo.done) - Number(a.todo.done) || a.index - b.index);
+  }
+
+  return sorted.map((item) => item.todo);
+}
+
+function nextTodoSortMode() {
+  const modes = ["default", "active-first", "done-first"];
+  const currentIndex = modes.indexOf(state.todoSortMode);
+  return modes[(currentIndex + 1) % modes.length];
 }
 
 function button(label, className = "", attrs = "") {
@@ -456,6 +1027,7 @@ function renderExecute() {
 function renderTodo() {
   const currentTodo = selectedTodo();
   const currentTask = currentTodo ? taskFromTodo(currentTodo) : state.selectedTask;
+  const visibleTodos = sortedTodosForView();
   return `
     <section class="page todo-page">
       ${designFrame("待办事项2-王紫涵.png", "todo-design")}
@@ -466,17 +1038,16 @@ function renderTodo() {
       <button class="hotspot todo-detail-hotspot" data-modal="todo-detail" aria-label="任务详情"></button>
       <button class="hotspot todo-execute-hotspot" data-action="execute-selected" aria-label="开始执行"></button>
       <button class="hotspot todo-side-hotspot side-one" data-action="toast" data-toast="已切换卡片视图" aria-label="卡片视图"></button>
-      <button class="hotspot todo-side-hotspot side-two" data-action="toast" data-toast="排序方式已更新" aria-label="排序"></button>
+      <button class="hotspot todo-side-hotspot side-two" data-action="toggle-todo-sort" aria-label="排序"></button>
       <button class="hotspot todo-side-hotspot side-three" data-action="toast" data-toast="插图功能稍后接入" aria-label="图片"></button>
       <button class="hotspot todo-side-hotspot side-four" data-modal="todo-new" aria-label="编辑"></button>
       <div class="todo-clean-list-panel" aria-hidden="true"></div>
       <div class="todo-clean-detail-panel" aria-hidden="true"></div>
       <div class="todo-live-list">
-        ${state.todos
-          .slice(0, 4)
+        ${visibleTodos
           .map(
             (todo) => `
-              <label class="todo-live-row ${state.selectedTodoId === todo.id ? "selected" : ""}">
+              <label class="todo-live-row ${state.selectedTodoId === todo.id ? "selected" : ""} ${todo.done ? "is-done" : ""}">
                 <input type="checkbox" data-todo="${todo.id}" ${todo.done ? "checked" : ""} />
                 <button class="todo-live-label" data-action="select-todo" data-todo-id="${todo.id}">${todo.name.replace(/^任务名：/, "")}</button>
               </label>
@@ -744,7 +1315,18 @@ function modalMarkup() {
   return "";
 }
 
-function render() {
+function renderMusicControl() {
+  return `
+    <div class="music-control ${state.bgmPlaying ? "is-playing" : ""}" aria-label="背景音乐控制">
+      <button class="music-toggle" data-action="toggle-bgm" aria-label="${state.bgmPlaying ? "暂停背景音乐" : "播放背景音乐"}" aria-pressed="${state.bgmPlaying}">
+        <span aria-hidden="true">${state.bgmPlaying ? "停" : "乐"}</span>
+      </button>
+      <input class="music-volume-slider" type="range" min="0" max="1" step="0.01" value="${state.bgmVolume}" aria-label="背景音乐音量" />
+    </div>
+  `;
+}
+
+function render(options = {}) {
   const pages = {
     [ROUTES.HOME]: renderHome,
     [ROUTES.AI]: renderAi,
@@ -756,15 +1338,23 @@ function render() {
     [ROUTES.DRAW]: renderDraw,
   };
 
+  const transitionClass = options.routeTransition ? " is-route-transition" : "";
+
   app.innerHTML = `
     <main class="stage ${routeClass()}">
-      <div class="page-transition" data-route="${state.route}">
+      <div class="page-transition${transitionClass}" data-route="${state.route}">
         ${pages[state.route]()}
       </div>
+      ${guideMarkup()}
+      ${renderMusicControl()}
       ${modalMarkup()}
       ${toastMarkup()}
     </main>
   `;
+
+  if (state.guideActive && state.guidePhase === 2) {
+    setTimeout(() => guidePositionArrow(), 0);
+  }
 }
 
 function handleRoute(target) {
@@ -774,6 +1364,10 @@ function handleRoute(target) {
   if (tab) state.cardTab = tab;
   if (profileTab) state.profileTab = profileTab;
   const route = target.dataset.route;
+  if (state.guideActive && state.guidePhase === 2 && route) {
+    navigate(route, { mode, fresh: true, fromGuide: true });
+    return;
+  }
   if (requiresAuth(route) && !state.authUser) {
     state.pendingRoute = route;
     state.authMode = "login";
@@ -791,9 +1385,40 @@ function requiresAuth(route) {
 
 async function handleAction(action, target) {
   if (action === "back") goBack();
+  if (action === "toggle-bgm") {
+    if (state.bgmPlaying) {
+      bgmAudio.pause();
+      state.bgmPlaying = false;
+      try {
+        localStorage.setItem(BGM_STORAGE_KEY, "paused");
+      } catch {}
+      render();
+      return;
+    }
+
+    try {
+      bgmAudio.volume = state.bgmVolume;
+      await bgmAudio.play();
+      state.bgmPlaying = true;
+      try {
+        localStorage.setItem(BGM_STORAGE_KEY, "playing");
+      } catch {}
+      render();
+    } catch {
+      state.bgmPlaying = false;
+      showToast("音乐暂时无法播放，请再点一次试试");
+    }
+    return;
+  }
   if (action === "toggle-menu") {
+    const wasOpen = state.menuOpen;
     state.menuOpen = !state.menuOpen;
     render();
+    if (state.guideActive && state.guidePhase === 2 && state.guideMenuHint && state.menuOpen && !wasOpen) {
+      state.guideMenuHint = false;
+      state.guideFeatureIdx = 0;
+      guideShowText();
+    }
   }
   if (action === "switch-auth") {
     state.authMode = state.authMode === "login" ? "signup" : "login";
@@ -871,6 +1496,15 @@ async function handleAction(action, target) {
     showToast(target.dataset.tab === "mail" ? "消息设置已打开" : target.dataset.tab === "notice" ? "提醒设置已打开" : "设置已打开");
     render();
   }
+  if (action === "toggle-todo-sort") {
+    state.todoSortMode = nextTodoSortMode();
+    const sortText = {
+      default: "排序：默认顺序",
+      "active-first": "排序：未完成优先",
+      "done-first": "排序：已完成优先",
+    };
+    showToast(sortText[state.todoSortMode]);
+  }
   if (action === "add-todo") {
     const input = document.querySelector("#newTaskName");
     const value = input?.value?.trim() || "新的任务";
@@ -945,6 +1579,58 @@ async function handleAction(action, target) {
 app.addEventListener("click", (event) => {
   const target = event.target.closest("button, .ai-file-button");
 
+  if (state.guideActive) {
+    if (target?.classList.contains("guide-option-btn")) {
+      guideHandleOption(target.dataset.branch ?? Number(target.dataset.idx), Boolean(target.dataset.branch));
+      return;
+    }
+
+    if (state.guidePhase === 2 && !state.guideMenuHint && !state.guideInFeature && target?.dataset.route) {
+      const feature = phase2Features[state.guideFeatureIdx];
+      if (feature && target.dataset.route === feature.route) {
+        state.guideInFeature = true;
+        state.guideShowBackArrow = false;
+        state.guideDisplayedText = "";
+        handleRoute(target);
+        setTimeout(() => guideShowText(), 20);
+        return;
+      }
+      return;
+    }
+
+    if (state.guidePhase === 2 && state.guideInFeature && !state.guideShowBackArrow && event.target.closest(".guide-overlay")) {
+      state.guideShowBackArrow = true;
+      state.guideTriangle = false;
+      render();
+      return;
+    }
+
+    if (state.guidePhase === 2 && state.guideInFeature && target) {
+      const isBack = target.dataset.action === "back" || target.classList.contains("back-btn") || target.classList.contains("back-hotspot");
+      if (isBack) {
+        const isLast = state.guideFeatureIdx >= phase2Features.length - 1;
+        state.guideInFeature = false;
+        state.guideShowBackArrow = false;
+        state.guideDisplayedText = "";
+        goBack();
+        if (isLast) {
+          guideNextPhase();
+        } else {
+          state.guideFeatureIdx += 1;
+          setTimeout(() => guideShowText(), 20);
+        }
+        return;
+      }
+    }
+
+    if (state.guidePhase !== 2 && event.target.closest(".guide-click-overlay")) {
+      guideAdvance();
+      return;
+    }
+
+    if (state.guidePhase !== 2) return;
+  }
+
   const aiPanel = event.target.closest(".ai-input-panel");
   if (aiPanel && !target) {
     const rect = aiPanel.getBoundingClientRect();
@@ -1016,6 +1702,9 @@ app.addEventListener("submit", async (event) => {
       const route = state.pendingRoute;
       state.pendingRoute = null;
       navigate(route, { mode: "push", fresh: true });
+      setTimeout(() => checkAutoGuide(), 120);
+    } else {
+      checkAutoGuide();
     }
   } catch (error) {
     state.authError = authErrorMessage(error);
@@ -1060,6 +1749,16 @@ app.addEventListener("change", (event) => {
 });
 
 app.addEventListener("input", (event) => {
+  if (event.target.classList.contains("music-volume-slider")) {
+    const volume = Math.min(Math.max(Number(event.target.value), 0), 1);
+    state.bgmVolume = Number.isFinite(volume) ? volume : 0.45;
+    bgmAudio.volume = state.bgmVolume;
+    try {
+      localStorage.setItem(BGM_VOLUME_STORAGE_KEY, String(state.bgmVolume));
+    } catch {}
+    return;
+  }
+
   if (event.target.classList.contains("ai-task-input")) {
     state.aiInput = event.target.value;
   }
@@ -1103,12 +1802,14 @@ render();
 if (isLocalPreviewAuthReady()) {
   state.authLoading = false;
   render();
+  checkAutoGuide();
 } else {
   initializeAuth({
     onChange(user) {
       state.authUser = user || null;
       state.authLoading = false;
       render();
+      checkAutoGuide();
     },
     onMessage(message) {
       state.authLoading = false;
@@ -1121,3 +1822,7 @@ if (isLocalPreviewAuthReady()) {
     render();
   });
 }
+
+window.startGuide = startGuide;
+window.completeGuide = completeGuide;
+window.skipGuide = completeGuide;
