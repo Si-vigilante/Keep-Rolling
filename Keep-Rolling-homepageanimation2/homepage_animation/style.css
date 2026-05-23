@@ -1,0 +1,204 @@
+/*读书螂动画*/
+.reading-gif-container {
+    position: fixed;
+    top:  80%;
+    left: 60%;
+
+    transform: translate(-50%, -50%);
+
+    width: 200px;
+    height: 200px;
+
+    z-index: 999999;
+}
+.reading1-gif {
+    position: fixed;
+
+    top: 80%;
+    left: 60%;
+
+    transform: translate(-50%, -50%);
+
+    width: 150px;
+    height: auto;
+
+    z-index: 999999;
+
+    pointer-events: none;
+}
+
+.reading2-gif {
+   position: fixed;
+
+    top: 80%;
+    left: 60%;
+
+    transform: translate(-50%, -50%);
+
+    width: 200px;
+    height: auto;
+
+    z-index: 999999;
+
+    pointer-events: none;
+}
+
+/* 默认显示 GIF1 */
+.reading1-gif {
+    opacity: 1;
+}
+
+/* 默认隐藏 GIF2 */
+.reading2-gif {
+    opacity: 0;
+}
+
+/* 鼠标悬停时 */
+.reading-gif-container:hover .reading1-gif {
+    opacity: 0;
+}
+
+.reading-gif-container:hover .reading2-gif {
+    opacity: 1;
+}
+
+
+/*保洁螂动画*/
+.sweep-gif-container {
+    position: fixed;
+    top: 50%;
+    left: 40%;
+
+    transform: translate(-50%, -50%);
+
+    width: 200px;
+    height: 200px;
+
+    z-index: 999999;
+}
+.sweep1-gif {
+    position: fixed;
+
+    top: 50%;
+    left: 40%;
+
+    transform: translate(-50%, -50%);
+
+    width: 120px;
+    height: auto;
+
+    z-index: 999999;
+
+    pointer-events: none;
+}
+
+.sweep2-gif {
+   position: fixed;
+
+    top: 48%;
+    left: 40%;
+
+    transform: translate(-50%, -50%);
+
+    width: 115px;
+    height: auto;
+
+    z-index: 999999;
+
+    pointer-events: none;
+}
+
+/* 默认显示 GIF1 */
+.sweep1-gif {
+    opacity: 1;
+}
+
+/* 默认隐藏 GIF2 */
+.sweep2-gif {
+    opacity: 0;
+}
+
+/* 鼠标悬停时 */
+.sweep-gif-container:hover .sweep1-gif {
+    opacity: 0;
+}
+
+.sweep-gif-container:hover .sweep2-gif {
+    opacity: 1;
+}
+
+/*冰螂动画*/
+.ice-gif-container {
+    position: fixed;
+    top: 50%;
+    left: 60%;
+
+    transform: translate(-50%, -50%);
+
+    width: 200px;
+    height: 200px;
+
+    z-index: 999999;
+}
+.ice1-gif {
+    position: fixed;
+
+    top: 50%;
+    left: 60%;
+
+    transform: translate(-50%, -50%);
+
+    width: 120px;
+    height: auto;
+
+    z-index: 999999;
+
+    pointer-events: none;
+}
+
+.ice2-gif {
+   position: fixed;
+
+    top: 48%;
+    left: 60%;
+
+    transform: translate(-50%, -50%);
+
+    width: 120px;
+    height: auto;
+
+    z-index: 999999;
+
+    pointer-events: none;
+}
+
+/* 默认显示 GIF1 */
+.ice1-gif {
+    opacity: 1;
+}
+
+/* 默认隐藏 GIF2 */
+.ice2-gif {
+    opacity: 0;
+}
+
+/* 鼠标悬停时 */
+.ice-gif-container:hover .ice1-gif {
+    opacity: 0;
+}
+
+.ice-gif-container:hover .ice2-gif {
+    opacity: 1;
+}
+
+/*粪球动画*/
+
+    #tumbleweed {
+        position: fixed;   /* 使用 fixed 定位，使其相对于屏幕视口运动 */
+        width: 120px;      /* 您可以根据需要调整大小 */
+        height: 120px;
+        cursor: pointer;
+        user-select: none;
+        z-index: 9999;     /* 确保它悬浮在页面最上层 */
+        will-change: transform;
+    }
