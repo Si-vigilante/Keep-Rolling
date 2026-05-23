@@ -2555,7 +2555,7 @@ button:active {
 .guide-bubble {
   left: 28%;
   top: 16%;
-  width: 900px;
+  width: 1100px;
   height: 440px;
   transform: none;
 }
@@ -2564,7 +2564,7 @@ button:active {
 .guide-bubble-feature {
   left: 50%;
   top: 45%;
-  width: 920px;
+  width: 1100px;
   height: 460px;
   transform: translate(-50%, -50%);
 }
@@ -2572,10 +2572,10 @@ button:active {
 /* 箭头模式的小气泡提示 */
 .guide-bubble-hint {
   left: auto;
-  right: 20%;
+  right: 18%;
   top: 8%;
-  width: 500px;
-  height: 160px;
+  width: 600px;
+  height: 180px;
   transform: none;
 }
 
@@ -2592,15 +2592,15 @@ button:active {
   position: relative;
   z-index: 1;
   font-family: 'ShangShouQingCheng', sans-serif;
-  font-size: 38px;
+  font-size: 36px;
   color: #5c2e14;
-  line-height: 1.35;
+  line-height: 1.4;
   text-align: center;
-  padding: 40px 50px;
-  max-width: 88%;
+  padding: 50px 60px;
+  max-width: 92%;
   pointer-events: none;
   white-space: pre-line;
-  text-shadow: 0 1px 1px rgba(255,255,240,0.5);
+  word-break: break-word;
   overflow-wrap: break-word;
 }
 
