@@ -155,6 +155,7 @@ const state = {
   guideBranchReturn: false, // 分支C：返回选项界面
   guideAfterBranch: false,  // 分支回应打完，推进而非显示选项
   guideMenuHint: false,    // 第二阶段：是否处于"请展开菜单"提示状态
+  guideReplayMode: false,  // 第二阶段：是否是通过"我想再看一遍"进入的重看模式
   guideShowBackArrow: false, // 第二阶段功能页：文字展示完后显示返回箭头
   guideFeatureIdx: 0,      // 第二阶段当前导览的功能索引
   guideInFeature: false,   // 第二阶段是否正在功能页面中
@@ -693,6 +694,7 @@ function guideNextPhase() {
     state.guideOptions = false;
     state.guideBranchReturn = false;
     state.guideShowBackArrow = false;
+    state.guideReplayMode = false;
     state.guideFeatureIdx = 0;
     state.guideInFeature = false;
     if (state.route !== ROUTES.HOME) {
@@ -727,6 +729,7 @@ function completeGuide() {
   state.guideOptions = false;
   state.guideBranchReturn = false;
   state.guideMenuHint = false;
+  state.guideReplayMode = false;
   state.guideShowBackArrow = false;
   state.guideFeatureIdx = 0;
   state.guideInFeature = false;
@@ -764,6 +767,7 @@ function startGuide() {
   state.guideOptions = false;
   state.guideBranchReturn = false;
   state.guideAfterBranch = false;
+  state.guideReplayMode = false;
   state.guideShowBackArrow = false;
   state.guideFeatureIdx = 0;
   state.guideInFeature = false;
@@ -790,6 +794,7 @@ function guideRestartPhase2() {
   state.guideBranchReturn = false;
   state.guideAfterBranch = false;
   state.guideMenuHint = true;
+  state.guideReplayMode = true;
   state.guideShowBackArrow = false;
   state.guideFeatureIdx = 0;
   state.guideInFeature = false;
@@ -990,7 +995,7 @@ function renderHome() {
       <button class="hotspot home-cloud-hotspot" data-modal="notice" aria-label="云朵提示"></button>
       <button class="hotspot home-king-hotspot" data-route="profile" aria-label="螂王"></button>
       ${
-        (state.guideActive && state.guidePhase === 2 && localStorage.getItem("beetle-guide-v1-seen"))
+        (state.guideActive && state.guidePhase === 2 && state.guideReplayMode)
           ? `<button class="guide-review-btn" data-action="guide-review"><img src="${asset("用户选项 .png")}" alt="" /><span>我看完了</span></button>`
           : ""
       }
