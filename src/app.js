@@ -339,33 +339,31 @@ function guideMarkup() {
 
   // 第二阶段：浮动气泡 + 箭头，不遮挡页面交互
   if (phase === 2) {
-    const _gsText2 = guideGetTextSimple();
     if (state.guideMenuHint) {
       // 菜单收起提示：箭头指向切换按钮，气泡在中间偏下
-      overlay += "<div class=\"guide-bubble\" id=\"guideBubble\" style=\"left:50%;top:48%;width:900px;height:440px;transform:translateX(-50%);\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\">" + _gsText2 + "</span></div>";
+      overlay += "<div class=\"guide-bubble\" id=\"guideBubble\" style=\"left:50%;top:48%;width:900px;height:440px;transform:translateX(-50%);\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\"></span></div>";
       overlay += "<div class=\"guide-arrow-overlay\" id=\"guideArrow\"><img src=\"" + asset("指引箭头.png") + "\" alt=\"指引箭头\" /></div>";
     } else if (!state.guideInFeature && state.route === ROUTES.HOME) {
-      overlay += "<div class=\"guide-bubble\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\">" + _gsText2 + "</span></div>";
+      overlay += "<div class=\"guide-bubble\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\"></span></div>";
       overlay += "<div class=\"guide-arrow-overlay\" id=\"guideArrow\"><img src=\"" + asset("指引箭头.png") + "\" alt=\"指引箭头\" /></div>";
     } else if (state.guideInFeature) {
       // 功能页面内：先显示气泡+三角标，点击后箭头+气泡提示出现
       if (!state.guideShowBackArrow) {
         const _triShow = state.guideTriangle;
-        overlay += "<div class=\"guide-bubble guide-bubble-feature\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\">" + _gsText2 + "</span></div>";
+        overlay += "<div class=\"guide-bubble guide-bubble-feature\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\"></span></div>";
         overlay += "<div class=\"guide-triangle " + (_triShow ? "" : "hidden") + "\" id=\"guideTri2\"><img src=\"" + asset("三角标.png") + "\" alt=\"提示\" /></div>";
       }
       if (state.guideShowBackArrow) {
         overlay += "<div class=\"guide-arrow-overlay\" id=\"guideArrow\" style=\"width:80px;height:80px;\"><img src=\"" + asset("指引箭头.png") + "\" alt=\"指引箭头\" /></div>";
-        overlay += "<div class=\"guide-bubble guide-bubble-hint\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\" style=\"font-size:32px;padding:25px 40px;\">" + _gsText2 + "</span></div>";
+        overlay += "<div class=\"guide-bubble guide-bubble-hint\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\" style=\"font-size:32px;padding:25px 40px;\"></span></div>";
       }
     }
   } else {
     // 第一/三阶段：螂王对话框
-    const _gsText = guideGetTextSimple();
     overlay += "<div class=\"guide-bg-layer\"><img src=\"" + asset("大背景.png") + "\" alt=\"背景\" /></div>"
       + "<div class=\"guide-character-layer\"><img src=\"" + beetles.king + "\" alt=\"螂王角色\" /></div>"
       + "<div class=\"guide-dialog-bg\"><img src=\"" + asset("对话框 .png") + "\" alt=\"对话框\" /></div>"
-      + "<div class=\"guide-dialog-text\" id=\"guideDialogText\">" + _gsText + "</div>"
+      + "<div class=\"guide-dialog-text\" id=\"guideDialogText\"></div>"
       + "<div class=\"guide-character-label\">螂王</div>";
 
     // 三角标
@@ -430,9 +428,10 @@ function guideGetTextSimple() {
 function guideShowText() {
   const text = guideGetTextSimple();
   const el = document.getElementById("guideDialogText");
-  if (el) el.textContent = text || "";
+  if (!el) return;
+
   // 第二阶段气泡文字自动适配字号（根据文字长度精细调节）
-  if (state.guidePhase === 2 && el && text) {
+  if (state.guidePhase === 2 && text) {
     const len = text.length;
     if (len > 35) { el.style.fontSize = "32px"; }
     else if (len > 25) { el.style.fontSize = "34px"; }
@@ -441,18 +440,33 @@ function guideShowText() {
     el.style.lineHeight = "1.35";
     el.style.padding = "40px 50px";
   }
+
   if (!text) {
     guideShowTriangle();
-  } else {
-    state.guideTriangle = false;
-    guideUpdateUI();
-    setTimeout(() => {
-      const el2 = document.getElementById("guideDialogText");
-      if (el2 && el2.textContent === text) {
-        guideShowTriangle();
-      }
-    }, 600);
+    return;
   }
+
+  // === 打字机效果（三个阶段通用） ===
+  state.guideTriangle = false;
+  guideUpdateUI();
+  el.textContent = "";
+
+  if (guideTimer) { clearInterval(guideTimer); guideTimer = null; }
+  guideFullText = text;
+  guideTypedIndex = 0;
+
+  guideTimer = setInterval(() => {
+    const e2 = document.getElementById("guideDialogText");
+    if (!e2) { clearInterval(guideTimer); guideTimer = null; return; }
+    if (guideTypedIndex < guideFullText.length) {
+      e2.textContent += guideFullText.charAt(guideTypedIndex);
+      guideTypedIndex++;
+    } else {
+      clearInterval(guideTimer);
+      guideTimer = null;
+      guideShowTriangle();
+    }
+  }, 30);
 }
 
 
@@ -1362,9 +1376,9 @@ function render() {
       ${toastMarkup()}
     </main>
   `;
-  // 引导激活时确保文字显示（文本已直接内联在 HTML 中）
+  // 引导激活时启动打字机
   if (state.guideActive) {
-    requestAnimationFrame(() => guideShowText());
+    setTimeout(() => guideShowText(), 50);
   }
 }
 
