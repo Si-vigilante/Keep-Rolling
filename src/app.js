@@ -341,7 +341,7 @@ function guideMarkup() {
   if (phase === 2) {
     if (state.guideMenuHint) {
       // 菜单收起提示：箭头指向切换按钮，气泡在中间偏下
-      overlay += "<div class=\"guide-bubble\" id=\"guideBubble\" style=\"left:50%;top:46%;width:1100px;height:440px;transform:translateX(-50%);\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\"></span></div>";
+      overlay += "<div class=\"guide-bubble\" id=\"guideBubble\" style=\"left:176px;top:24px;width:527px;height:527px;transform:none;\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\"></span></div>";
       overlay += "<div class=\"guide-arrow-overlay\" id=\"guideArrow\"><img src=\"" + asset("指引箭头.png") + "\" alt=\"指引箭头\" /></div>";
     } else if (!state.guideInFeature && state.route === ROUTES.HOME) {
       overlay += "<div class=\"guide-bubble\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\"></span></div>";
@@ -355,7 +355,7 @@ function guideMarkup() {
       }
       if (state.guideShowBackArrow) {
         overlay += "<div class=\"guide-arrow-overlay\" id=\"guideArrow\" style=\"width:80px;height:80px;\"><img src=\"" + asset("指引箭头.png") + "\" alt=\"指引箭头\" /></div>";
-        overlay += "<div class=\"guide-bubble guide-bubble-hint\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\" style=\"font-size:32px;padding:25px 40px;\"></span></div>";
+        overlay += "<div class=\"guide-bubble guide-bubble-hint\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\" style=\"font-size:36px;padding:30px 35px;\"></span></div>";
       }
     }
   } else {
@@ -433,12 +433,12 @@ function guideShowText() {
   // 第二阶段气泡文字自动适配字号（根据文字长度精细调节）
   if (state.guidePhase === 2 && text) {
     const len = text.length;
-    if (len > 40) { el.style.fontSize = "30px"; }
-    else if (len > 30) { el.style.fontSize = "32px"; }
-    else if (len > 20) { el.style.fontSize = "34px"; }
-    else { el.style.fontSize = "36px"; }
-    el.style.lineHeight = "1.4";
-    el.style.padding = "50px 60px";
+    if (len > 25) { el.style.fontSize = "34px"; }
+    else if (len > 18) { el.style.fontSize = "36px"; }
+    else if (len > 12) { el.style.fontSize = "38px"; }
+    else { el.style.fontSize = "40px"; }
+    el.style.lineHeight = "1.165";
+    el.style.padding = "48px 40px";
   }
 
   if (!text) {
@@ -875,9 +875,9 @@ function guidePositionArrow() {
   if (bubble) {
     bubble.style.position = "absolute";
     bubble.style.left = (btnR + 10) + "px";
-    bubble.style.top = (btnCy - 220) + "px";
-    bubble.style.width = "1100px";
-    bubble.style.height = "440px";
+    bubble.style.top = (btnCy - 260) + "px";
+    bubble.style.width = "527px";
+    bubble.style.height = "527px";
     bubble.style.transform = "none";
   }
 }
