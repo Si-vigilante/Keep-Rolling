@@ -342,18 +342,21 @@ function guideMarkup() {
     const _gsText2 = guideGetTextSimple();
     if (state.guideMenuHint) {
       // 菜单收起提示：箭头指向切换按钮，气泡在中间偏下
-      overlay += "<div class=\"guide-bubble\" id=\"guideBubble\" style=\"left:50%;top:50%;width:800px;height:380px;transform:translateX(-50%);\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\">" + _gsText2 + "</span></div>";
+      overlay += "<div class=\"guide-bubble\" id=\"guideBubble\" style=\"left:50%;top:48%;width:900px;height:440px;transform:translateX(-50%);\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\">" + _gsText2 + "</span></div>";
       overlay += "<div class=\"guide-arrow-overlay\" id=\"guideArrow\"><img src=\"" + asset("指引箭头.png") + "\" alt=\"指引箭头\" /></div>";
     } else if (!state.guideInFeature && state.route === ROUTES.HOME) {
       overlay += "<div class=\"guide-bubble\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\">" + _gsText2 + "</span></div>";
       overlay += "<div class=\"guide-arrow-overlay\" id=\"guideArrow\"><img src=\"" + asset("指引箭头.png") + "\" alt=\"指引箭头\" /></div>";
     } else if (state.guideInFeature) {
-      // 功能页面内：先显示气泡（可点击任意处关闭），点击后箭头出现
+      // 功能页面内：先显示气泡+三角标，点击后箭头+气泡提示出现
       if (!state.guideShowBackArrow) {
+        const _triShow = state.guideTriangle;
         overlay += "<div class=\"guide-bubble guide-bubble-feature\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\">" + _gsText2 + "</span></div>";
+        overlay += "<div class=\"guide-triangle " + (_triShow ? "" : "hidden") + "\" id=\"guideTri2\"><img src=\"" + asset("三角标.png") + "\" alt=\"提示\" /></div>";
       }
       if (state.guideShowBackArrow) {
         overlay += "<div class=\"guide-arrow-overlay\" id=\"guideArrow\" style=\"width:80px;height:80px;\"><img src=\"" + asset("指引箭头.png") + "\" alt=\"指引箭头\" /></div>";
+        overlay += "<div class=\"guide-bubble guide-bubble-hint\" id=\"guideBubble\"><img src=\"" + asset("大气泡.png") + "\" alt=\"\" class=\"guide-bubble-bg\" /><span class=\"guide-bubble-text\" id=\"guideDialogText\" style=\"font-size:32px;padding:25px 40px;\">" + _gsText2 + "</span></div>";
       }
     }
   } else {
@@ -431,12 +434,12 @@ function guideShowText() {
   // 第二阶段气泡文字自动适配字号（根据文字长度精细调节）
   if (state.guidePhase === 2 && el && text) {
     const len = text.length;
-    if (len > 35) { el.style.fontSize = "28px"; }
-    else if (len > 25) { el.style.fontSize = "30px"; }
-    else if (len > 18) { el.style.fontSize = "32px"; }
-    else { el.style.fontSize = "34px"; }
-    el.style.lineHeight = "1.3";
-    el.style.padding = "30px 40px";
+    if (len > 35) { el.style.fontSize = "32px"; }
+    else if (len > 25) { el.style.fontSize = "34px"; }
+    else if (len > 18) { el.style.fontSize = "36px"; }
+    else { el.style.fontSize = "38px"; }
+    el.style.lineHeight = "1.35";
+    el.style.padding = "40px 50px";
   }
   if (!text) {
     guideShowTriangle();
@@ -455,9 +458,13 @@ function guideShowText() {
 
 
 function guideShowTriangle() {
-  // 第二阶段：全部不显示三角标（主页点击功能按钮/功能页点击任意处）
+  // 第二阶段：主页不显示三角标，功能页内箭头模式不显示，仅气泡模式显示
   if (state.guidePhase === 2) {
-    state.guideTriangle = false;
+    if (state.guideInFeature && !state.guideShowBackArrow) {
+      state.guideTriangle = true;
+    } else {
+      state.guideTriangle = false;
+    }
     guideUpdateUI();
     return;
   }
@@ -468,6 +475,8 @@ function guideShowTriangle() {
 function guideUpdateUI() {
   const tri = document.querySelector(".guide-triangle");
   if (tri) tri.classList.toggle("hidden", !state.guideTriangle);
+  const tri2 = document.getElementById("guideTri2");
+  if (tri2) tri2.classList.toggle("hidden", !state.guideTriangle);
   const ov = document.getElementById("guideOptionsOverlay");
   if (ov) ov.classList.toggle("visible", state.guideOptions);
   const co = document.getElementById("guideClickOverlay");
@@ -845,9 +854,9 @@ function guidePositionArrow() {
   if (bubble) {
     bubble.style.position = "absolute";
     bubble.style.left = (btnR + 10) + "px";
-    bubble.style.top = (btnCy - 190) + "px";
-    bubble.style.width = "800px";
-    bubble.style.height = "380px";
+    bubble.style.top = (btnCy - 220) + "px";
+    bubble.style.width = "900px";
+    bubble.style.height = "440px";
     bubble.style.transform = "none";
   }
 }

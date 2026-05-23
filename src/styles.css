@@ -2555,18 +2555,28 @@ button:active {
 .guide-bubble {
   left: 28%;
   top: 16%;
-  width: 800px;
-  height: 380px;
+  width: 900px;
+  height: 440px;
   transform: none;
 }
 
-/* 功能页面内的气泡（居中偏右） */
+/* 功能页面内的气泡（居中） */
 .guide-bubble-feature {
   left: 50%;
   top: 45%;
-  width: 820px;
-  height: 400px;
+  width: 920px;
+  height: 460px;
   transform: translate(-50%, -50%);
+}
+
+/* 箭头模式的小气泡提示 */
+.guide-bubble-hint {
+  left: auto;
+  right: 20%;
+  top: 8%;
+  width: 500px;
+  height: 160px;
+  transform: none;
 }
 
 .guide-bubble-bg {
@@ -2582,12 +2592,12 @@ button:active {
   position: relative;
   z-index: 1;
   font-family: 'ShangShouQingCheng', sans-serif;
-  font-size: 34px;
+  font-size: 38px;
   color: #5c2e14;
-  line-height: 1.3;
+  line-height: 1.35;
   text-align: center;
-  padding: 30px 40px;
-  max-width: 85%;
+  padding: 40px 50px;
+  max-width: 88%;
   pointer-events: none;
   white-space: pre-line;
   text-shadow: 0 1px 1px rgba(255,255,240,0.5);
@@ -2615,6 +2625,13 @@ button:active {
 /* 箭头翻转指向按钮 */
 .guide-arrow-overlay.point-left img {
   transform: scaleX(-1);
+}
+
+/* 功能页气泡三角标（叠加在气泡右下方） */
+.guide-bubble-feature + .guide-triangle#guideTri2 {
+  left: auto;
+  right: 18%;
+  top: 52%;
 }
 
 @keyframes guideArrowBounce {
