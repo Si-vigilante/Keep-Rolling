@@ -989,7 +989,7 @@ function renderHome() {
       <button class="hotspot home-cloud-hotspot" data-modal="notice" aria-label="云朵提示"></button>
       <button class="hotspot home-king-hotspot" data-route="profile" aria-label="螂王"></button>
       ${
-        (state.guidePhase === 4 || localStorage.getItem("beetle-guide-v1-seen"))
+        (state.guideActive && state.guidePhase === 2 && localStorage.getItem("beetle-guide-v1-seen"))
           ? `<button class="guide-review-btn" data-action="guide-review"><img src="${asset("用户选项 .png")}" alt="" /><span>我看完了</span></button>`
           : ""
       }
@@ -1575,7 +1575,6 @@ async function handleAction(action, target) {
   if (action === "finish-home") finishToHome();
   if (action === "toast") showToast(target.dataset.toast || "功能稍后接入");
   if (action === "guide-review") {
-    closeModal();
     // 回到第三阶段分支对话
     clearInterval(guideTimer);
     guideTimer = null;
