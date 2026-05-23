@@ -886,7 +886,6 @@ function guidePositionArrow() {
 // ---------- 检查是否自动弹出 ----------
 
 function checkAutoGuide() {
-  if (state.route !== ROUTES.HOME) return;
   // 硬性规则：仅在用户注册并登录后首次进入时触发
   // 本地调试时无 auth 也可通过 window.__forceGuide 触发
   if (!state.authUser && !window.__forceGuide) return;
@@ -894,6 +893,7 @@ function checkAutoGuide() {
     const seen = localStorage.getItem("beetle-guide-v1-seen");
     if (seen) return;
   } catch (e) { /* ignore */ }
+  // startGuide 会自动导航到主页
   setTimeout(() => { if (!state.authLoading) startGuide(); }, 100);
 }
 
