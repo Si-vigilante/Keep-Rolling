@@ -176,6 +176,185 @@ button {
   animation-name: pageBackIn;
 }
 
+.guide-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+}
+
+.guide-overlay-stage2 {
+  z-index: 75;
+}
+
+.guide-bg-layer,
+.guide-character-layer,
+.guide-dialog-bg,
+.guide-triangle,
+.guide-options-overlay,
+.guide-arrow-overlay,
+.guide-bubble {
+  position: absolute;
+}
+
+.guide-bg-layer {
+  inset: 0;
+}
+
+.guide-bg-layer img,
+.guide-character-layer img,
+.guide-dialog-bg img,
+.guide-triangle img,
+.guide-arrow-overlay img,
+.guide-bubble-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.guide-character-layer {
+  left: 7%;
+  bottom: 10%;
+  width: 22%;
+  height: 44%;
+}
+
+.guide-dialog-bg {
+  left: 15%;
+  right: 15%;
+  bottom: 5.2%;
+  height: 34%;
+}
+
+.guide-dialog-text {
+  position: absolute;
+  left: 24%;
+  right: 24%;
+  bottom: 13.2%;
+  z-index: 3;
+  color: #6f3723;
+  font-size: 34px;
+  line-height: 1.42;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.guide-character-label {
+  position: absolute;
+  left: 18.5%;
+  bottom: 22.5%;
+  z-index: 3;
+  color: #8b4a2d;
+  font-size: 30px;
+}
+
+.guide-triangle {
+  left: 49.2%;
+  bottom: 12.2%;
+  width: 52px;
+  height: 52px;
+  z-index: 4;
+}
+
+.guide-triangle.hidden {
+  opacity: 0;
+}
+
+.guide-options-overlay {
+  inset: 0;
+  display: grid;
+  place-items: end center;
+  padding-bottom: 12%;
+  opacity: 0;
+  transition: opacity .18s ease;
+}
+
+.guide-options-overlay.visible {
+  opacity: 1;
+}
+
+.guide-options-container {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 78%;
+}
+
+.guide-option-btn {
+  min-width: 180px;
+  min-height: 56px;
+  padding: 0 20px;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 245, 216, .95), rgba(210, 127, 56, .9)),
+    url("../Assets/操作按钮.jpg") center / cover no-repeat;
+  box-shadow: 0 10px 20px rgba(95, 50, 20, .2);
+  color: #fff8e7;
+  font-size: 24px;
+}
+
+.guide-click-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+}
+
+.guide-bubble {
+  left: 19%;
+  top: 8%;
+  width: 56%;
+  height: 58%;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.guide-bubble-feature {
+  width: 527px;
+  height: 527px;
+}
+
+.guide-bubble-hint {
+  width: 527px;
+  height: 527px;
+}
+
+.guide-bubble-bg {
+  object-fit: fill;
+}
+
+.guide-bubble-text {
+  position: absolute;
+  inset: 0;
+  padding: 19% 14% 14%;
+  color: #6f3723;
+  font-size: 30px;
+  line-height: 1.26;
+  white-space: pre-wrap;
+}
+
+.guide-arrow-overlay {
+  width: 76px;
+  height: 76px;
+  z-index: 5;
+}
+
+.guide-arrow-overlay.point-left img {
+  transform: scaleX(-1);
+}
+
+.guide-review-btn {
+  position: absolute;
+  right: 4.5%;
+  bottom: 4.8%;
+  min-height: 54px;
+  padding: 0 20px;
+  border-radius: 999px;
+  background: rgba(255, 248, 226, .92);
+  box-shadow: inset 0 0 0 2px rgba(206, 152, 66, .58);
+  font-size: 24px;
+}
+
 .music-control {
   position: absolute;
   left: 32.5%;
