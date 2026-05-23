@@ -156,6 +156,7 @@ const state = {
   guideAfterBranch: false,  // 分支回应打完，推进而非显示选项
   guideMenuHint: false,    // 第二阶段：是否处于"请展开菜单"提示状态
   guideReplayMode: false,  // 第二阶段：是否是通过"我想再看一遍"进入的重看模式
+  guideBranchTyping: false, // 第三阶段：是否正在打字显示分支回应文字
   guideShowBackArrow: false, // 第二阶段功能页：文字展示完后显示返回箭头
   guideFeatureIdx: 0,      // 第二阶段当前导览的功能索引
   guideInFeature: false,   // 第二阶段是否正在功能页面中
@@ -448,6 +449,7 @@ function guideShowText() {
   }
 
   // === 打字机效果（三个阶段通用） ===
+  state.guideBranchTyping = false; // 非分支回应，清除标记
   state.guideTriangle = false;
   guideUpdateUI();
   el.textContent = "";
@@ -544,8 +546,11 @@ function guideAdvance() {
     const el = document.getElementById("guideDialogText");
     if (el) el.textContent = guideFullText;
     guideTypedIndex = guideFullText.length;
-    // 注意：只有分支回应的打字才标记 afterBranch，段落的打字不标记
-    // （分支回应的打字由 guideHandleOption 中的 setInterval 管理）
+    // 如果是分支回应打字中途跳过，也要标记 afterBranch
+    if (state.guideBranchTyping) {
+      state.guideBranchTyping = false;
+      state.guideAfterBranch = true;
+    }
     guideShowTriangle();
     return;
   }
@@ -628,6 +633,7 @@ function guideHandleOption(indexOrKey, isBranch) {
     }
 
     // 打字显示分支回应
+    state.guideBranchTyping = true;
     guideFullText = branch.response;
     guideTypedIndex = 0;
     const el = document.getElementById("guideDialogText");
@@ -642,6 +648,7 @@ function guideHandleOption(indexOrKey, isBranch) {
         clearInterval(guideTimer);
         guideTimer = null;
         // 分支回应打完显示三角标
+        state.guideBranchTyping = false;
         state.guideTriangle = true;
         // 非循环分支（A/B）设置标记，下次点击推进而非重新显示选项
         if (!branch.loop) state.guideAfterBranch = true;
