@@ -2569,13 +2569,13 @@ button:active {
   transform: translate(-50%, -50%);
 }
 
-/* 箭头模式的小气泡提示 */
+/* 箭头模式的气泡提示（和介绍气泡一样大） */
 .guide-bubble-hint {
   left: auto;
-  right: 18%;
+  right: 14%;
   top: 8%;
   width: 527px;
-  height: 240px;
+  height: 527px;
   transform: none;
 }
 
