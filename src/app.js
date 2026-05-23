@@ -770,7 +770,13 @@ function startGuide() {
   state.guideShowBackArrow = false;
   state.guideFeatureIdx = 0;
   state.guideInFeature = false;
-  render();
+  state.menuOpen = true;
+  // 确保回到主页才显示引导
+  if (state.route !== ROUTES.HOME) {
+    navigate(ROUTES.HOME, { mode: "reset", direction: "back", fromGuide: true });
+  } else {
+    render();
+  }
 }
 
 // ---------- 回去重看：重启第二阶段 ----------
@@ -890,7 +896,7 @@ function checkAutoGuide() {
     const seen = localStorage.getItem("beetle-guide-v1-seen");
     if (seen) return;
   } catch (e) { /* ignore */ }
-  setTimeout(() => { if (!state.authLoading) startGuide(); }, 600);
+  setTimeout(() => { if (!state.authLoading) startGuide(); }, 100);
 }
 
 function selectedTodo() {
