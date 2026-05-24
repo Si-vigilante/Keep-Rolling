@@ -208,6 +208,134 @@ let guideTimer;
 let guideTypedIndex = 0;
 let guideFullText = "";
 let guideFadeTimer;
+let homeBallAnimFrame = 0;
+let homeBallState = null;
+
+function cancelHomeBallAnimation() {
+  if (homeBallAnimFrame) {
+    cancelAnimationFrame(homeBallAnimFrame);
+    homeBallAnimFrame = 0;
+  }
+}
+
+function homeAnimationsMarkup() {
+  if (state.route !== ROUTES.HOME) return "";
+
+  return `
+    <div class="homepage-animations-wrapper" aria-hidden="true">
+      <button class="homepage-tumbleweed" data-action="boost-home-ball" aria-label="滚动的小球">
+        <img src="${asset("littleball.png")}" alt="" />
+      </button>
+
+      <div class="homepage-beetle homepage-reader-beetle">
+        <img src="${asset("reading1.gif")}" alt="" class="beetle-state idle" />
+        <img src="${asset("reading2.gif")}" alt="" class="beetle-state hover" />
+      </div>
+
+      <div class="homepage-beetle homepage-cleaner-beetle">
+        <img src="${asset("sweep1.gif")}" alt="" class="beetle-state idle" />
+        <img src="${asset("sweep2.gif")}" alt="" class="beetle-state hover" />
+      </div>
+
+      <div class="homepage-beetle homepage-ice-beetle">
+        <img src="${asset("ice1.gif")}" alt="" class="beetle-state idle" />
+        <img src="${asset("ice2.gif")}" alt="" class="beetle-state hover" />
+      </div>
+    </div>
+  `;
+}
+
+function ensureHomeBallState() {
+  if (homeBallState) return homeBallState;
+  homeBallState = {
+    x: 860,
+    y: 552,
+    vx: 1.4,
+    vy: -1.1,
+    rotation: 0,
+    boosted: false,
+  };
+  return homeBallState;
+}
+
+function boostHomeBall() {
+  const ball = ensureHomeBallState();
+  const angle = Math.random() * Math.PI * 2;
+  const speed = 18 + Math.random() * 8;
+  ball.vx = Math.cos(angle) * speed;
+  ball.vy = Math.sin(angle) * speed;
+  ball.boosted = true;
+}
+
+function animateHomeBall() {
+  cancelHomeBallAnimation();
+  if (state.route !== ROUTES.HOME) return;
+
+  const ballEl = document.querySelector(".homepage-tumbleweed");
+  const stageEl = document.querySelector(".stage");
+  if (!ballEl || !stageEl) return;
+
+  const stageWidth = 1280;
+  const stageHeight = 800;
+  const ballWidth = 112;
+  const ballHeight = 112;
+  const normalSpeed = 1.75;
+  const friction = 0.965;
+  const bounceFactor = -0.86;
+  const drift = 0.22;
+  const ball = ensureHomeBallState();
+
+  const tick = () => {
+    if (state.route !== ROUTES.HOME) {
+      homeBallAnimFrame = 0;
+      return;
+    }
+
+    let speed = Math.hypot(ball.vx, ball.vy);
+
+    if (!ball.boosted) {
+      ball.vx += (Math.random() - 0.5) * drift;
+      ball.vy += (Math.random() - 0.5) * drift;
+      speed = Math.hypot(ball.vx, ball.vy) || 1;
+      ball.vx = (ball.vx / speed) * normalSpeed;
+      ball.vy = (ball.vy / speed) * normalSpeed;
+    } else {
+      ball.vx *= friction;
+      ball.vy *= friction;
+      if (Math.hypot(ball.vx, ball.vy) <= normalSpeed + 0.15) {
+        ball.boosted = false;
+      }
+    }
+
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+    ball.rotation += ball.vx * 1.45;
+
+    const maxX = stageWidth - ballWidth;
+    const maxY = stageHeight - ballHeight;
+
+    if (ball.x < 0) {
+      ball.x = 0;
+      ball.vx *= bounceFactor;
+    } else if (ball.x > maxX) {
+      ball.x = maxX;
+      ball.vx *= bounceFactor;
+    }
+
+    if (ball.y < 0) {
+      ball.y = 0;
+      ball.vy *= bounceFactor;
+    } else if (ball.y > maxY) {
+      ball.y = maxY;
+      ball.vy *= bounceFactor;
+    }
+
+    ballEl.style.transform = `translate(${ball.x}px, ${ball.y}px) rotate(${ball.rotation}deg)`;
+    homeBallAnimFrame = requestAnimationFrame(tick);
+  };
+
+  homeBallAnimFrame = requestAnimationFrame(tick);
+}
 
 const routeMeta = {
   [ROUTES.HOME]: { resetOnEnter: true },
@@ -1205,6 +1333,17 @@ function modalShell(content, className = "", options = {}) {
 function modalMarkup() {
   if (!state.modal) return "";
 
+  if (state.modal === "guide-confirm") {
+    return modalShell(`
+      <div class="cloud-modal guide-confirm-modal" role="dialog" aria-modal="true">
+        <h2>是否要进入<br />新手引导？</h2>
+        <p class="guide-confirm-text">点“是”会重新开始一遍引导。</p>
+        ${button("是", "orange", 'data-action="confirm-guide-replay"')}
+        ${button("否", "paper", 'data-action="close-modal"')}
+      </div>
+    `, "guide-confirm-layer", { dismissible: false });
+  }
+
   if (state.modal === "auth") {
     const isSignup = state.authMode === "signup";
     const accountPlaceholder = "账号或邮箱";
@@ -1345,12 +1484,19 @@ function render(options = {}) {
       <div class="page-transition${transitionClass}" data-route="${state.route}">
         ${pages[state.route]()}
       </div>
+      ${homeAnimationsMarkup()}
       ${guideMarkup()}
       ${renderMusicControl()}
       ${modalMarkup()}
       ${toastMarkup()}
     </main>
   `;
+
+  if (state.route === ROUTES.HOME) {
+    setTimeout(() => animateHomeBall(), 0);
+  } else {
+    cancelHomeBallAnimation();
+  }
 
   if (state.guideActive && state.guidePhase === 2) {
     setTimeout(() => guidePositionArrow(), 0);
@@ -1408,6 +1554,10 @@ async function handleAction(action, target) {
       state.bgmPlaying = false;
       showToast("音乐暂时无法播放，请再点一次试试");
     }
+    return;
+  }
+  if (action === "boost-home-ball") {
+    boostHomeBall();
     return;
   }
   if (action === "toggle-menu") {
@@ -1487,6 +1637,10 @@ async function handleAction(action, target) {
     showToast("已删除完成项");
   }
   if (action === "close-modal") closeModal();
+  if (action === "confirm-guide-replay") {
+    closeModal();
+    startGuide();
+  }
   if (action === "card-tab") {
     state.cardTab = target.dataset.tab;
     render();
@@ -1629,6 +1783,13 @@ app.addEventListener("click", (event) => {
     }
 
     if (state.guidePhase !== 2) return;
+  }
+
+  if (target?.classList.contains("home-king-hotspot")) {
+    if (state.authUser) {
+      setModal("guide-confirm");
+      return;
+    }
   }
 
   const aiPanel = event.target.closest(".ai-input-panel");

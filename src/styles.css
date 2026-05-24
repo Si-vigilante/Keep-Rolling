@@ -230,8 +230,12 @@ button {
   position: absolute;
   left: 12%;
   right: 12%;
-  bottom: 12%;
+  top: 57.2%;
+  bottom: 9.8%;
   z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #5a3116;
   font-size: 28px;
   line-height: 1.58;
@@ -355,13 +359,107 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 12%;
+  padding: 0 12% 2.4%;
   color: #4a2a16;
   font-size: 28px;
   line-height: 1.4;
   white-space: pre-wrap;
   text-align: center;
   z-index: 2;
+}
+
+.homepage-animations-wrapper {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.homepage-beetle,
+.homepage-tumbleweed {
+  position: absolute;
+  pointer-events: auto;
+}
+
+.homepage-beetle {
+  width: 180px;
+  height: 180px;
+}
+
+.homepage-beetle .beetle-state {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: opacity .18s ease;
+  pointer-events: none;
+}
+
+.homepage-beetle .beetle-state.hover {
+  opacity: 0;
+}
+
+.homepage-beetle:hover .beetle-state.idle {
+  opacity: 0;
+}
+
+.homepage-beetle:hover .beetle-state.hover {
+  opacity: 1;
+}
+
+.homepage-reader-beetle {
+  left: 55.3%;
+  top: 65.5%;
+}
+
+.homepage-reader-beetle .beetle-state.idle {
+  transform: scale(.82);
+}
+
+.homepage-reader-beetle .beetle-state.hover {
+  transform: scale(1.02);
+}
+
+.homepage-cleaner-beetle {
+  left: 34.1%;
+  top: 41.6%;
+}
+
+.homepage-cleaner-beetle .beetle-state.idle {
+  transform: scale(.68);
+}
+
+.homepage-cleaner-beetle .beetle-state.hover {
+  transform: translateY(-2px) scale(.66);
+}
+
+.homepage-ice-beetle {
+  left: 51.2%;
+  top: 40.7%;
+}
+
+.homepage-ice-beetle .beetle-state.idle,
+.homepage-ice-beetle .beetle-state.hover {
+  transform: scale(.68);
+}
+
+.homepage-tumbleweed {
+  left: 0;
+  top: 0;
+  width: 112px;
+  height: 112px;
+  z-index: 1;
+  will-change: transform;
+}
+
+.homepage-tumbleweed img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 16px rgba(101, 55, 30, .22));
+  user-select: none;
+  pointer-events: none;
 }
 
 .guide-arrow-overlay {
@@ -2817,6 +2915,28 @@ button:active {
   bottom: -10%;
   width: 19%;
   border-radius: 50%;
+}
+
+.guide-confirm-layer {
+  background: rgba(255, 244, 214, .56);
+}
+
+.guide-confirm-modal {
+  width: 52%;
+  min-height: 50%;
+  gap: 18px;
+}
+
+.guide-confirm-modal .button,
+.guide-confirm-modal button {
+  min-width: 160px;
+}
+
+.guide-confirm-text {
+  margin: 0;
+  color: #8b4a2d;
+  font-size: 28px;
+  text-align: center;
 }
 
 .cancel-modal img {
