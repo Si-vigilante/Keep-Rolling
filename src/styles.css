@@ -807,6 +807,11 @@ button:active {
   max-width: 64px;
   min-width: 34px;
   aspect-ratio: 1;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  display: block;
 }
 
 .tool-btn img {
@@ -814,6 +819,26 @@ button:active {
   height: 100%;
   object-fit: contain;
   filter: drop-shadow(0 6px 14px var(--shadow));
+  background: transparent;
+}
+
+.tool-animation-toggle--home {
+  width: 63px;
+  margin-left: 0;
+  margin-top: 0;
+}
+
+.tool-animation-toggle--home img {
+  transform: none;
+}
+
+.tool-animation-toggle.is-off {
+  opacity: .72;
+  filter: grayscale(.08) brightness(.96);
+}
+
+.tool-animation-toggle.is-on {
+  filter: brightness(1.03);
 }
 
 .home-cloud,

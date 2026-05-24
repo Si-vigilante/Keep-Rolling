@@ -7,6 +7,7 @@ const design = (name) => `./Page_View/${name}?v=${ASSET_VERSION}`;
 const LOCAL_AUTH_STORAGE_KEY = "beetle-kingdom-local-auth";
 const BGM_STORAGE_KEY = "beetle-kingdom-bgm";
 const BGM_VOLUME_STORAGE_KEY = "beetle-kingdom-bgm-volume";
+const HOME_ANIMATIONS_STORAGE_KEY = "beetle-home-animations-enabled";
 const IS_LOCAL_PREVIEW = window.location.protocol === "file:" || ["", "localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
 const LOCAL_PREVIEW_USER = {
   name: "本地测试员",
@@ -42,6 +43,32 @@ function readStoredBgmVolume() {
   } catch {
     return 0.45;
   }
+}
+
+function hasSeenGuide() {
+  try {
+    return localStorage.getItem(GUIDE_SEEN_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function readStoredHomeAnimationsEnabled(isAuthed = Boolean(readLocalPreviewUser())) {
+  if (!isAuthed) return false;
+
+  try {
+    const stored = localStorage.getItem(HOME_ANIMATIONS_STORAGE_KEY);
+    if (stored === "true") return true;
+    if (stored === "false") return false;
+  } catch {}
+
+  return hasSeenGuide();
+}
+
+function persistHomeAnimationsEnabled(enabled) {
+  try {
+    localStorage.setItem(HOME_ANIMATIONS_STORAGE_KEY, String(Boolean(enabled)));
+  } catch {}
 }
 
 const ROUTES = {
@@ -180,6 +207,7 @@ const state = {
   drawPhase: "selecting",
   bgmPlaying: false,
   bgmVolume: readStoredBgmVolume(),
+  homeAnimationsEnabled: readStoredHomeAnimationsEnabled(),
   guideActive: false,
   guidePhase: 0,
   guideStep: 0,
@@ -219,7 +247,7 @@ function cancelHomeBallAnimation() {
 }
 
 function homeAnimationsMarkup() {
-  if (state.route !== ROUTES.HOME) return "";
+  if (state.route !== ROUTES.HOME || !state.homeAnimationsEnabled) return "";
 
   return `
     <div class="homepage-animations-wrapper" aria-hidden="true">
@@ -867,6 +895,8 @@ function completeGuide() {
   try {
     localStorage.setItem(GUIDE_SEEN_STORAGE_KEY, "1");
   } catch {}
+  state.homeAnimationsEnabled = true;
+  persistHomeAnimationsEnabled(true);
 
   if (returnHome) {
     navigate(ROUTES.HOME, { mode: "reset", direction: "back", fromGuide: true });
@@ -999,9 +1029,12 @@ function userPanel() {
 function homeTools() {
   return `
     <div class="floating-tools">
-      <button class="tool-btn tool-gear" data-route="profile" data-profile-tab="settings" aria-label="设置"><img src="${asset("操作按钮1.png")}" alt="" /></button>
-      <button class="tool-btn tool-mail" data-modal="message" aria-label="消息"><img src="${asset("操作按钮2.png")}" alt="" /></button>
-      <button class="tool-btn tool-bell" data-modal="notice" aria-label="提醒"><img src="${asset("操作按钮3.png")}" alt="" /></button>
+      <button class="tool-btn tool-gear" data-route="profile" data-profile-tab="settings" aria-label="settings"><img src="${asset("操作按钮1.png")}" alt="" /></button>
+      <button class="tool-btn tool-mail" data-modal="message" aria-label="messages"><img src="${asset("操作按钮2.png")}" alt="" /></button>
+      <button class="tool-btn tool-bell" data-modal="notice" aria-label="notifications"><img src="${asset("操作按钮3.png")}" alt="" /></button>
+      <button class="tool-btn tool-animation-toggle tool-animation-toggle--home ${state.homeAnimationsEnabled ? "is-on" : "is-off"}" data-action="toggle-home-animations" aria-label="homepage animations" aria-pressed="${state.homeAnimationsEnabled}">
+        <img src="${asset("button_ani.png")}" alt="" />
+      </button>
     </div>
   `;
 }
@@ -1033,6 +1066,7 @@ function renderHome() {
   return `
     <section class="page home-page">
       ${designFrame(state.menuOpen ? "主页2-王紫涵.png" : "主页1-王紫涵.png", "home-design")}
+      ${homeTools()}
       ${userPanel()}
       ${authStatus()}
       <button class="hotspot home-profile-hotspot" data-route="profile" aria-label="个人中心"></button>
@@ -1709,6 +1743,8 @@ async function handleAction(action, target) {
         await logoutCurrentUser();
       }
       state.authUser = null;
+      state.homeAnimationsEnabled = false;
+      persistHomeAnimationsEnabled(false);
       state.pendingRoute = null;
       closeModal();
       showToast("已退出登录");
@@ -1720,6 +1756,27 @@ async function handleAction(action, target) {
     } finally {
       state.authSubmitting = false;
     }
+  }
+  if (action === "toggle-home-animations") {
+    if (!state.authUser) {
+      state.homeAnimationsEnabled = false;
+      persistHomeAnimationsEnabled(false);
+      showToast("请先登录后再开启主页交互");
+      render();
+      return;
+    }
+
+    if (!hasSeenGuide() && !state.homeAnimationsEnabled) {
+      showToast("请先完成一次新手引导后再开启主页交互");
+      render();
+      return;
+    }
+
+    state.homeAnimationsEnabled = !state.homeAnimationsEnabled;
+    persistHomeAnimationsEnabled(state.homeAnimationsEnabled);
+    showToast(state.homeAnimationsEnabled ? "主页交互已开启" : "主页交互已关闭");
+    render();
+    return;
   }
   if (action === "finish-to-cards") {
     state.cardTab = "cards";
@@ -1857,6 +1914,7 @@ app.addEventListener("submit", async (event) => {
   try {
     const user = await authenticateForm(email, password, name);
     state.authUser = user;
+    state.homeAnimationsEnabled = readStoredHomeAnimationsEnabled(true);
     state.modal = null;
     showToast(user.emailVerified === false ? "注册成功，请前往邮箱确认账号。" : "登录成功");
     if (state.pendingRoute) {
@@ -1962,12 +2020,14 @@ render();
 
 if (isLocalPreviewAuthReady()) {
   state.authLoading = false;
+  state.homeAnimationsEnabled = readStoredHomeAnimationsEnabled(Boolean(state.authUser));
   render();
   checkAutoGuide();
 } else {
   initializeAuth({
     onChange(user) {
       state.authUser = user || null;
+      state.homeAnimationsEnabled = user ? readStoredHomeAnimationsEnabled(true) : false;
       state.authLoading = false;
       render();
       checkAutoGuide();
