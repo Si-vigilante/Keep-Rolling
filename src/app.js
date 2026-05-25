@@ -307,6 +307,9 @@ const state = {
   completionPulse: 0,
   todos: structuredClone(todoSeed),
   todoSortMode: "default",
+  todoMode: "view",
+  todoDraft: "",
+  todoRemoveSelection: [],
   aiPhase: "input",
   aiInput: "",
   aiAttachment: null,
@@ -553,7 +556,12 @@ function syncRouteState(route, options = {}) {
     state.selectedTodoId = state.todos[0]?.id ?? null;
   }
 
-  if (route === ROUTES.TODO) normalizeTodoSelection();
+  if (route === ROUTES.TODO) {
+    normalizeTodoSelection();
+    state.todoMode = "view";
+    state.todoDraft = "";
+    state.todoRemoveSelection = [];
+  }
 
   if (route === ROUTES.EXECUTE && state.executeStatus === "idle") {
     state.executeStatus = "running";
@@ -1103,6 +1111,30 @@ function sortedTodosForView() {
   return sorted.map((item) => item.todo);
 }
 
+function todoDisplayName(todo) {
+  return String(todo.name || "").replace(/^任务名：/, "");
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function toggleTodoSelection(todoId) {
+  const id = Number(todoId);
+  if (!Number.isFinite(id)) return;
+  if (state.todoRemoveSelection.includes(id)) {
+    state.todoRemoveSelection = state.todoRemoveSelection.filter((value) => value !== id);
+  } else {
+    state.todoRemoveSelection = [...state.todoRemoveSelection, id];
+  }
+  render();
+}
+
 function nextTodoSortMode() {
   const modes = ["default", "active-first", "done-first"];
   const currentIndex = modes.indexOf(state.todoSortMode);
@@ -1417,44 +1449,74 @@ function renderExecute() {
 }
 
 function renderTodo() {
-  const currentTodo = selectedTodo();
-  const currentTask = currentTodo ? taskFromTodo(currentTodo) : state.selectedTask;
   const visibleTodos = sortedTodosForView();
+  const hasTodos = visibleTodos.length > 0;
+  const addMode = state.todoMode === "add";
+  const removeMode = state.todoMode === "remove";
   return `
     <section class="page todo-page">
       ${designFrame("待办事项2-王紫涵.png", "todo-design")}
       <button class="hotspot todo-back-hotspot" data-action="back" aria-label="返回"></button>
       <button class="hotspot todo-draw-hotspot" data-action="open-draw-choice" aria-label="抽卡"></button>
-      <button class="hotspot todo-add-hotspot" data-modal="todo-new" aria-label="新增任务"></button>
-      <button class="hotspot todo-remove-hotspot" data-action="ask-remove-done" aria-label="删除已完成"></button>
-      <button class="hotspot todo-detail-hotspot" data-modal="todo-detail" aria-label="任务详情"></button>
+      <button class="hotspot todo-add-hotspot" data-action="todo-enter-add" aria-label="新增任务"></button>
+      <button class="hotspot todo-remove-hotspot" data-action="todo-enter-remove" aria-label="删除待办"></button>
+      <button class="hotspot todo-detail-hotspot" data-action="todo-enter-view" aria-label="任务详情"></button>
       <button class="hotspot todo-execute-hotspot" data-action="execute-selected" aria-label="开始执行"></button>
       <button class="hotspot todo-side-hotspot side-one" data-action="toast" data-toast="已切换卡片视图" aria-label="卡片视图"></button>
       <button class="hotspot todo-side-hotspot side-two" data-action="toggle-todo-sort" aria-label="排序"></button>
       <button class="hotspot todo-side-hotspot side-three" data-action="toast" data-toast="插图功能稍后接入" aria-label="图片"></button>
-      <button class="hotspot todo-side-hotspot side-four" data-modal="todo-new" aria-label="编辑"></button>
-      <div class="todo-clean-list-panel" aria-hidden="true"></div>
-      <div class="todo-clean-detail-panel" aria-hidden="true"></div>
-      <div class="todo-live-list">
-        ${visibleTodos
-          .map(
-            (todo) => `
-              <label class="todo-live-row ${state.selectedTodoId === todo.id ? "selected" : ""} ${todo.done ? "is-done" : ""}">
-                <input type="checkbox" data-todo="${todo.id}" ${todo.done ? "checked" : ""} />
-                <button class="todo-live-label" data-action="select-todo" data-todo-id="${todo.id}">${todo.name.replace(/^任务名：/, "")}</button>
-              </label>
-            `,
-          )
-          .join("")}
+      <button class="hotspot todo-side-hotspot side-four" data-action="todo-enter-add" aria-label="编辑"></button>
+      <div class="todo-shell ${addMode ? "is-add" : removeMode ? "is-remove" : "is-view"}">
+        <div class="todo-shell-left">
+          <div class="todo-title">我的待办事项</div>
+          <div class="todo-list">
+                ${hasTodos
+              ? visibleTodos
+                  .map(
+                    (todo) => `
+                      <div class="todo-row ${state.selectedTodoId === todo.id ? "selected" : ""} ${todo.done ? "is-done" : ""} ${state.todoRemoveSelection.includes(todo.id) ? "is-marked" : ""}">
+                        <input
+                          type="checkbox"
+                          class="${removeMode ? "todo-remove-check" : "todo-done-check"}"
+                          data-todo="${todo.id}"
+                          ${removeMode ? (state.todoRemoveSelection.includes(todo.id) ? "checked" : "") : todo.done ? "checked" : ""}
+                        />
+                        <button class="todo-row-name" data-action="select-todo" data-todo-id="${todo.id}">${escapeHtml(todoDisplayName(todo))}</button>
+                      </div>
+                    `,
+                  )
+                  .join("")
+              : `<div class="todo-empty">还没有待办，先用右侧加号添加一个吧。</div>`}
+          </div>
+        </div>
+        <div class="todo-shell-right">
+          ${addMode
+            ? `
+              <div class="todo-acorn-panel">
+                <div class="todo-acorn-plus">+</div>
+                <textarea class="todo-draft-input" maxlength="120" placeholder="填写要新增的待办说明">${escapeHtml(state.todoDraft)}</textarea>
+                <button class="todo-panel-action" data-action="todo-add-submit">+</button>
+              </div>
+            `
+            : removeMode
+              ? `
+                <div class="todo-sweeper-panel">
+                  <img src="${asset("透明保洁螂.png")}" alt="透明保洁螂" />
+                  <button class="todo-panel-action" data-action="todo-remove-submit">-</button>
+                </div>
+              `
+              : `
+                <div class="todo-view-panel">
+                  <img src="${asset("透明螂王.png")}" alt="螂王" class="todo-king-image" />
+                  <div class="todo-view-hint">点击 + 进入新增，点击 - 进入删除</div>
+                </div>
+              `}
+        </div>
       </div>
-      <button class="todo-detail-copy" data-modal="todo-detail" aria-label="查看任务详情">
-        <strong>${currentTask.name.replace(/^任务名：/, "")}</strong>
-        ${currentTask.detail.slice(0, 4).map((line) => `<span>${line}</span>`).join("")}
-      </button>
       <button class="todo-cheer-hotspot" data-action="toast" data-toast="加油，准备好了就开始吧" aria-label="加油"></button>
       <button class="todo-king-hotspot" data-route="profile" aria-label="螂王"></button>
-      <button class="todo-acorn-plus-hotspot" data-modal="todo-new" aria-label="橡果加号"></button>
-      <button class="todo-acorn-minus-hotspot" data-action="ask-remove-done" aria-label="橡果减号"></button>
+      <button class="todo-acorn-plus-hotspot" data-action="todo-enter-add" aria-label="橡果加号"></button>
+      <button class="todo-acorn-minus-hotspot" data-action="todo-enter-remove" aria-label="橡果减号"></button>
     </section>
   `;
 }
@@ -1980,6 +2042,53 @@ async function handleAction(action, target) {
     closeModal();
     showToast("已删除完成项");
   }
+  if (action === "todo-enter-add") {
+    state.todoMode = "add";
+    state.todoDraft = "";
+    state.todoRemoveSelection = [];
+    render();
+  }
+  if (action === "todo-enter-remove") {
+    state.todoMode = "remove";
+    state.todoDraft = "";
+    state.todoRemoveSelection = [];
+    render();
+  }
+  if (action === "todo-enter-view") {
+    state.todoMode = "view";
+    state.todoDraft = "";
+    state.todoRemoveSelection = [];
+    render();
+  }
+  if (action === "todo-add-submit") {
+    const value = state.todoDraft.trim();
+    if (!value) {
+      showToast("请先填写待办内容");
+      return;
+    }
+    const todo = makeTodo(value);
+    state.todos = [...state.todos, todo];
+    state.selectedTodoId = todo.id;
+    state.selectedTask = taskFromTodo(todo);
+    state.todoMode = "view";
+    state.todoDraft = "";
+    state.todoRemoveSelection = [];
+    showToast("已添加待办");
+    render();
+  }
+  if (action === "todo-remove-submit") {
+    if (!state.todoRemoveSelection.length) {
+      showToast("先勾选要删除的待办");
+      return;
+    }
+    state.todos = state.todos.filter((todo) => !state.todoRemoveSelection.includes(todo.id));
+    normalizeTodoSelection();
+    state.todoMode = "view";
+    state.todoDraft = "";
+    state.todoRemoveSelection = [];
+    showToast("已删除待办");
+    render();
+  }
   if (action === "close-modal") closeModal();
   if (action === "confirm-guide-replay") {
     closeModal();
@@ -2282,6 +2391,12 @@ async function authenticateForm(email, password, name) {
 }
 
 app.addEventListener("change", (event) => {
+  const removeCheckbox = event.target.closest(".todo-remove-check");
+  if (removeCheckbox) {
+    toggleTodoSelection(removeCheckbox.dataset.todo);
+    return;
+  }
+
   const checkbox = event.target.closest("[data-todo]");
   if (!checkbox) {
     if (event.target.classList.contains("ai-task-input")) {
@@ -2307,6 +2422,10 @@ app.addEventListener("input", (event) => {
 
   if (event.target.classList.contains("ai-task-input")) {
     state.aiInput = event.target.value;
+  }
+
+  if (event.target.classList.contains("todo-draft-input")) {
+    state.todoDraft = event.target.value;
   }
 });
 
