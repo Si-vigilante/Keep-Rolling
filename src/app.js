@@ -335,6 +335,10 @@ function guideCurrentStep() {
   return steps?.[state.guideStep] ?? null;
 }
 
+function isGuideFeatureActive(featureId) {
+  return state.guideActive && state.guidePhase === 2 && phase2Features[state.guideFeatureIdx]?.id === featureId;
+}
+
 const state = {
   route: ROUTES.HOME,
   previousRoute: ROUTES.HOME,
@@ -2175,7 +2179,18 @@ async function handleAction(action, target) {
     startDrawMode(DRAW_MODES.TASK);
   }
   if (action === "start-action-draw") {
+    const fromGuideDrawFeature = isGuideFeatureActive("draw");
+    if (fromGuideDrawFeature) {
+      state.guideInFeature = true;
+      state.guideMenuHint = false;
+      state.guideShowBackArrow = true;
+      state.guideDisplayedText = "";
+      state.guideTriangle = false;
+    }
     startDrawMode(DRAW_MODES.ACTION);
+    if (fromGuideDrawFeature) {
+      setTimeout(() => guideShowText(), 20);
+    }
   }
   if (action === "shuffle-draw") {
     shuffleDrawCards();
