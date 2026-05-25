@@ -73,7 +73,7 @@ function persistHomeAnimationsEnabled(enabled) {
 }
 
 function readJourneyProgress() {
-  const fallback = { completedTasks: [], unlockedCardIds: [] };
+  const fallback = { completedTasks: [], unlockedCardIds: [9] };
 
   try {
     const raw = localStorage.getItem(JOURNEY_PROGRESS_STORAGE_KEY);
@@ -97,8 +97,8 @@ function readJourneyProgress() {
           })
       : [];
     const unlockedCardIds = Array.isArray(parsed.unlockedCardIds)
-      ? [...new Set(parsed.unlockedCardIds.map((value) => Number(value)).filter((value) => Number.isFinite(value)))]
-      : [];
+      ? [...new Set([9, ...parsed.unlockedCardIds.map((value) => Number(value)).filter((value) => Number.isFinite(value))])]
+      : [9];
 
     return { completedTasks, unlockedCardIds };
   } catch {
