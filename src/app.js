@@ -1595,21 +1595,27 @@ function renderExecute() {
   return `
     <section class="page execute-page">
       ${designFrame(isPaused ? "任务执行透明图2.png" : "任务执行透明图.png", "execute-design")}
-      <div class="status-pill">正在执行：${escapeHtml(state.selectedTask?.name || "任务A")}</div>
-      <div class="timer-row" aria-label="执行计时">
-        <div class="timer-card">${h1}</div>
-        <div class="timer-card">${h2}</div>
-        <div class="colon">:</div>
-        <div class="timer-card">${m1}</div>
-        <div class="timer-card">${m2}</div>
-        <div class="colon">:</div>
-        <div class="timer-card">${s1}</div>
-        <div class="timer-card">${s2}</div>
-      </div>
+      ${isPaused ? "" : `
+        <div class="status-pill">正在执行：${escapeHtml(state.selectedTask?.name || "任务A")}</div>
+        <div class="timer-row" aria-label="执行计时">
+          <div class="timer-card">${h1}</div>
+          <div class="timer-card">${h2}</div>
+          <div class="colon">:</div>
+          <div class="timer-card">${m1}</div>
+          <div class="timer-card">${m2}</div>
+          <div class="colon">:</div>
+          <div class="timer-card">${s1}</div>
+          <div class="timer-card">${s2}</div>
+        </div>
+      `}
       <button class="hotspot execute-back-hotspot" data-action="ask-abandon" aria-label="返回"></button>
-      <button class="hotspot execute-complete-hotspot" data-action="complete-task" aria-label="完成任务"></button>
-      <button class="hotspot execute-toggle-hotspot" data-action="toggle-execute" aria-label="${state.executeStatus === "paused" ? "继续执行" : "暂停任务"}"></button>
-      <button class="hotspot execute-cancel-hotspot" data-action="ask-abandon" aria-label="取消任务"></button>
+      ${isPaused
+        ? `<button class="hotspot execute-resume-hotspot" data-action="toggle-execute" aria-label="继续执行"></button>`
+        : `
+          <button class="hotspot execute-complete-hotspot" data-action="complete-task" aria-label="完成任务"></button>
+          <button class="hotspot execute-toggle-hotspot" data-action="toggle-execute" aria-label="暂停任务"></button>
+          <button class="hotspot execute-cancel-hotspot" data-action="ask-abandon" aria-label="取消任务"></button>
+        `}
     </section>
   `;
 }
