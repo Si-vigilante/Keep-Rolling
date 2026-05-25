@@ -1558,20 +1558,11 @@ function renderTodo() {
   const hasTodos = visibleTodos.length > 0;
   const addMode = state.todoMode === "add";
   const removeMode = state.todoMode === "remove";
-  const todoFrame = addMode ? "待办事项2-王紫涵.png" : removeMode ? "待办事项3-王紫涵.png" : "待办事项1-王紫涵.png";
+  const todoFrame = addMode ? "待办事项背景图2.png" : removeMode ? "待办事项背景图3.png" : "待办事项背景图1.png";
   return `
     <section class="page todo-page">
       ${designFrame(todoFrame, "todo-design")}
       <button class="hotspot todo-back-hotspot" data-action="back" aria-label="返回"></button>
-      <button class="hotspot todo-draw-hotspot" data-action="open-draw-choice" aria-label="抽卡"></button>
-      <button class="hotspot todo-add-hotspot" data-action="todo-enter-add" aria-label="新增任务"></button>
-      <button class="hotspot todo-remove-hotspot" data-action="todo-enter-remove" aria-label="删除待办"></button>
-      <button class="hotspot todo-detail-hotspot" data-action="todo-enter-view" aria-label="任务详情"></button>
-      <button class="hotspot todo-execute-hotspot" data-action="execute-selected" aria-label="开始执行"></button>
-      <button class="hotspot todo-side-hotspot side-one" data-action="toast" data-toast="已切换卡片视图" aria-label="卡片视图"></button>
-      <button class="hotspot todo-side-hotspot side-two" data-action="toggle-todo-sort" aria-label="排序"></button>
-      <button class="hotspot todo-side-hotspot side-three" data-action="toast" data-toast="插图功能稍后接入" aria-label="图片"></button>
-      <button class="hotspot todo-side-hotspot side-four" data-action="todo-enter-add" aria-label="编辑"></button>
       <div class="todo-shell ${addMode ? "is-add" : removeMode ? "is-remove" : "is-view"}">
         <div class="todo-shell-left">
           <div class="todo-list">
@@ -1579,7 +1570,7 @@ function renderTodo() {
               ? visibleTodos
                   .map(
                     (todo) => `
-                      <div class="todo-row ${state.selectedTodoId === todo.id ? "selected" : ""} ${todo.done ? "is-done" : ""} ${state.todoRemoveSelection.includes(todo.id) ? "is-marked" : ""}">
+                      <label class="todo-row ${state.selectedTodoId === todo.id ? "selected" : ""} ${todo.done ? "is-done" : ""} ${state.todoRemoveSelection.includes(todo.id) ? "is-marked" : ""}">
                         <input
                           type="checkbox"
                           class="${removeMode ? "todo-remove-check" : "todo-done-check"}"
@@ -1587,7 +1578,7 @@ function renderTodo() {
                           ${removeMode ? (state.todoRemoveSelection.includes(todo.id) ? "checked" : "") : todo.done ? "checked" : ""}
                         />
                         <button class="todo-row-name" data-action="select-todo" data-todo-id="${todo.id}">${escapeHtml(todoDisplayName(todo))}</button>
-                      </div>
+                      </label>
                     `,
                   )
                   .join("")
@@ -1598,7 +1589,6 @@ function renderTodo() {
           ${addMode
             ? `
               <div class="todo-acorn-panel">
-                <div class="todo-acorn-plus">+</div>
                 <textarea class="todo-draft-input" maxlength="120" placeholder="填写要新增的待办说明">${escapeHtml(state.todoDraft)}</textarea>
                 <button class="todo-panel-action" data-action="todo-add-submit">+</button>
               </div>
@@ -1618,8 +1608,6 @@ function renderTodo() {
               `}
         </div>
       </div>
-      <button class="todo-cheer-hotspot" data-action="toast" data-toast="加油，准备好了就开始吧" aria-label="加油"></button>
-      <button class="todo-king-hotspot" data-route="profile" aria-label="螂王"></button>
     </section>
   `;
 }
