@@ -1453,9 +1453,10 @@ function renderTodo() {
   const hasTodos = visibleTodos.length > 0;
   const addMode = state.todoMode === "add";
   const removeMode = state.todoMode === "remove";
+  const todoFrame = addMode ? "待办事项2-王紫涵.png" : removeMode ? "待办事项3-王紫涵.png" : "待办事项1-王紫涵.png";
   return `
     <section class="page todo-page">
-      ${designFrame("待办事项2-王紫涵.png", "todo-design")}
+      ${designFrame(todoFrame, "todo-design")}
       <button class="hotspot todo-back-hotspot" data-action="back" aria-label="返回"></button>
       <button class="hotspot todo-draw-hotspot" data-action="open-draw-choice" aria-label="抽卡"></button>
       <button class="hotspot todo-add-hotspot" data-action="todo-enter-add" aria-label="新增任务"></button>
@@ -1468,7 +1469,6 @@ function renderTodo() {
       <button class="hotspot todo-side-hotspot side-four" data-action="todo-enter-add" aria-label="编辑"></button>
       <div class="todo-shell ${addMode ? "is-add" : removeMode ? "is-remove" : "is-view"}">
         <div class="todo-shell-left">
-          <div class="todo-title">我的待办事项</div>
           <div class="todo-list">
                 ${hasTodos
               ? visibleTodos
@@ -1506,17 +1506,15 @@ function renderTodo() {
                 </div>
               `
               : `
-                <div class="todo-view-panel">
-                  <img src="${asset("透明螂王.png")}" alt="螂王" class="todo-king-image" />
-                  <div class="todo-view-hint">点击 + 进入新增，点击 - 进入删除</div>
+                <div class="todo-mode-buttons">
+                  <button class="todo-mode-button is-add" data-action="todo-enter-add" aria-label="新增待办">+</button>
+                  <button class="todo-mode-button is-remove" data-action="todo-enter-remove" aria-label="删除待办">-</button>
                 </div>
               `}
         </div>
       </div>
       <button class="todo-cheer-hotspot" data-action="toast" data-toast="加油，准备好了就开始吧" aria-label="加油"></button>
       <button class="todo-king-hotspot" data-route="profile" aria-label="螂王"></button>
-      <button class="todo-acorn-plus-hotspot" data-action="todo-enter-add" aria-label="橡果加号"></button>
-      <button class="todo-acorn-minus-hotspot" data-action="todo-enter-remove" aria-label="橡果减号"></button>
     </section>
   `;
 }
