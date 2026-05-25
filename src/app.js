@@ -1032,9 +1032,26 @@ function homeTools() {
       <button class="tool-btn tool-gear" data-route="profile" data-profile-tab="settings" aria-label="settings"><img src="${asset("操作按钮1.png")}" alt="" /></button>
       <button class="tool-btn tool-mail" data-modal="message" aria-label="messages"><img src="${asset("操作按钮2.png")}" alt="" /></button>
       <button class="tool-btn tool-bell" data-modal="notice" aria-label="notifications"><img src="${asset("操作按钮3.png")}" alt="" /></button>
-      <button class="tool-btn tool-animation-toggle tool-animation-toggle--home ${state.homeAnimationsEnabled ? "is-on" : "is-off"}" data-action="toggle-home-animations" aria-label="homepage animations" aria-pressed="${state.homeAnimationsEnabled}">
-        <img src="${asset("button_ani.png")}" alt="" />
-      </button>
+    </div>
+  `;
+}
+
+function homeAnimationToggle() {
+  if (state.route !== ROUTES.HOME) return "";
+
+  return `
+    <button class="home-animation-toggle ${state.homeAnimationsEnabled ? "is-on" : "is-off"}" data-action="toggle-home-animations" aria-label="homepage animations" aria-pressed="${state.homeAnimationsEnabled}">
+      <img src="${asset("button_ani.png")}" alt="" />
+    </button>
+  `;
+}
+
+function renderHomeBottomControls() {
+  if (state.route !== ROUTES.HOME) return "";
+  return `
+    <div class="home-bottom-controls">
+      ${renderMusicControl()}
+      ${homeAnimationToggle()}
     </div>
   `;
 }
@@ -1520,7 +1537,7 @@ function render(options = {}) {
       </div>
       ${homeAnimationsMarkup()}
       ${guideMarkup()}
-      ${renderMusicControl()}
+      ${state.route === ROUTES.HOME ? renderHomeBottomControls() : renderMusicControl()}
       ${modalMarkup()}
       ${toastMarkup()}
     </main>

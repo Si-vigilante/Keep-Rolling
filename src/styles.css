@@ -793,43 +793,42 @@ button:active {
   font-weight: 400;
 }
 
-.floating-tools {
+.floating-action-bar {
   position: absolute;
-  right: 18px;
-  top: 280px;
-  display: grid;
-  gap: 34px;
+  right: 24px;
+  top: 40%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
   z-index: 7;
 }
 
-.tool-btn {
-  width: 63px;
-  max-width: 64px;
-  min-width: 34px;
-  aspect-ratio: 1;
+.floating-action-button {
+  width: 64px;
+  height: 64px;
   padding: 0;
   background: transparent;
   border: 0;
   border-radius: 0;
   display: block;
+  flex: 0 0 64px;
 }
 
-.tool-btn img {
+.floating-action-button img {
   width: 100%;
   height: 100%;
+  max-width: 64px;
+  max-height: 64px;
   object-fit: contain;
-  filter: drop-shadow(0 6px 14px var(--shadow));
+  display: block;
   background: transparent;
+  filter: drop-shadow(0 6px 14px var(--shadow));
 }
 
-.tool-animation-toggle--home {
-  width: 63px;
-  margin-left: 0;
-  margin-top: 0;
-}
-
-.tool-animation-toggle--home img {
-  transform: none;
+.floating-action-button:hover {
+  transform: scale(1.06);
 }
 
 .tool-animation-toggle.is-off {
@@ -839,6 +838,58 @@ button:active {
 
 .tool-animation-toggle.is-on {
   filter: brightness(1.03);
+}
+
+.home-animation-toggle {
+  position: relative;
+  z-index: 31;
+  width: 83px;
+  height: 83px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  display: block;
+  flex: 0 0 83px;
+}
+
+.home-animation-toggle img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: transparent;
+  filter: drop-shadow(0 8px 18px var(--shadow));
+}
+
+.home-animation-toggle:hover {
+  transform: scale(1.06);
+}
+
+.home-animation-toggle.is-off {
+  opacity: .72;
+  filter: grayscale(.08) brightness(.96);
+}
+
+.home-animation-toggle.is-on {
+  filter: brightness(1.03);
+}
+
+.home-bottom-controls {
+  position: absolute;
+  left: 32.5%;
+  bottom: 3.6%;
+  z-index: 31;
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+}
+
+.home-bottom-controls .music-control {
+  position: relative;
+  left: auto;
+  bottom: auto;
+  margin: 0;
 }
 
 .home-cloud,
