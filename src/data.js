@@ -174,9 +174,9 @@ export const achievements = [
 ];
 
 export const profileRows = [
-  ["昵称", "金角大螂"],
-  ["IP属地", "广东"],
-  ["生日", "2006-01-01"],
-  ["头像", "点击更换"],
-  ["用户ID", "V123456"],
+  ["昵称", "金角大螂", "nickname"],
+  ["IP属地", "广东", "ipLocation"],
+  ["生日", "2006-01-01", "birthday"],
+  ["头像", "点击更换", "avatar"],
+  ["用户ID", "V123456", "userId"],
 ];

@@ -2661,6 +2661,43 @@ button:active {
   box-shadow: inset 0 0 38px rgba(203, 105, 25, .6);
 }
 
+.editable-row {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  align-items: center;
+  gap: 16px;
+}
+
+.profile-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 14px;
+  background: rgba(255, 248, 230, .9);
+  box-shadow: inset 0 0 0 2px rgba(181, 126, 54, .18);
+  color: var(--deep-ink);
+  font-size: 22px;
+  font-family: "ShangShouHeFeng", "ShangShouQingCheng", serif;
+}
+
+.profile-input:focus {
+  outline: 2px solid rgba(196, 123, 37, .55);
+  outline-offset: 1px;
+}
+
+.profile-save-btn {
+  width: 100%;
+  min-height: 52px;
+  margin-top: 18px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(248, 196, 97, .96), rgba(220, 138, 39, .92));
+  box-shadow: 0 10px 18px rgba(118, 66, 20, .16), inset 0 0 0 2px rgba(255, 245, 214, .34);
+  color: #7a3415;
+  font-size: 28px;
+  font-family: "ShangShouQingCheng", "ShangShouHeFeng", serif;
+}
+
 .profile-head {
   display: flex;
   align-items: center;

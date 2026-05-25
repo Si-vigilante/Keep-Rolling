@@ -9,6 +9,7 @@ const BGM_STORAGE_KEY = "beetle-kingdom-bgm";
 const BGM_VOLUME_STORAGE_KEY = "beetle-kingdom-bgm-volume";
 const HOME_ANIMATIONS_STORAGE_KEY = "beetle-home-animations-enabled";
 const JOURNEY_PROGRESS_STORAGE_KEY = "beetle-journey-progress-v1";
+const PROFILE_STORAGE_KEY = "beetle-profile-v1";
 const IS_LOCAL_PREVIEW = window.location.protocol === "file:" || ["", "localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
 const LOCAL_PREVIEW_USER = {
   name: "本地测试员",
@@ -356,6 +357,7 @@ const state = {
   selectedTask: tasks[0],
   selectedTodoId: todoSeed[0].id,
   selectedCard: cards[0],
+  profile: readProfileState(),
   completedTasks: [],
   unlockedCardIds: [],
   recentUnlockedCardId: null,
@@ -1410,7 +1412,7 @@ function markTaskComplete() {
 }
 
 function userPanel() {
-  const name = state.authUser ? authName(state.authUser) : "游客螂";
+  const name = displayUserName();
   const date = new Date();
   return `
     <button class="home-user-panel ${state.authUser ? "is-authed" : "is-guest"}" data-modal="${state.authUser ? "account" : "auth"}" aria-label="${state.authUser ? `账号：${name}` : "注册或登录"}">
@@ -1455,7 +1457,7 @@ function renderHomeBottomControls() {
 }
 
 function profileCard() {
-  const name = authName(state.authUser);
+  const name = displayUserName();
   const email = authEmail(state.authUser);
   return `
     <button class="profile-card" data-route="profile">
@@ -1618,6 +1620,45 @@ function renderExecute() {
         `}
     </section>
   `;
+}
+
+function defaultProfileState() {
+  return {
+    nickname: "金角大螂",
+    ipLocation: "广东",
+    birthday: "2006-01-01",
+    avatar: "点击更换",
+    userId: "V123456",
+  };
+}
+
+function readProfileState() {
+  const fallback = defaultProfileState();
+  try {
+    const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw);
+    return {
+      ...fallback,
+      ...Object.fromEntries(Object.entries(parsed || {}).filter(([, value]) => typeof value === "string")),
+    };
+  } catch {
+    return fallback;
+  }
+}
+
+function persistProfileState() {
+  try {
+    localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(state.profile));
+  } catch {}
+}
+
+function displayProfileValue(key) {
+  return state.profile[key] || defaultProfileState()[key] || "";
+}
+
+function displayUserName() {
+  return displayProfileValue("nickname") || (state.authUser ? authName(state.authUser) : "游客螂");
 }
 
 function renderTodo() {
@@ -1793,6 +1834,7 @@ function renderProfile() {
     ["mail", "操作按钮2.png"],
     ["notice", "操作按钮3.png"],
   ];
+  const profileName = displayUserName();
   return `
     <section class="page profile-page">
       ${backButton()}
@@ -1805,9 +1847,20 @@ function renderProfile() {
         <div class="profile-panel">
           <div class="profile-head">
             <img src="${beetles.king}" alt="金角大螂" />
-            <div class="name-strip"><b>${state.authUser ? authName(state.authUser) : "游客螂"}</b><span>Lv.3</span></div>
+            <div class="name-strip"><b>${profileName}</b><span>Lv.3</span></div>
           </div>
-          ${profileRows.map((row) => `<button class="setting-row" data-action="toast" data-toast="${row[0]}编辑稍后接入"><span>${row[0]}</span><b>${row[1]}</b><em>›</em></button>`).join("")}
+          ${profileRows.map(([label, fallback, key]) => `
+            <label class="setting-row editable-row">
+              <span>${label}</span>
+              <input
+                class="profile-input"
+                data-profile-field="${key}"
+                value="${escapeHtml(displayProfileValue(key) || fallback)}"
+                ${key === "userId" ? "maxlength=\"20\"" : key === "birthday" ? "type=\"date\"" : "type=\"text\""}
+              />
+            </label>
+          `).join("")}
+          <button class="profile-save-btn" data-action="save-profile">保存修改</button>
           <label class="export-row">一键导出任务记录 <input type="checkbox" /></label>
         </div>
         <div class="profile-panel">
@@ -2290,6 +2343,19 @@ async function handleAction(action, target) {
   if (action === "profile-tab") {
     state.profileTab = target.dataset.tab;
     showToast(target.dataset.tab === "mail" ? "消息设置已打开" : target.dataset.tab === "notice" ? "提醒设置已打开" : "设置已打开");
+    render();
+  }
+  if (action === "save-profile") {
+    const inputs = document.querySelectorAll("[data-profile-field]");
+    const nextProfile = { ...state.profile };
+    inputs.forEach((input) => {
+      const key = input.dataset.profileField;
+      if (!key) return;
+      nextProfile[key] = String(input.value || "").trim() || defaultProfileState()[key];
+    });
+    state.profile = nextProfile;
+    persistProfileState();
+    showToast("个人资料已保存");
     render();
   }
   if (action === "toggle-todo-sort") {
