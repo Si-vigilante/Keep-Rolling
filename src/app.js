@@ -774,6 +774,11 @@ function guideStopTimers() {
   guideFadeTimer = null;
 }
 
+function guideUpdateDialogText(text) {
+  const dialogText = document.getElementById("guideDialogText");
+  if (dialogText) dialogText.textContent = text;
+}
+
 function guideTextForCurrentState() {
   if (state.guidePhase === 2) {
     if (state.guideMenuHint) return "请先点击右侧的展开菜单按钮，打开功能面板。";
@@ -814,12 +819,13 @@ function guideShowText() {
   guideFullText = text;
   guideTypedIndex = 0;
   render();
+  guideUpdateDialogText("");
 
   guideTimer = setInterval(() => {
     if (guideTypedIndex < guideFullText.length) {
       state.guideDisplayedText += guideFullText.charAt(guideTypedIndex);
       guideTypedIndex += 1;
-      render();
+      guideUpdateDialogText(state.guideDisplayedText);
       return;
     }
 
@@ -925,11 +931,12 @@ function guideHandleOption(indexOrKey, isBranch) {
     guideFullText = branch.response || "";
     guideTypedIndex = 0;
     render();
+    guideUpdateDialogText("");
     guideTimer = setInterval(() => {
       if (guideTypedIndex < guideFullText.length) {
         state.guideDisplayedText += guideFullText.charAt(guideTypedIndex);
         guideTypedIndex += 1;
-        render();
+        guideUpdateDialogText(state.guideDisplayedText);
         return;
       }
 
@@ -955,6 +962,7 @@ function guideAdvance() {
       state.guideBranchTyping = false;
       state.guideAfterBranch = true;
     }
+    guideUpdateDialogText(state.guideDisplayedText);
     guideShowTriangle();
     return;
   }
