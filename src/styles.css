@@ -704,11 +704,13 @@ button:active {
     url("../Assets/弹窗底图.webp");
   background-size: cover;
   box-shadow: inset 0 0 0 4px rgba(197, 159, 68, .45), 0 16px 40px rgba(81, 41, 16, .22);
-  transition: transform .35s ease;
+  transition: transform .72s cubic-bezier(.22, .61, .36, 1), opacity .5s ease;
+  will-change: transform, opacity;
 }
 
 .home-menu.closed {
-  transform: translateX(-87%);
+  transform: translateX(-89%);
+  opacity: .98;
 }
 
 .menu-inner {
@@ -751,6 +753,8 @@ button:active {
   font-size: 40px;
   color: var(--ink);
   font-weight: 400;
+  transition: transform .72s cubic-bezier(.22, .61, .36, 1), filter .3s ease;
+  will-change: transform;
 }
 
 .profile-card {
@@ -1036,6 +1040,7 @@ button:active {
   height: 6.8%;
   border-radius: 22%;
   z-index: 9;
+  transition: left .72s cubic-bezier(.22, .61, .36, 1), width .72s cubic-bezier(.22, .61, .36, 1), height .72s cubic-bezier(.22, .61, .36, 1);
 }
 
 .home-toggle-hotspot.is-closed {
@@ -1052,6 +1057,7 @@ button:active {
   height: 9.4%;
   border-radius: 18px;
   z-index: 8;
+  transition: top .72s cubic-bezier(.22, .61, .36, 1), opacity .45s ease, transform .45s ease;
 }
 
 .menu-ai { top: 18.7%; }
@@ -2924,9 +2930,9 @@ button:active {
   height: 100%;
   display: grid;
   align-content: center;
-  gap: 4px;
+  gap: 3px;
   box-sizing: border-box;
-  padding: 7% 8%;
+  padding: 6.5% 7%;
   text-align: center;
   color: #6c340f;
   overflow: hidden;
@@ -2934,16 +2940,18 @@ button:active {
 
 .task-card-title {
   display: block;
-  font-size: 28px;
-  line-height: 1.02;
+  font-size: 30px;
+  line-height: 1;
   word-break: break-word;
   overflow-wrap: anywhere;
+  border-bottom: 1px solid rgba(140, 78, 42, .16);
+  padding-bottom: 2px;
 }
 
 .task-card-task {
   display: block;
-  font-size: 18px;
-  line-height: 1.08;
+  font-size: 20px;
+  line-height: 1.05;
   color: #8a4d22;
   word-break: break-word;
   overflow-wrap: anywhere;
@@ -2951,13 +2959,13 @@ button:active {
 
 .task-card-detail {
   margin: 0;
-  font-size: 13px;
-  line-height: 1.25;
+  font-size: 15px;
+  line-height: 1.2;
   word-break: break-word;
   overflow-wrap: anywhere;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 5;
+  -webkit-line-clamp: 6;
   overflow: hidden;
 }
 

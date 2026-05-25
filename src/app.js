@@ -371,6 +371,8 @@ const state = {
   cardTab: "cards",
   profileTab: "settings",
   executeStatus: "idle",
+  executeStartedAt: null,
+  executeElapsedMs: 0,
   drawnCard: null,
   drawPhase: "selecting",
   drawMode: null,
@@ -417,6 +419,7 @@ let guideFullText = "";
 let guideFadeTimer;
 let homeBallAnimFrame = 0;
 let homeBallState = null;
+let executeTimer = null;
 
 function cancelHomeBallAnimation() {
   if (homeBallAnimFrame) {
@@ -574,6 +577,8 @@ function routeClass() {
 function resetFlowState(destination = ROUTES.HOME) {
   clearTimeout(pendingTimer);
   clearTimeout(state.aiLoadingTimer);
+  clearInterval(executeTimer);
+  executeTimer = null;
   state.modal = null;
   state.toast = null;
   if ([ROUTES.HOME, ROUTES.CARDS, ROUTES.REVIEW].includes(destination)) {
@@ -586,6 +591,8 @@ function resetFlowState(destination = ROUTES.HOME) {
     state.drawnCard = null;
     state.drawPhase = "selecting";
     state.executeStatus = "idle";
+    state.executeStartedAt = null;
+    state.executeElapsedMs = 0;
   }
 }
 
@@ -623,6 +630,43 @@ function syncRouteState(route, options = {}) {
   if (route === ROUTES.EXECUTE && state.executeStatus === "idle") {
     state.executeStatus = "running";
   }
+}
+
+function formatExecuteTimer(ms = 0) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+  const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
+  const seconds = String(totalSeconds % 60).padStart(2, "0");
+  return `${hours}:${minutes}:${seconds}`;
+}
+
+function executeTimerDigits() {
+  return formatExecuteTimer(state.executeElapsedMs).replace(/:/g, "").split("");
+}
+
+function stopExecuteTimer() {
+  clearInterval(executeTimer);
+  executeTimer = null;
+}
+
+function syncExecuteElapsed() {
+  if (!state.executeStartedAt) return;
+  state.executeElapsedMs = Math.max(0, Date.now() - state.executeStartedAt);
+}
+
+function startExecuteTimer(reset = false) {
+  if (reset || !state.executeStartedAt) {
+    state.executeStartedAt = Date.now();
+    state.executeElapsedMs = 0;
+  }
+
+  stopExecuteTimer();
+  syncExecuteElapsed();
+  executeTimer = setInterval(() => {
+    if (state.executeStatus !== "running" || state.route !== ROUTES.EXECUTE) return;
+    syncExecuteElapsed();
+    render();
+  }, 1000);
 }
 
 function setHistory(route, mode) {
@@ -1542,9 +1586,21 @@ function readFileAsText(file) {
 }
 
 function renderExecute() {
+  const [h1, h2, m1, m2, s1, s2] = executeTimerDigits();
   return `
     <section class="page execute-page">
       ${designFrame(state.executeStatus === "paused" ? "任务执行2.3-汪嫣然.png" : "任务执行2.0-汪嫣然.png", "execute-design")}
+      <div class="status-pill">正在执行：${escapeHtml(state.selectedTask?.name || "任务A")}</div>
+      <div class="timer-row" aria-label="执行计时">
+        <div class="timer-card">${h1}</div>
+        <div class="timer-card">${h2}</div>
+        <div class="colon">:</div>
+        <div class="timer-card">${m1}</div>
+        <div class="timer-card">${m2}</div>
+        <div class="colon">:</div>
+        <div class="timer-card">${s1}</div>
+        <div class="timer-card">${s2}</div>
+      </div>
       <button class="hotspot execute-back-hotspot" data-action="ask-abandon" aria-label="返回"></button>
       <button class="hotspot execute-complete-hotspot" data-action="complete-task" aria-label="完成任务"></button>
       <button class="hotspot execute-toggle-hotspot" data-action="toggle-execute" aria-label="${state.executeStatus === "paused" ? "继续执行" : "暂停任务"}"></button>
@@ -2126,10 +2182,20 @@ async function handleAction(action, target) {
     return;
   }
   if (action === "toggle-execute") {
-    state.executeStatus = state.executeStatus === "running" ? "paused" : "running";
+    if (state.executeStatus === "running") {
+      syncExecuteElapsed();
+      state.executeStatus = "paused";
+      stopExecuteTimer();
+    } else {
+      state.executeStatus = "running";
+      state.executeStartedAt = Date.now() - state.executeElapsedMs;
+      startExecuteTimer();
+    }
     render();
   }
   if (action === "complete-task") {
+    syncExecuteElapsed();
+    stopExecuteTimer();
     markTaskComplete();
     state.executeStatus = "complete";
     setModal("complete");
@@ -2241,6 +2307,9 @@ async function handleAction(action, target) {
     const todo = selectedTodo();
     if (todo) state.selectedTask = taskFromTodo(todo);
     state.executeStatus = "running";
+    state.executeStartedAt = null;
+    state.executeElapsedMs = 0;
+    startExecuteTimer(true);
     navigate(ROUTES.EXECUTE, { mode: "push", direction: "forward" });
   }
   if (action === "redraw") {
@@ -2261,6 +2330,9 @@ async function handleAction(action, target) {
     state.selectedTask = state.drawnCard ? taskCardToSelectedTask(state.drawnCard) : tasks[0];
     if (state.drawnCard) state.selectedCard = cards.find((card) => card.id === Number(state.drawnCard.rewardCardId)) || cards[0];
     state.executeStatus = "running";
+    state.executeStartedAt = null;
+    state.executeElapsedMs = 0;
+    startExecuteTimer(true);
     navigate(ROUTES.EXECUTE, { mode: "replace", direction: "forward" });
   }
   if (action === "confirm-logout") {
