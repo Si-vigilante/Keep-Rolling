@@ -1,0 +1,18 @@
+127.0.0.1 - - [25/May/2026 22:56:48] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [25/May/2026 22:56:48] "GET /src/styles.css?v=20260525-journey-progress HTTP/1.1" 200 -
+127.0.0.1 - - [25/May/2026 22:56:48] "GET /src/app.js?v=20260525-journey-progress HTTP/1.1" 200 -
+127.0.0.1 - - [25/May/2026 22:56:48] "GET /src/data.js HTTP/1.1" 200 -
+127.0.0.1 - - [25/May/2026 22:56:48] "GET /src/authService.js HTTP/1.1" 200 -
+127.0.0.1 - - [25/May/2026 22:56:48] "GET /src/deepseekService.js HTTP/1.1" 200 -
+127.0.0.1 - - [25/May/2026 22:56:48] "GET /src/mockServices.js HTTP/1.1" 200 -
+127.0.0.1 - - [25/May/2026 22:56:48] "GET /Assets/%E6%93%8D%E4%BD%9C%E6%8C%89%E9%92%AE1.png HTTP/1.1" 200 -
+127.0.0.1 - - [25/May/2026 22:56:48] "GET /Assets/%E6%93%8D%E4%BD%9C%E6%8C%89%E9%92%AE2.png HTTP/1.1" 200 -
+127.0.0.1 - - [25/May/2026 22:56:48] "GET /Assets/%E6%93%8D%E4%BD%9C%E6%8C%89%E9%92%AE3.png HTTP/1.1" 200 -
+127.0.0.1 - - [25/May/2026 22:56:48] "GET /Assets/button_ani.png HTTP/1.1" 200 -
+127.0.0.1 - - [25/May/2026 22:56:48] "GET /public/fonts/shangshou-qingcheng.ttf HTTP/1.1" 200 -
+127.0.0.1 - - [25/May/2026 22:56:48] "GET /public/fonts/shangshou-hefeng.ttf HTTP/1.1" 200 -
+127.0.0.1 - - [25/May/2026 22:56:48] "GET /Assets/%E8%83%8C%E6%99%AF.jpg HTTP/1.1" 200 -
+127.0.0.1 - - [25/May/2026 22:56:48] "GET /Page_View/%E4%B8%BB%E9%A1%B52-%E7%8E%8B%E7%B4%AB%E6%B6%B5.png?v=20260525-journey-progress HTTP/1.1" 200 -
+127.0.0.1 - - [25/May/2026 22:56:48] "GET /Assets/%E5%BC%B9%E7%AA%97%E5%BA%95%E5%9B%BE.webp HTTP/1.1" 200 -
+127.0.0.1 - - [25/May/2026 22:56:48] code 404, message File not found
+127.0.0.1 - - [25/May/2026 22:56:48] "GET /favicon.ico HTTP/1.1" 404 -

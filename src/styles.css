@@ -909,6 +909,15 @@ button:active {
   z-index: 0;
 }
 
+.execute-page .status-pill,
+.execute-page .timer-row,
+.execute-page .execute-back-hotspot,
+.execute-page .execute-complete-hotspot,
+.execute-page .execute-toggle-hotspot,
+.execute-page .execute-cancel-hotspot {
+  z-index: 8;
+}
+
 .todo-design {
   background-position: center;
   background-size: cover;

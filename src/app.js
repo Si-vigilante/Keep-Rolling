@@ -1591,9 +1591,10 @@ function readFileAsText(file) {
 
 function renderExecute() {
   const [h1, h2, m1, m2, s1, s2] = executeTimerDigits();
+  const isPaused = state.executeStatus === "paused";
   return `
     <section class="page execute-page">
-      ${designFrame(state.executeStatus === "paused" ? "任务执行2.3-汪嫣然.png" : "任务执行2.0-汪嫣然.png", "execute-design")}
+      ${designFrame(isPaused ? "任务执行透明图2.png" : "任务执行透明图.png", "execute-design")}
       <div class="status-pill">正在执行：${escapeHtml(state.selectedTask?.name || "任务A")}</div>
       <div class="timer-row" aria-label="执行计时">
         <div class="timer-card">${h1}</div>
