@@ -216,6 +216,57 @@ const DRAW_MODES = {
   ACTION: "action",
 };
 
+const taskDrawCards = [
+  {
+    id: "task-story",
+    title: "灵感起跳台",
+    task: "确定动画故事方向",
+    detail:
+      "想清楚这支动画到底在讲什么：主角为什么必须跃迁？它在逃离、突破、进化，还是抵达某个新世界？先把故事说通，再开始制作。",
+    rewardCardId: 1,
+  },
+  {
+    id: "task-board",
+    title: "十二秒地图",
+    task: "绘制12秒分镜",
+    detail:
+      "把动画拆成4个段落：蓄势前、加速中、跃迁瞬间、跃迁之后。每一段只需要画出关键画面和动作说明，帮助后续制作不跑偏。",
+    rewardCardId: 2,
+  },
+  {
+    id: "task-hero",
+    title: "主角孵化所",
+    task: "制作跃迁主体",
+    detail:
+      "完成主角模型或整理可用素材。主角可以是人物、机械、载具、动物或抽象物体，但外观上最好能体现“积蓄力量”和“瞬间爆发”。",
+    rewardCardId: 3,
+  },
+  {
+    id: "task-scene",
+    title: "坡道施工队",
+    task: "搭建动画场景",
+    detail:
+      "围绕固定摄像机搭建主角经过的道路、坡道、起跳点和落地区域。重点做镜头里看得到的部分，让空间服务于“蓄势跃迁”的运动逻辑。",
+    rewardCardId: 4,
+  },
+  {
+    id: "task-effect",
+    title: "跃迁点火器",
+    task: "制作运动与特效",
+    detail:
+      "完成主角从蓄力到起跳的动画。通过速度变化、身体压缩、冲击波、烟尘、光效或运动模糊，让观众感受到力量逐渐积累并瞬间释放。",
+    rewardCardId: 5,
+  },
+  {
+    id: "task-pack",
+    title: "最终封装箱",
+    task: "渲染并整理提交文件",
+    detail:
+      "输出最终视频，制作汇报PPT，整理工程文件和素材文件夹。最后检查时长、帧率、分辨率、格式和源文件完整性，确认可以直接提交。",
+    rewardCardId: 6,
+  },
+];
+
 const actionCards = [
   {
     id: "action-study",
@@ -324,6 +375,7 @@ const state = {
   drawPhase: "selecting",
   drawMode: null,
   drawPool: [],
+  drawShufflePulse: 0,
   bgmPlaying: false,
   bgmVolume: readStoredBgmVolume(),
   homeAnimationsEnabled: readStoredHomeAnimationsEnabled(),
@@ -1162,16 +1214,48 @@ function nextTodoSortMode() {
 
 function currentDrawPool() {
   if (state.drawMode === DRAW_MODES.ACTION) return actionCards;
-  return state.drawPool.length ? state.drawPool : cards.slice(0, 6);
+  return state.drawPool.length ? state.drawPool : taskDrawCards.slice();
 }
 
 function startDrawMode(mode) {
   state.drawMode = mode;
-  state.drawPool = mode === DRAW_MODES.ACTION ? [...actionCards] : cards.slice(0, 6);
+  state.drawPool = mode === DRAW_MODES.ACTION ? [...actionCards] : taskDrawCards.slice();
   state.drawnCard = null;
   state.drawPhase = "selecting";
+  state.drawShufflePulse = 0;
   closeModal();
   navigate(ROUTES.DRAW, { mode: "push", direction: "forward", fresh: true });
+}
+
+function shuffleDrawCards() {
+  if (state.drawMode !== DRAW_MODES.TASK || state.drawnCard) return;
+  const pool = currentDrawPool();
+  if (!pool.length) return;
+
+  const nextPool = [...pool];
+  for (let index = nextPool.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [nextPool[index], nextPool[swapIndex]] = [nextPool[swapIndex], nextPool[index]];
+  }
+
+  state.drawPool = nextPool;
+  state.drawShufflePulse += 1;
+  render();
+}
+
+function taskCardToSelectedTask(card) {
+  return {
+    id: card.id,
+    name: card.task,
+    owner: "任务抽卡",
+    time: "待开始",
+    status: "pending",
+    detail: [card.detail],
+    reward: `完成后解锁：${card.title}`,
+    rewardCardId: card.rewardCardId,
+    taskCardTitle: card.title,
+    source: "draw",
+  };
 }
 
 function button(label, className = "", attrs = "") {
@@ -1268,11 +1352,13 @@ function markTaskComplete() {
   pulseAchievement();
   persistJourneyProgress();
 
-  state.todos = state.todos.map((todo) =>
-    todo.id === state.selectedTodoId || taskFromTodo(todo).id === task.id
-      ? { ...todo, done: true }
-      : todo,
-  );
+  if (!task.rewardCardId) {
+    state.todos = state.todos.map((todo) =>
+      todo.id === state.selectedTodoId || taskFromTodo(todo).id === task.id
+        ? { ...todo, done: true }
+        : todo,
+    );
+  }
 }
 
 function userPanel() {
@@ -1687,25 +1773,26 @@ function renderDraw() {
   const renderDrawFace = (card) =>
     isActionMode
       ? `<strong class="action-card-title">${card.title}</strong><span class="action-card-text">${card.detail}</span>`
-      : `<img src="${card.character}" alt="${card.title}" /><strong>${card.title}</strong>`;
+      : `<div class="task-card-face"><strong class="task-card-title">${card.title}</strong><span class="task-card-task">任务：${card.task}</span><p class="task-card-detail">${card.detail}</p></div>`;
   return `
     <section class="page draw-page">
       ${backButton()}
-      <h1 class="page-title">${isActionMode ? "行动抽卡" : "抽卡"}</h1>
+      <h1 class="page-title">${isActionMode ? "行动抽卡" : "任务抽卡"}</h1>
       <button class="history-btn" data-route="cards" data-mode="push"><img src="${asset("操作按钮4.png")}" alt="" /><span>历史</span></button>
+      ${isActionMode ? "" : `<button class="ui-btn orange draw-shuffle-btn ${state.drawShufflePulse ? "is-shuffling" : ""}" data-action="shuffle-draw" ${picked ? "disabled" : ""}><span>洗牌</span></button>`}
       <img class="draw-king" src="${beetles.king}" alt="螂王" />
       <div class="pick-one">Pick One</div>
-      <div class="card-fan ${state.drawPhase === "revealed" ? "has-pick" : ""}">
+      <div class="card-fan ${state.drawPhase === "revealed" ? "has-pick" : ""} ${state.drawShufflePulse ? "is-shuffling" : ""}">
         <div class="card-fan-track">
           ${pool
             .map(
               (card, index) =>
-                `<button class="fan-card fan-${index % 6} ${picked?.id === card.id ? "picked" : ""}" data-draw="${card.id}" ${picked ? "disabled" : ""}><img src="${asset("透明卡牌背面.png")}" alt="抽卡" /></button>`,
+                `<button class="fan-card fan-${index % 6} ${picked?.id === card.id ? "picked" : ""}" style="--shuffle-index:${index};" data-draw="${card.id}" ${picked ? "disabled" : ""}><img src="${asset("透明卡牌背面.png")}" alt="抽卡" /></button>`,
             )
             .join("")}
         </div>
       </div>
-      <div class="draw-tip">${isActionMode ? "选择一张行动卡，开启今天的行动吧!" : "选择一张卡片，开启你的任务之旅吧!"}</div>
+      <div class="draw-tip">${isActionMode ? "选择一张行动卡，开启今天的行动吧！" : "选择一张任务卡，开始你的动画制作吧！"}</div>
       ${
         picked
           ? `<div class="draw-result">
@@ -2046,6 +2133,10 @@ async function handleAction(action, target) {
   if (action === "start-action-draw") {
     startDrawMode(DRAW_MODES.ACTION);
   }
+  if (action === "shuffle-draw") {
+    shuffleDrawCards();
+    return;
+  }
   if (action === "toggle-execute") {
     state.executeStatus = state.executeStatus === "running" ? "paused" : "running";
     render();
@@ -2179,7 +2270,8 @@ async function handleAction(action, target) {
       finishToHome();
       return;
     }
-    state.selectedTask = tasks.find((task) => task.name === state.drawnCard?.title) || tasks[0];
+    state.selectedTask = state.drawnCard ? taskCardToSelectedTask(state.drawnCard) : tasks[0];
+    if (state.drawnCard) state.selectedCard = cards.find((card) => card.id === Number(state.drawnCard.rewardCardId)) || cards[0];
     state.executeStatus = "running";
     navigate(ROUTES.EXECUTE, { mode: "replace", direction: "forward" });
   }

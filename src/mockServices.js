@@ -47,5 +47,8 @@ export function resolveTask(taskId) {
 }
 
 export function rewardCardForTask(task) {
+  if (task?.rewardCardId) {
+    return cards.find((card) => card.id === Number(task.rewardCardId)) || cards[0];
+  }
   return cards.find((card) => card.title === task.name) || cards[0];
 }
