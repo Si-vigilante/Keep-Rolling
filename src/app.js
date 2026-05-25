@@ -349,7 +349,7 @@ const state = {
 state.achievementCount = state.completedTasks.length;
 
 const app = document.querySelector("#app");
-const bgmAudio = new Audio(asset("沙丘慢步.mp3"));
+const bgmAudio = new Audio(asset("沙丘慢步-rebalanced.mp3"));
 bgmAudio.loop = true;
 bgmAudio.volume = state.bgmVolume;
 let toastTimer;
