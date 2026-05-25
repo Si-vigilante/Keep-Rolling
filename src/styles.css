@@ -2299,6 +2299,9 @@ button:active {
 
 .card-tile {
   position: relative;
+  padding: 0;
+  background: transparent;
+  border: 0;
   display: grid;
   justify-items: center;
   align-content: start;
@@ -2316,6 +2319,40 @@ button:active {
   object-position: center;
   border-radius: 4%;
   filter: drop-shadow(0 8px 12px rgba(79, 45, 15, .24));
+}
+
+.card-tile .card-face {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+
+.card-tile .card-face strong,
+.card-tile .card-face small {
+  display: block;
+  line-height: 1.15;
+}
+
+.card-tile.is-locked {
+  filter: grayscale(1) brightness(.84);
+  opacity: .62;
+}
+
+.card-tile.is-locked .card-face small {
+  color: rgba(90, 52, 19, .72);
+}
+
+.card-tile.is-unlocked {
+  animation: cardUnlockPop .52s ease-out;
+}
+
+.card-tile.is-recent-unlock {
+  animation: cardUnlockPop .52s ease-out, cardUnlockShake .55s ease-in-out .04s;
+}
+
+.card-tile.is-unlocked img {
+  filter: drop-shadow(0 10px 18px rgba(79, 45, 15, .3));
 }
 
 .search-pill {
@@ -2337,6 +2374,39 @@ button:active {
   display: grid;
   gap: 3.4%;
   padding: 3.1% 2.5%;
+}
+
+.achievement-total {
+  position: absolute;
+  left: 3.2%;
+  top: 3.5%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 30px;
+  font-weight: 400;
+}
+
+.achievement-total strong {
+  font-size: 56px;
+  line-height: 1;
+  transition: transform .18s ease;
+}
+
+.achievement-total.is-pulsing strong {
+  animation: achievementCountPop .48s ease;
+}
+
+.achievement-icon,
+.seal.is-lit {
+  background: linear-gradient(180deg, #fff7c7, #f0b647);
+  box-shadow: 0 0 0 3px rgba(226, 144, 49, .34), 0 8px 18px rgba(136, 90, 23, .18);
+}
+
+.achievement-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
 }
 
 .achievement-row {
@@ -2366,14 +2436,6 @@ button:active {
   border-radius: 50%;
   background: #fff3c9;
   box-shadow: inset 0 0 0 3px rgba(226, 144, 49, .58);
-}
-
-.achievement-total {
-  position: absolute;
-  right: 3.2%;
-  bottom: 1.5%;
-  font-size: 56px;
-  font-weight: 400;
 }
 
 .profile-tabs {
@@ -2430,22 +2492,60 @@ button:active {
   font-weight: 400;
 }
 
-.review-book p {
-  display: flex;
-  align-items: center;
-  gap: 3%;
-  margin: 3.6% 0;
+.review-empty {
+  display: grid;
+  gap: 10px;
+  margin-top: 14%;
   color: #5b290c;
-  font-size: 40px;
-  font-family: "ShangShouHeFeng", "ShangShouQingCheng", serif;
-  font-weight: 400;
+  text-align: center;
 }
 
-.review-book p span {
-  flex: 1;
-  height: 4px;
-  background: var(--ink);
+.review-empty b {
+  font-size: 38px;
+}
+
+.review-empty small {
+  font-size: 24px;
+}
+
+.review-entry {
+  width: 100%;
+  margin: 3.2% 0;
+  padding: 2.8% 3.2%;
+  display: grid;
+  grid-template-columns: 46px 1fr;
+  align-items: center;
+  gap: 16px;
+  border-radius: 18px;
+  background: rgba(255, 246, 223, .92);
+  box-shadow: inset 0 0 0 2px rgba(178, 126, 54, .16);
+  text-align: left;
+}
+
+.review-entry span {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
+  background: linear-gradient(180deg, #fff3c6, #efb34f);
+  color: #6c340f;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.review-entry b,
+.review-entry small {
+  display: block;
+}
+
+.review-entry b {
+  font-size: 30px;
+}
+
+.review-entry small {
+  font-size: 20px;
+  opacity: .82;
 }
 
 .cloud-note {
@@ -2498,6 +2598,26 @@ button:active {
   transform: translateX(-50%);
   font-family: inherit;
   font-size: 18px;
+}
+
+@keyframes cardUnlockPop {
+  0% { opacity: .25; transform: scale(.82); }
+  65% { opacity: 1; transform: scale(1.04); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes cardUnlockShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-2px); }
+  40% { transform: translateX(2px); }
+  60% { transform: translateX(-1px); }
+  80% { transform: translateX(1px); }
+}
+
+@keyframes achievementCountPop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.14); }
+  100% { transform: scale(1); }
 }
 
 .profile-grid {

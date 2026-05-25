@@ -2,12 +2,13 @@ import { achievements, asset, beetles, cards, navItems, profileRows, tasks, todo
 import { authEmail, authErrorMessage, authName, initializeAuth, loginWithEmail, logoutCurrentUser, signupWithEmail } from "./authService.js";
 import { decomposeTaskWithDeepSeek } from "./deepseekService.js";
 import { createAiTaskBreakdown, createTodosFromAi, makeTodo, rewardCardForTask, taskFromTodo } from "./mockServices.js";
-const ASSET_VERSION = "20260517-ai21-todo-fix";
+const ASSET_VERSION = "20260525-journey-progress";
 const design = (name) => `./Page_View/${name}?v=${ASSET_VERSION}`;
 const LOCAL_AUTH_STORAGE_KEY = "beetle-kingdom-local-auth";
 const BGM_STORAGE_KEY = "beetle-kingdom-bgm";
 const BGM_VOLUME_STORAGE_KEY = "beetle-kingdom-bgm-volume";
 const HOME_ANIMATIONS_STORAGE_KEY = "beetle-home-animations-enabled";
+const JOURNEY_PROGRESS_STORAGE_KEY = "beetle-journey-progress-v1";
 const IS_LOCAL_PREVIEW = window.location.protocol === "file:" || ["", "localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
 const LOCAL_PREVIEW_USER = {
   name: "本地测试员",
@@ -68,6 +69,52 @@ function readStoredHomeAnimationsEnabled(isAuthed = Boolean(readLocalPreviewUser
 function persistHomeAnimationsEnabled(enabled) {
   try {
     localStorage.setItem(HOME_ANIMATIONS_STORAGE_KEY, String(Boolean(enabled)));
+  } catch {}
+}
+
+function readJourneyProgress() {
+  const fallback = { completedTasks: [], unlockedCardIds: [] };
+
+  try {
+    const raw = localStorage.getItem(JOURNEY_PROGRESS_STORAGE_KEY);
+    if (!raw) return fallback;
+
+    const parsed = JSON.parse(raw);
+    const completedTasks = Array.isArray(parsed.completedTasks)
+      ? parsed.completedTasks
+          .filter(Boolean)
+          .map((item, index) => {
+            const completedAt = item.completedAt || new Date().toISOString();
+            return {
+              id: Number(item.id) || Date.now() + index,
+              taskId: Number(item.taskId) || 0,
+              taskName: String(item.taskName || "未命名任务"),
+              unlockedCardId: Number(item.unlockedCardId) || 0,
+              completedAt,
+              completedDate: item.completedDate || formatReviewDate(completedAt),
+              completedAtText: item.completedAtText || `${formatReviewDate(completedAt)} ${formatUserTime(new Date(completedAt))}`,
+            };
+          })
+      : [];
+    const unlockedCardIds = Array.isArray(parsed.unlockedCardIds)
+      ? [...new Set(parsed.unlockedCardIds.map((value) => Number(value)).filter((value) => Number.isFinite(value)))]
+      : [];
+
+    return { completedTasks, unlockedCardIds };
+  } catch {
+    return fallback;
+  }
+}
+
+function persistJourneyProgress() {
+  try {
+    localStorage.setItem(
+      JOURNEY_PROGRESS_STORAGE_KEY,
+      JSON.stringify({
+        completedTasks: state.completedTasks,
+        unlockedCardIds: state.unlockedCardIds,
+      }),
+    );
   } catch {}
 }
 
@@ -192,6 +239,10 @@ const state = {
   selectedTask: tasks[0],
   selectedTodoId: todoSeed[0].id,
   selectedCard: cards[0],
+  completedTasks: [],
+  unlockedCardIds: [],
+  recentUnlockedCardId: null,
+  completionPulse: 0,
   todos: structuredClone(todoSeed),
   todoSortMode: "default",
   aiPhase: "input",
@@ -224,6 +275,14 @@ const state = {
   guideNeedsTyping: false,
   guideDisplayedText: "",
 };
+
+{
+  const journeyProgress = readJourneyProgress();
+  state.completedTasks = journeyProgress.completedTasks;
+  state.unlockedCardIds = journeyProgress.unlockedCardIds;
+}
+
+state.achievementCount = state.completedTasks.length;
 
 const app = document.querySelector("#app");
 const bgmAudio = new Audio(asset("沙丘慢步.mp3"));
@@ -1011,6 +1070,82 @@ function formatUserTime(date = new Date()) {
   return `${hour}:${minute}`;
 }
 
+function formatReviewDate(value) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "未知日期";
+  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function formatReviewDateLabel(value) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "未知时间";
+  return `${date.getFullYear()}年${String(date.getMonth() + 1).padStart(2, "0")}月${String(date.getDate()).padStart(2, "0")}日`;
+}
+
+function groupCompletedTasksByDate() {
+  return state.completedTasks.reduce((groups, item) => {
+    const key = formatReviewDate(item.completedAt);
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(item);
+    return groups;
+  }, {});
+}
+
+function isCardUnlocked(cardId) {
+  return state.unlockedCardIds.includes(Number(cardId));
+}
+
+function latestCompletionForCard(cardId) {
+  return state.completedTasks.find((item) => item.unlockedCardId === Number(cardId)) || null;
+}
+
+function pulseAchievement() {
+  state.completionPulse += 1;
+  const current = state.completionPulse;
+  setTimeout(() => {
+    if (state.completionPulse === current) {
+      state.completionPulse = 0;
+      render();
+    }
+  }, 520);
+}
+
+function createCompletionRecord(task, reward) {
+  const now = new Date();
+  return {
+    id: Date.now(),
+    taskId: task.id,
+    taskName: task.name,
+    unlockedCardId: reward.id,
+    completedAt: now.toISOString(),
+    completedDate: formatReviewDate(now),
+    completedAtText: `${formatReviewDate(now)} ${formatUserTime(now)}`,
+  };
+}
+
+function markTaskComplete() {
+  if (state.executeStatus === "complete") return;
+
+  const task = state.selectedTask || tasks[0];
+  const reward = rewardCardForTask(task);
+  const record = createCompletionRecord(task, reward);
+
+  state.completedTasks = [record, ...state.completedTasks];
+  if (!state.unlockedCardIds.includes(reward.id)) {
+    state.unlockedCardIds = [...state.unlockedCardIds, reward.id];
+  }
+  state.achievementCount = state.completedTasks.length;
+  state.recentUnlockedCardId = reward.id;
+  pulseAchievement();
+  persistJourneyProgress();
+
+  state.todos = state.todos.map((todo) =>
+    todo.id === state.selectedTodoId || taskFromTodo(todo).id === task.id
+      ? { ...todo, done: true }
+      : todo,
+  );
+}
+
 function userPanel() {
   const name = state.authUser ? authName(state.authUser) : "游客螂";
   const date = new Date();
@@ -1247,40 +1382,53 @@ function renderTodo() {
 }
 
 function renderCards() {
+  const unlockedCount = state.unlockedCardIds.length;
   const body =
     state.cardTab === "cards"
       ? `<div class="library-panel tab-panel">
           ${cards
             .map(
-              (card) => `
-                <button class="card-tile" data-card="${card.id}">
+              (card) => {
+                const unlocked = isCardUnlocked(card.id);
+                const recent = state.recentUnlockedCardId === card.id && state.completionPulse > 0;
+                return `
+                <button class="card-tile ${unlocked ? "is-unlocked" : "is-locked"} ${recent ? "is-recent-unlock" : ""}" data-card="${card.id}" ${unlocked ? "" : 'aria-disabled="true"'}>
                   <span>${card.date}</span>
-                  <img src="${asset("透明卡牌背面.png")}" alt="${card.title}" />
+                  <div class="card-face">
+                    <img src="${unlocked ? card.character : asset("透明卡牌背面.png")}" alt="${card.title}" />
+                    <strong>${card.title}</strong>
+                    <small>${unlocked ? "已解锁" : "未解锁"}</small>
+                  </div>
                 </button>
-              `,
+              `;
+              },
             )
             .join("")}
         </div>`
       : `<div class="achievement-panel tab-panel">
+          <div class="achievement-total ${state.completionPulse > 0 ? "is-pulsing" : ""}">
+            <span class="achievement-icon ${unlockedCount > 0 ? "is-lit" : ""}"></span>
+            <strong>${String(unlockedCount).padStart(2, "0")}</strong>
+            <small>张卡牌已点亮</small>
+          </div>
           ${achievements
             .map(
               (item) => `
                 <div class="achievement-row">
-                  <span class="seal"></span>
+                  <span class="seal ${unlockedCount > 0 ? "is-lit" : ""}"></span>
                   <div><b>${item.title}</b><small>${item.desc}</small></div>
                   <strong>${item.progress}</strong>
                 </div>
               `,
             )
             .join("")}
-          <div class="achievement-total">已完成 12/50</div>
         </div>`;
 
   return `
     <section class="page cards-page">
       ${backButton()}
       <h1 class="page-title">卡牌库</h1>
-      ${state.cardTab === "achievements" ? `<div class="search-pill">⌕ 搜索成就</div>` : ""}
+      ${state.cardTab === "achievements" ? `<div class="search-pill">⌕ 解锁 ${unlockedCount}</div>` : ""}
       <nav class="library-tabs">
         <button class="tab ${state.cardTab === "cards" ? "active" : ""}" data-action="card-tab" data-tab="cards">卡牌</button>
         <button class="tab ${state.cardTab === "achievements" ? "active" : ""}" data-action="card-tab" data-tab="achievements">成就</button>
@@ -1291,21 +1439,47 @@ function renderCards() {
 }
 
 function renderReview() {
+  const groups = groupCompletedTasksByDate();
+  const dates = Object.keys(groups).sort((a, b) => b.localeCompare(a));
+  const hasRecords = dates.length > 0;
   return `
     <section class="page review-page">
       ${backButton()}
       <h1 class="page-title">任务回顾</h1>
       <div class="review-book">
-        <div class="date-pill">4月28日</div>
-        ${[1, 2, 3].map(() => `<p>✓ <span></span></p>`).join("")}
-        <div class="date-pill">4月28日</div>
-        ${[1, 2, 3].map(() => `<p>✓ <span></span></p>`).join("")}
+        ${
+          hasRecords
+            ? dates
+                .map(
+                  (date) => `
+                    <div class="date-pill">${formatReviewDateLabel(date)}</div>
+                    ${groups[date]
+                      .map(
+                        (item) => `
+                          <button class="review-entry" data-action="toast" data-toast="完成时间 ${item.completedAtText}">
+                            <span>✓</span>
+                            <div>
+                              <b>${item.taskName}</b>
+                              <small>${item.completedAtText}</small>
+                            </div>
+                          </button>
+                        `,
+                      )
+                      .join("")}
+                  `,
+                )
+                .join("")
+            : `<div class="review-empty">
+                <b>还没有完成记录</b>
+                <small>完成任务后，这里会按日期自动归档</small>
+              </div>`
+        }
       </div>
-      <button class="cloud-note" data-action="toast" data-toast="今日回顾已保存">太厉害!</button>
+      <button class="cloud-note" data-action="toast" data-toast="${hasRecords ? "点击记录可查看完成时间" : "先完成任务再来回顾"}">${hasRecords ? "查看时间" : "暂无记录"}</button>
       <img class="review-character" src="${beetles.board}" alt="看板螂" />
       <div class="review-actions">
-        <button data-action="toast" data-toast="分享面板稍后接入"><img src="${asset("操作按钮1.png")}" alt="" /><span>分享</span></button>
-        <button data-action="toast" data-toast="已切换回顾样式"><img src="${asset("操作按钮2.png")}" alt="" /><span>切换</span></button>
+        <button data-route="cards"><img src="${asset("操作按钮1.png")}" alt="" /><span>卡牌</span></button>
+        <button data-action="toast" data-toast="回顾内容会随着任务完成持续累积"><img src="${asset("操作按钮2.png")}" alt="" /><span>说明</span></button>
       </div>
     </section>
   `;
@@ -1484,14 +1658,15 @@ function modalMarkup() {
 
   if (state.modal === "card-detail") {
     const card = state.selectedCard;
+    const latestRecord = latestCompletionForCard(card.id);
     return modalShell(`
       <div class="card-detail-modal">
         <div class="collected-card">
           <img src="${card.character}" alt="${card.title}" />
-          <strong>${card.date}收集</strong>
+          <strong>${latestRecord?.completedDate || card.date}收集</strong>
         </div>
         <div class="card-info">
-          <p>▣ 收集时间：<b>${card.date}</b></p>
+          <p>▣ 收集时间：<b>${latestRecord?.completedAtText || card.date}</b></p>
           <p>☆ 任务名称：<b>${card.title}</b></p>
           <p>▤ 备注：${card.note}</p>
           <p>◉ 收集地点：${card.place}</p>
@@ -1675,6 +1850,7 @@ async function handleAction(action, target) {
     render();
   }
   if (action === "complete-task") {
+    markTaskComplete();
     state.executeStatus = "complete";
     setModal("complete");
   }
@@ -1900,7 +2076,13 @@ app.addEventListener("click", (event) => {
   }
 
   if (target.dataset.card) {
-    state.selectedCard = cards.find((card) => card.id === Number(target.dataset.card));
+    const card = cards.find((item) => item.id === Number(target.dataset.card));
+    if (!card) return;
+    if (!isCardUnlocked(card.id)) {
+      showToast("这张卡还没有解锁");
+      return;
+    }
+    state.selectedCard = card;
     setModal("card-detail");
     return;
   }
