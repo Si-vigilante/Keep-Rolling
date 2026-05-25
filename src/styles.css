@@ -1942,29 +1942,28 @@ button:active {
 
 .todo-mode-button {
   position: absolute;
-  width: 96px;
-  height: 96px;
+  width: 148px;
+  height: 148px;
   border-radius: 50%;
-  border: 3px solid rgba(175, 114, 64, .82);
-  background: rgba(255, 244, 217, .9);
-  color: #8f512a;
-  font-size: 56px;
-  line-height: 1;
+  border: 0;
+  background: transparent;
+  color: transparent;
+  font-size: 0;
+  line-height: 0;
   display: grid;
   place-items: center;
-  box-shadow: 0 10px 16px rgba(126, 72, 32, .12);
   pointer-events: auto;
 }
 
 .todo-mode-button.is-add {
   left: 50%;
-  top: 23%;
+  top: 20.5%;
   transform: translateX(-50%);
 }
 
 .todo-mode-button.is-remove {
   left: 50%;
-  top: 63%;
+  top: 61%;
   transform: translateX(-50%);
 }
 
@@ -1977,10 +1976,10 @@ button:active {
 }
 
 .todo-sweeper-panel img {
+  display: none;
   max-width: 82%;
   max-height: 82%;
   object-fit: contain;
-  display: block;
 }
 
 .todo-acorn-panel {
@@ -1989,44 +1988,30 @@ button:active {
 
 .todo-acorn-panel::before {
   content: "";
-  width: 82%;
-  height: 84%;
-  border-radius: 45% 45% 49% 49% / 28% 28% 62% 62%;
-  background:
-    linear-gradient(180deg, rgba(131, 84, 44, .96) 0 24%, transparent 24% 26%, rgba(240, 225, 196, .96) 26% 100%);
+  width: 72%;
+  height: 58%;
+  border-radius: 24px;
+  background: rgba(255, 249, 236, .94);
   box-shadow:
-    inset 0 0 0 5px rgba(167, 109, 58, .55),
-    0 12px 26px rgba(126, 74, 34, .12);
-}
-
-.todo-acorn-plus {
-  position: absolute;
-  left: 16%;
-  top: 10%;
-  width: 50px;
-  height: 50px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  border: 3px solid rgba(216, 149, 79, .9);
-  color: #8d4f28;
-  font-size: 36px;
-  line-height: 1;
-  background: rgba(255, 243, 216, .88);
+    inset 0 0 0 3px rgba(173, 119, 70, .55),
+    0 10px 22px rgba(126, 74, 34, .12);
 }
 
 .todo-draft-input {
   position: absolute;
-  top: 31%;
-  width: 60%;
-  height: 41%;
+  top: 21%;
+  width: 62%;
+  height: 46%;
+  padding: 18px 20px;
   border: 0;
-  background: transparent;
+  border-radius: 18px;
+  background: rgba(255, 250, 240, .9);
   resize: none;
   color: #8c4f28;
-  font-size: 18px;
-  line-height: 1.42;
+  font-size: 20px;
+  line-height: 1.45;
   text-align: left;
+  box-shadow: inset 0 0 0 2px rgba(192, 149, 99, .35);
   outline: none;
 }
 
@@ -2044,6 +2029,23 @@ button:active {
   display: grid;
   place-items: center;
   box-shadow: 0 10px 16px rgba(126, 72, 32, .12);
+}
+
+.todo-panel-exit {
+  position: absolute;
+  top: 12%;
+  right: 16%;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid rgba(175, 114, 64, .72);
+  background: rgba(255, 245, 220, .92);
+  color: #8f512a;
+  font-size: 28px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 8px 14px rgba(126, 72, 32, .12);
 }
 
 .todo-cheer-hotspot {

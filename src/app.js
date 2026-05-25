@@ -1589,6 +1589,7 @@ function renderTodo() {
           ${addMode
             ? `
               <div class="todo-acorn-panel">
+                <button class="todo-panel-exit" data-action="todo-enter-view" aria-label="退出">×</button>
                 <textarea class="todo-draft-input" maxlength="120" placeholder="填写要新增的待办说明">${escapeHtml(state.todoDraft)}</textarea>
                 <button class="todo-panel-action" data-action="todo-add-submit">+</button>
               </div>
@@ -1596,14 +1597,13 @@ function renderTodo() {
             : removeMode
               ? `
                 <div class="todo-sweeper-panel">
-                  <img src="${asset("透明保洁螂.png")}" alt="透明保洁螂" />
                   <button class="todo-panel-action" data-action="todo-remove-submit">-</button>
                 </div>
               `
               : `
                 <div class="todo-mode-buttons">
-                  <button class="todo-mode-button is-add" data-action="todo-enter-add" aria-label="新增待办">+</button>
-                  <button class="todo-mode-button is-remove" data-action="todo-enter-remove" aria-label="删除待办">-</button>
+                  <button class="todo-mode-button is-add" data-action="todo-enter-add" aria-label="新增待办"><span>+</span></button>
+                  <button class="todo-mode-button is-remove" data-action="todo-enter-remove" aria-label="删除待办"><span>-</span></button>
                 </div>
               `}
         </div>
