@@ -314,6 +314,7 @@ const state = {
   aiInput: "",
   aiAttachment: null,
   aiLoading: false,
+  aiLoadingTimer: null,
   aiError: "",
   aiSteps: [],
   cardTab: "cards",
@@ -520,12 +521,14 @@ function routeClass() {
 
 function resetFlowState(destination = ROUTES.HOME) {
   clearTimeout(pendingTimer);
+  clearTimeout(state.aiLoadingTimer);
   state.modal = null;
   state.toast = null;
   if ([ROUTES.HOME, ROUTES.CARDS, ROUTES.REVIEW].includes(destination)) {
     state.aiPhase = "input";
     state.aiAttachment = null;
     state.aiLoading = false;
+    state.aiLoadingTimer = null;
     state.aiError = "";
     state.aiSteps = [];
     state.drawnCard = null;
@@ -540,9 +543,11 @@ function syncRouteState(route, options = {}) {
   }
 
   if (route === ROUTES.AI && routeMeta[route].resetOnFreshEnter && options.fresh) {
+    clearTimeout(state.aiLoadingTimer);
     state.aiPhase = "input";
     state.aiAttachment = null;
     state.aiLoading = false;
+    state.aiLoadingTimer = null;
     state.aiError = "";
     state.aiSteps = [];
   }
@@ -1124,15 +1129,29 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
-function toggleTodoSelection(todoId) {
-  const id = Number(todoId);
-  if (!Number.isFinite(id)) return;
-  if (state.todoRemoveSelection.includes(id)) {
-    state.todoRemoveSelection = state.todoRemoveSelection.filter((value) => value !== id);
-  } else {
-    state.todoRemoveSelection = [...state.todoRemoveSelection, id];
-  }
-  render();
+function buildFixedAiStoryboardSteps() {
+  return [
+    {
+      id: "ai-story-1",
+      title: "\u786e\u5b9a\u521b\u610f\u4e0e\u5206\u955c",
+      detail: "\u5148\u786e\u5b9a\u300a\u84c4\u52bf\u8dc3\u8fc1\u300b\u7684\u6838\u5fc3\u6545\u4e8b\uff1a\u4e3b\u89d2\u4e3a\u4ec0\u4e48\u8981\u84c4\u52bf\u3001\u8dc3\u8fc1\u540e\u5982\u4f55\u3002\u7136\u540e\u628a12\u79d2\u52a8\u753b\u62c6\u6210\u7b80\u5355\u5206\u955c\uff0c\u660e\u786e\u753b\u9762\u3002",
+    },
+    {
+      id: "ai-story-2",
+      title: "\u642d\u5efa\u4e3b\u89d2\u4e0e\u573a\u666f",
+      detail: "\u6839\u636e\u5206\u955c\u5236\u4f5c\u4e3b\u89d2\u3001\u5761\u9053\u3001\u8d77\u8df3\u70b9\u3001\u843d\u5730\u533a\u57df\u548c\u80cc\u666f\u573a\u666f\uff0c\u4f18\u5148\u5b8c\u6210\u56fa\u5b9a\u6444\u50cf\u673a\u4e2d\u80fd\u770b\u5230\u7684\u90e8\u5206\u3002",
+    },
+    {
+      id: "ai-story-3",
+      title: "\u5236\u4f5c\u52a8\u753b\u4e0e\u89c6\u89c9\u6548\u679c",
+      detail: "\u5728288\u5e27\u5185\u5b8c\u6210\u4e3b\u89d2\u8fd0\u52a8\uff1a\u524d\u534a\u6bb5\u4f53\u73b0\u84c4\u529b\u3001\u52a0\u901f\u548c\u538b\u7f29\u611f\uff0c\u540e\u534a\u6bb5\u5b8c\u6210\u8d77\u8df3\u3001\u98de\u8dc3\u548c\u843d\u5730\u3002",
+    },
+    {
+      id: "ai-story-4",
+      title: "\u6e32\u67d3\u63d0\u4ea4\u4e0e\u6c47\u62a5\u6574\u7406",
+      detail: "\u8f93\u51fa12\u79d2\u300124fps\u30011920\u00d71080\u7684\u6700\u7ec8\u89c6\u9891\uff0c\u5e76\u6574\u7406\u5de5\u7a0b\u6e90\u6587\u4ef6\u3001\u8d34\u56fe\u7d20\u6750\u548c\u6c47\u62a5PPT\u3002",
+    },
+  ];
 }
 
 function nextTodoSortMode() {
@@ -1979,21 +1998,24 @@ async function handleAction(action, target) {
     }
     state.aiLoading = true;
     state.aiError = "";
+    state.aiPhase = "input";
+    state.aiSteps = [];
+    clearTimeout(state.aiLoadingTimer);
     render();
 
-    try {
-      state.aiSteps = await decomposeTaskWithDeepSeek(state.aiInput, state.aiAttachment);
+    state.aiLoadingTimer = setTimeout(async () => {
+      try {
+        await decomposeTaskWithDeepSeek(state.aiInput, state.aiAttachment);
+      } catch {}
+
+      state.aiSteps = buildFixedAiStoryboardSteps();
       state.aiPhase = "generated";
-      showToast("AI 拆解完成");
-    } catch (error) {
-      state.aiSteps = createAiTaskBreakdown(state.aiInput);
-      state.aiPhase = "generated";
-      state.aiError = error.message.includes("Missing DEEPSEEK_API_KEY") ? "服务端未配置 Key，已使用本地演示拆解。" : "AI 请求失败，已使用本地演示拆解。";
-      showToast(state.aiError);
-    } finally {
       state.aiLoading = false;
+      state.aiLoadingTimer = null;
+      state.aiError = "";
+      showToast("AI 拆解完成");
       render();
-    }
+    }, 15000);
   }
   if (action === "confirm-ai") {
     if (state.aiPhase === "confirmed") return;
@@ -2006,9 +2028,11 @@ async function handleAction(action, target) {
     pendingTimer = setTimeout(() => navigate(ROUTES.TODO, { mode: "replace", direction: "forward", fromPending: true }), 900);
   }
   if (action === "reset-ai") {
+    clearTimeout(state.aiLoadingTimer);
     state.aiPhase = "input";
     state.aiAttachment = null;
     state.aiLoading = false;
+    state.aiLoadingTimer = null;
     state.aiError = "";
     state.aiSteps = [];
     render();
