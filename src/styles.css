@@ -2896,6 +2896,28 @@ button:active {
   object-fit: contain;
 }
 
+.result-card.is-action-result {
+  width: 38%;
+  min-height: 62%;
+  background: url("../Assets/透明卡牌底图.png") center / cover no-repeat;
+  box-shadow: 0 0 24px rgba(241, 182, 75, .95);
+}
+
+.result-card.is-action-result .action-card-title,
+.result-card.is-action-result .action-card-text {
+  display: block;
+  text-align: center;
+}
+
+.result-card.is-action-result .action-card-title {
+  font-size: 42px;
+}
+
+.result-card.is-action-result .action-card-text {
+  font-size: 22px;
+  color: #9b5a24;
+}
+
 .result-actions {
   position: absolute;
   left: 8.2%;
@@ -3133,6 +3155,18 @@ button:active {
   color: #8b4a2d;
   font-size: 28px;
   text-align: center;
+}
+
+.draw-choice-modal {
+  width: 54%;
+  min-height: 48%;
+}
+
+.draw-choice-actions {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .cancel-modal img {

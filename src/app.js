@@ -211,6 +211,68 @@ const phase3Steps = [
   },
 ];
 
+const DRAW_MODES = {
+  TASK: "task",
+  ACTION: "action",
+};
+
+const actionCards = [
+  {
+    id: "action-study",
+    title: "专注搬运",
+    category: "学习",
+    detail: "专注学习/工作 25 分钟",
+    reward: "奖励: +15 能量",
+    icon: "book",
+    accent: "#4d76be",
+  },
+  {
+    id: "action-life",
+    title: "巢穴整理",
+    category: "生活",
+    detail: "整理桌面或背包 10 分钟",
+    reward: "奖励: +10 秩序值",
+    icon: "nest",
+    accent: "#6d8b39",
+  },
+  {
+    id: "action-health",
+    title: "叶露补给",
+    category: "健康",
+    detail: "喝一杯水，并伸展 5 分钟",
+    reward: "奖励: +10 体力",
+    icon: "drop",
+    accent: "#4a9eb7",
+  },
+  {
+    id: "action-social",
+    title: "友情传信",
+    category: "社交",
+    detail: "给一位朋友发一条问候",
+    reward: "奖励: +12 亲密值",
+    icon: "mail",
+    accent: "#cb6c63",
+  },
+  {
+    id: "action-create",
+    title: "灵感涂鸦",
+    category: "创作",
+    detail: "记录一个想法，写/画 5 分钟",
+    reward: "奖励: +15 灵感",
+    icon: "feather",
+    accent: "#8b63b7",
+  },
+  {
+    id: "action-challenge",
+    title: "勇气探路",
+    category: "挑战",
+    detail: "完成一件拖延最久的小事",
+    reward: "奖励: +20 勇气",
+    icon: "flag",
+    accent: "#d07c33",
+  },
+];
+
 function guideCurrentSteps() {
   if (state.guidePhase === 1) return phase1Steps;
   if (state.guidePhase === 3) return phase3Steps;
@@ -256,6 +318,8 @@ const state = {
   executeStatus: "idle",
   drawnCard: null,
   drawPhase: "selecting",
+  drawMode: null,
+  drawPool: [],
   bgmPlaying: false,
   bgmVolume: readStoredBgmVolume(),
   homeAnimationsEnabled: readStoredHomeAnimationsEnabled(),
@@ -1045,6 +1109,20 @@ function nextTodoSortMode() {
   return modes[(currentIndex + 1) % modes.length];
 }
 
+function currentDrawPool() {
+  if (state.drawMode === DRAW_MODES.ACTION) return actionCards;
+  return state.drawPool.length ? state.drawPool : cards.slice(0, 6);
+}
+
+function startDrawMode(mode) {
+  state.drawMode = mode;
+  state.drawPool = mode === DRAW_MODES.ACTION ? [...actionCards] : cards.slice(0, 6);
+  state.drawnCard = null;
+  state.drawPhase = "selecting";
+  closeModal();
+  navigate(ROUTES.DRAW, { mode: "push", direction: "forward", fresh: true });
+}
+
 function button(label, className = "", attrs = "") {
   return `<button class="ui-btn ${className}" ${attrs}><span>${label}</span></button>`;
 }
@@ -1230,7 +1308,7 @@ function renderHome() {
         state.menuOpen
           ? `
             <button class="hotspot home-menu-hotspot menu-ai" data-route="ai" aria-label="AI任务拆解"></button>
-            <button class="hotspot home-menu-hotspot menu-draw" data-route="draw" aria-label="任务选择"></button>
+            <button class="hotspot home-menu-hotspot menu-draw" data-action="open-draw-choice" aria-label="任务选择"></button>
             <button class="hotspot home-menu-hotspot menu-todo" data-route="todo" aria-label="待办管理"></button>
             <button class="hotspot home-menu-hotspot menu-review" data-route="review" aria-label="任务回顾"></button>
             <button class="hotspot home-menu-hotspot menu-cards" data-route="cards" aria-label="卡片收藏"></button>
@@ -1346,7 +1424,7 @@ function renderTodo() {
     <section class="page todo-page">
       ${designFrame("待办事项2-王紫涵.png", "todo-design")}
       <button class="hotspot todo-back-hotspot" data-action="back" aria-label="返回"></button>
-      <button class="hotspot todo-draw-hotspot" data-route="draw" aria-label="抽卡"></button>
+      <button class="hotspot todo-draw-hotspot" data-action="open-draw-choice" aria-label="抽卡"></button>
       <button class="hotspot todo-add-hotspot" data-modal="todo-new" aria-label="新增任务"></button>
       <button class="hotspot todo-remove-hotspot" data-action="ask-remove-done" aria-label="删除已完成"></button>
       <button class="hotspot todo-detail-hotspot" data-modal="todo-detail" aria-label="任务详情"></button>
@@ -1485,6 +1563,10 @@ function renderReview() {
   `;
 }
 
+function openDrawModeChooser() {
+  setModal("draw-choice");
+}
+
 function renderProfile() {
   const labels = [
     ["settings", "操作按钮1.png"],
@@ -1521,24 +1603,35 @@ function renderProfile() {
 
 function renderDraw() {
   const picked = state.drawnCard;
+  const pool = currentDrawPool();
+  const isActionMode = state.drawMode === DRAW_MODES.ACTION;
+  const renderDrawFace = (card) =>
+    isActionMode
+      ? `<strong class="action-card-title">${card.title}</strong><span class="action-card-text">${card.detail}</span>`
+      : `<img src="${card.character}" alt="${card.title}" /><strong>${card.title}</strong>`;
   return `
     <section class="page draw-page">
       ${backButton()}
-      <h1 class="page-title">抽卡</h1>
+      <h1 class="page-title">${isActionMode ? "行动抽卡" : "抽卡"}</h1>
       <button class="history-btn" data-route="cards" data-mode="push"><img src="${asset("操作按钮4.png")}" alt="" /><span>历史</span></button>
       <img class="draw-king" src="${beetles.king}" alt="螂王" />
       <div class="pick-one">Pick One</div>
       <div class="card-fan ${state.drawPhase === "revealed" ? "has-pick" : ""}">
         <div class="card-fan-track">
-          ${cards.map((card, index) => `<button class="fan-card fan-${index % 6} ${picked?.id === card.id ? "picked" : ""}" data-draw="${card.id}" ${picked ? "disabled" : ""}><img src="${asset("透明卡牌背面.png")}" alt="抽卡" /></button>`).join("")}
+          ${pool
+            .map(
+              (card, index) =>
+                `<button class="fan-card fan-${index % 6} ${picked?.id === card.id ? "picked" : ""}" data-draw="${card.id}" ${picked ? "disabled" : ""}><img src="${asset("透明卡牌背面.png")}" alt="抽卡" /></button>`,
+            )
+            .join("")}
         </div>
       </div>
-      <div class="draw-tip">选择一张卡片，开启你的任务之旅吧!</div>
+      <div class="draw-tip">${isActionMode ? "选择一张行动卡，开启今天的行动吧!" : "选择一张卡片，开启你的任务之旅吧!"}</div>
       ${
         picked
           ? `<div class="draw-result">
-              <div class="result-card"><img src="${picked.character}" alt="${picked.title}" /><strong>${picked.title}</strong></div>
-              <div class="result-actions">${button("确认", "paper", 'data-action="confirm-draw"')}${button("重抽", "paper", 'data-action="redraw"')}</div>
+              <div class="result-card ${isActionMode ? "is-action-result" : ""}">${renderDrawFace(picked)}</div>
+              <div class="result-actions">${button("确认", "paper", 'data-action="confirm-draw"')}${isActionMode ? "" : button("重抽", "paper", 'data-action="redraw"')}</div>
             </div>`
           : ""
       }
@@ -1557,6 +1650,19 @@ function modalShell(content, className = "", options = {}) {
 
 function modalMarkup() {
   if (!state.modal) return "";
+
+  if (state.modal === "draw-choice") {
+    return modalShell(`
+      <div class="cloud-modal draw-choice-modal" role="dialog" aria-modal="true">
+        <h2>请选择抽卡模式</h2>
+        <p class="guide-confirm-text">任务抽卡用于进入任务流程，行动抽卡用于选择今日行动。</p>
+        <div class="draw-choice-actions">
+          ${button("任务抽卡", "orange", 'data-action="start-task-draw"')}
+          ${button("行动抽卡", "orange", 'data-action="start-action-draw"')}
+        </div>
+      </div>
+    `, "draw-choice-layer", { dismissible: false });
+  }
 
   if (state.modal === "guide-confirm") {
     return modalShell(`
@@ -1627,6 +1733,8 @@ function modalMarkup() {
       </div>
     `, "golden", { dismissible: false });
   }
+
+  if (state.modal === "draw-choice") return "";
 
   if (state.modal === "cancel" || state.modal === "logout" || state.modal === "remove-done") {
     const copy = {
@@ -1845,6 +1953,15 @@ async function handleAction(action, target) {
     state.aiSteps = [];
     render();
   }
+  if (action === "open-draw-choice") {
+    openDrawModeChooser();
+  }
+  if (action === "start-task-draw") {
+    startDrawMode(DRAW_MODES.TASK);
+  }
+  if (action === "start-action-draw") {
+    startDrawMode(DRAW_MODES.ACTION);
+  }
   if (action === "toggle-execute") {
     state.executeStatus = state.executeStatus === "running" ? "paused" : "running";
     render();
@@ -1917,11 +2034,20 @@ async function handleAction(action, target) {
     navigate(ROUTES.EXECUTE, { mode: "push", direction: "forward" });
   }
   if (action === "redraw") {
+    if (state.drawMode === DRAW_MODES.ACTION) return;
     state.drawnCard = null;
     state.drawPhase = "selecting";
     render();
   }
   if (action === "confirm-draw") {
+    if (state.drawMode === DRAW_MODES.ACTION) {
+      state.drawnCard = null;
+      state.drawPhase = "selecting";
+      state.drawMode = null;
+      state.drawPool = [];
+      finishToHome();
+      return;
+    }
     state.selectedTask = tasks.find((task) => task.name === state.drawnCard?.title) || tasks[0];
     state.executeStatus = "running";
     navigate(ROUTES.EXECUTE, { mode: "replace", direction: "forward" });
@@ -2088,7 +2214,9 @@ app.addEventListener("click", (event) => {
   }
 
   if (target.dataset.draw) {
-    state.drawnCard = cards.find((card) => card.id === Number(target.dataset.draw));
+    const drawId = target.dataset.draw;
+    state.drawnCard = currentDrawPool().find((card) => String(card.id) === drawId) || null;
+    if (!state.drawnCard) return;
     state.drawPhase = "revealed";
     render();
     return;
