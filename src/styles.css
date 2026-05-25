@@ -1475,17 +1475,19 @@ button:active {
 
 .ai-error-note,
 .ai-loading-note {
-  position: absolute;
-  left: 37.4%;
-  bottom: 17.8%;
-  z-index: 9;
-  max-width: 28%;
-  padding: 10px 16px;
-  border-radius: 999px;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 30;
+  max-width: min(90vw, 840px);
+  padding: 28px 44px;
+  border-radius: 36px;
   background: rgba(255, 244, 209, .86);
   color: #8b4a2d;
-  font-size: 18px;
+  font-size: 36px;
   text-align: center;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 28px 60px rgba(94, 46, 24, .18);
 }
 
 .ai-result-live {
