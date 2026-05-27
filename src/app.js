@@ -9,7 +9,11 @@ const BGM_STORAGE_KEY = "beetle-kingdom-bgm";
 const BGM_VOLUME_STORAGE_KEY = "beetle-kingdom-bgm-volume";
 const HOME_ANIMATIONS_STORAGE_KEY = "beetle-home-animations-enabled";
 const JOURNEY_PROGRESS_STORAGE_KEY = "beetle-journey-progress-v1";
+const DEMO_JOURNEY_PROGRESS_STORAGE_KEY = "beetle-demo-journey-progress-v1";
 const PROFILE_STORAGE_KEY = "beetle-profile-v1";
+const DEMO_PROFILE_STORAGE_KEY = "beetle-demo-profile-v1";
+const DEMO_ACCOUNT_STORAGE_KEY = "beetle-demo-account-v1";
+const DEMO_GUIDE_SEEN_STORAGE_KEY = "beetle-demo-guide-v1-seen";
 const IS_LOCAL_PREVIEW = window.location.protocol === "file:" || ["", "localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
 const LOCAL_PREVIEW_USER = {
   name: "本地测试员",
@@ -19,23 +23,47 @@ const LOCAL_PREVIEW_USER = {
   localPreview: true,
 };
 
+const DEMO_PREVIEW_USER = {
+  name: "数媒螂",
+  email: "HITSZ@local.preview",
+  user_metadata: { full_name: "数媒螂" },
+  emailVerified: true,
+  localPreview: true,
+  demoAccount: true,
+};
+
 function readLocalPreviewUser() {
   if (!IS_LOCAL_PREVIEW) return null;
   try {
-    return sessionStorage.getItem(LOCAL_AUTH_STORAGE_KEY) === "active" ? LOCAL_PREVIEW_USER : null;
+    const session = sessionStorage.getItem(LOCAL_AUTH_STORAGE_KEY);
+    if (session === "demo") return DEMO_PREVIEW_USER;
+    if (session === "active") return LOCAL_PREVIEW_USER;
+    return null;
   } catch {
     return null;
   }
 }
 
-function setLocalPreviewSession(active) {
+function setLocalPreviewSession(active, mode = "active") {
   if (!IS_LOCAL_PREVIEW) return;
   try {
-    if (active) sessionStorage.setItem(LOCAL_AUTH_STORAGE_KEY, "active");
+    if (active) sessionStorage.setItem(LOCAL_AUTH_STORAGE_KEY, mode);
     else sessionStorage.removeItem(LOCAL_AUTH_STORAGE_KEY);
   } catch {
     // Session storage can be unavailable in strict privacy modes; the in-memory state still works.
   }
+}
+
+function isDemoPreviewSession() {
+  return Boolean(readLocalPreviewUser()?.demoAccount);
+}
+
+function journeyProgressStorageKey() {
+  return isDemoPreviewSession() ? DEMO_JOURNEY_PROGRESS_STORAGE_KEY : JOURNEY_PROGRESS_STORAGE_KEY;
+}
+
+function profileStorageKey() {
+  return isDemoPreviewSession() ? DEMO_PROFILE_STORAGE_KEY : PROFILE_STORAGE_KEY;
 }
 
 function readStoredBgmVolume() {
@@ -49,7 +77,7 @@ function readStoredBgmVolume() {
 
 function hasSeenGuide() {
   try {
-    return localStorage.getItem(GUIDE_SEEN_STORAGE_KEY) === "1";
+    return localStorage.getItem(isDemoPreviewSession() ? DEMO_GUIDE_SEEN_STORAGE_KEY : GUIDE_SEEN_STORAGE_KEY) === "1";
   } catch {
     return false;
   }
@@ -73,11 +101,21 @@ function persistHomeAnimationsEnabled(enabled) {
   } catch {}
 }
 
+function resetDemoGuideState() {
+  try {
+    localStorage.removeItem(DEMO_GUIDE_SEEN_STORAGE_KEY);
+    localStorage.setItem(HOME_ANIMATIONS_STORAGE_KEY, "false");
+  } catch {}
+  state.homeAnimationsEnabled = false;
+}
+
 function readJourneyProgress() {
-  const fallback = { completedTasks: [], unlockedCardIds: [9] };
+  const fallback = isDemoPreviewSession()
+    ? { completedTasks: [], unlockedCardIds: [] }
+    : { completedTasks: [], unlockedCardIds: [9] };
 
   try {
-    const raw = localStorage.getItem(JOURNEY_PROGRESS_STORAGE_KEY);
+    const raw = localStorage.getItem(journeyProgressStorageKey());
     if (!raw) return fallback;
 
     const parsed = JSON.parse(raw);
@@ -98,8 +136,12 @@ function readJourneyProgress() {
           })
       : [];
     const unlockedCardIds = Array.isArray(parsed.unlockedCardIds)
-      ? [...new Set([9, ...parsed.unlockedCardIds.map((value) => Number(value)).filter((value) => Number.isFinite(value))])]
-      : [9];
+      ? [...new Set(parsed.unlockedCardIds.map((value) => Number(value)).filter((value) => Number.isFinite(value)))]
+      : fallback.unlockedCardIds;
+
+    if (!isDemoPreviewSession() && !unlockedCardIds.includes(9)) {
+      unlockedCardIds.unshift(9);
+    }
 
     return { completedTasks, unlockedCardIds };
   } catch {
@@ -110,7 +152,7 @@ function readJourneyProgress() {
 function persistJourneyProgress() {
   try {
     localStorage.setItem(
-      JOURNEY_PROGRESS_STORAGE_KEY,
+      journeyProgressStorageKey(),
       JSON.stringify({
         completedTasks: state.completedTasks,
         unlockedCardIds: state.unlockedCardIds,
@@ -1139,7 +1181,7 @@ function completeGuide() {
   state.guideNeedsTyping = false;
   state.guideDisplayedText = "";
   try {
-    localStorage.setItem(GUIDE_SEEN_STORAGE_KEY, "1");
+    localStorage.setItem(isDemoPreviewSession() ? DEMO_GUIDE_SEEN_STORAGE_KEY : GUIDE_SEEN_STORAGE_KEY, "1");
   } catch {}
   state.homeAnimationsEnabled = true;
   persistHomeAnimationsEnabled(true);
@@ -1180,9 +1222,7 @@ function startGuide() {
 function checkAutoGuide() {
   if (!state.authUser) return;
   if (!state.authLoading) {
-    try {
-      if (localStorage.getItem(GUIDE_SEEN_STORAGE_KEY) === "1") return;
-    } catch {}
+    if (hasSeenGuide()) return;
     setTimeout(() => startGuide(), 120);
   }
 }
@@ -1631,6 +1671,15 @@ function renderExecute() {
 }
 
 function defaultProfileState() {
+  if (isDemoPreviewSession()) {
+    return {
+      nickname: "数媒螂",
+      ipLocation: "",
+      birthday: "",
+      avatar: "",
+      userId: "HITSZ",
+    };
+  }
   return {
     nickname: "金角大螂",
     ipLocation: "广东",
@@ -1643,7 +1692,7 @@ function defaultProfileState() {
 function readProfileState() {
   const fallback = defaultProfileState();
   try {
-    const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
+    const raw = localStorage.getItem(profileStorageKey());
     if (!raw) return fallback;
     const parsed = JSON.parse(raw);
     return {
@@ -1657,8 +1706,32 @@ function readProfileState() {
 
 function persistProfileState() {
   try {
-    localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(state.profile));
+    localStorage.setItem(profileStorageKey(), JSON.stringify(state.profile));
   } catch {}
+}
+
+function resetDemoProgress() {
+  state.completedTasks = [];
+  state.unlockedCardIds = [];
+  state.recentUnlockedCardId = null;
+  state.achievementCount = 0;
+  state.todos = [];
+  state.todoSortMode = "default";
+  state.todoMode = "view";
+  state.todoDraft = "";
+  state.todoRemoveSelection = [];
+  state.selectedTask = tasks[0];
+  state.selectedTodoId = null;
+  state.selectedCard = cards[0];
+  state.drawnCard = null;
+  state.drawPhase = "selecting";
+  state.drawMode = null;
+  state.drawPool = [];
+  state.drawShufflePulse = 0;
+  state.executeStatus = "idle";
+  state.executeStartedAt = null;
+  state.executeElapsedMs = 0;
+  state.cardTab = "cards";
 }
 
 function displayProfileValue(key) {
@@ -2622,6 +2695,11 @@ app.addEventListener("submit", async (event) => {
     state.authUser = user;
     state.homeAnimationsEnabled = readStoredHomeAnimationsEnabled(true);
     state.modal = null;
+    if (user?.demoAccount) {
+      state.profile = defaultProfileState();
+      persistProfileState();
+      showToast("欢迎进入数媒螂演示账号");
+    }
     showToast(user.emailVerified === false ? "注册成功，请前往邮箱确认账号。" : "登录成功");
     if (state.pendingRoute) {
       const route = state.pendingRoute;
@@ -2640,8 +2718,25 @@ app.addEventListener("submit", async (event) => {
 });
 
 async function authenticateForm(email, password, name) {
+  const normalizedEmail = String(email || "").trim().toUpperCase();
+  if (normalizedEmail === "HITSZ" && password === "123") {
+    setLocalPreviewSession(true, "demo");
+    resetDemoProgress();
+    resetDemoGuideState();
+    state.profile = {
+      ...defaultProfileState(),
+      nickname: "数媒螂",
+      ipLocation: "",
+      birthday: "",
+      avatar: "",
+      userId: "HITSZ",
+    };
+    persistProfileState();
+    return { ...DEMO_PREVIEW_USER, name: "数媒螂" };
+  }
+
   if (email === "123" && password === "123") {
-    setLocalPreviewSession(true);
+    setLocalPreviewSession(true, "active");
     return { ...LOCAL_PREVIEW_USER, name: name || LOCAL_PREVIEW_USER.name };
   }
 

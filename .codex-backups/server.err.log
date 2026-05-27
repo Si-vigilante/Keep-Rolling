@@ -1540,3 +1540,553 @@ ConnectionResetError: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
 ----------------------------------------
 127.0.0.1 - - [26/May/2026 00:22:33] "GET /src/app.js?v=20260525-journey-progress HTTP/1.1" 304 -
 127.0.0.1 - - [26/May/2026 00:22:33] "GET /Assets/%E6%B2%99%E4%B8%98%E6%85%A2%E6%AD%A5-rebalanced.mp3 HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 57644)
+Traceback (most recent call last):
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 1320, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                             directory=args.directory)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 424, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 881, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionResetError: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+----------------------------------------
+127.0.0.1 - - [26/May/2026 00:33:07] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [26/May/2026 00:33:07] "GET /src/styles.css?v=20260525-journey-progress HTTP/1.1" 304 -
+127.0.0.1 - - [26/May/2026 00:33:07] "GET /src/app.js?v=20260525-journey-progress HTTP/1.1" 200 -
+127.0.0.1 - - [26/May/2026 00:33:07] "GET /src/data.js HTTP/1.1" 304 -
+127.0.0.1 - - [26/May/2026 00:33:07] "GET /src/mockServices.js HTTP/1.1" 304 -
+127.0.0.1 - - [26/May/2026 00:33:07] "GET /Assets/%E6%B2%99%E4%B8%98%E6%85%A2%E6%AD%A5-rebalanced.mp3 HTTP/1.1" 200 -
+127.0.0.1 - - [26/May/2026 00:33:08] "GET / HTTP/1.1" 304 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 57142)
+Traceback (most recent call last):
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 1320, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                             directory=args.directory)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 424, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 881, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionResetError: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+----------------------------------------
+127.0.0.1 - - [26/May/2026 00:33:08] "GET /Assets/%E6%B2%99%E4%B8%98%E6%85%A2%E6%AD%A5-rebalanced.mp3 HTTP/1.1" 200 -
+127.0.0.1 - - [26/May/2026 00:33:15] "GET / HTTP/1.1" 304 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 64120)
+Traceback (most recent call last):
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 1320, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                             directory=args.directory)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 424, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 881, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionResetError: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+----------------------------------------
+127.0.0.1 - - [26/May/2026 00:33:15] "GET /src/app.js?v=20260525-journey-progress HTTP/1.1" 304 -
+127.0.0.1 - - [26/May/2026 00:33:15] "GET /Assets/%E6%B2%99%E4%B8%98%E6%85%A2%E6%AD%A5-rebalanced.mp3 HTTP/1.1" 200 -
+127.0.0.1 - - [26/May/2026 00:33:18] "GET / HTTP/1.1" 304 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 56231)
+Traceback (most recent call last):
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 1320, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                             directory=args.directory)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 424, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 881, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionResetError: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+----------------------------------------
+127.0.0.1 - - [26/May/2026 00:33:18] "GET /Assets/%E6%B2%99%E4%B8%98%E6%85%A2%E6%AD%A5-rebalanced.mp3 HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 53984)
+Traceback (most recent call last):
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 1320, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                             directory=args.directory)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 424, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 881, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionResetError: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+----------------------------------------
+127.0.0.1 - - [26/May/2026 00:34:02] code 404, message File not found
+127.0.0.1 - - [26/May/2026 00:34:02] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [26/May/2026 00:34:02] "GET /Assets/%E6%B2%99%E4%B8%98%E6%85%A2%E6%AD%A5-rebalanced.mp3 HTTP/1.1" 200 -
+127.0.0.1 - - [26/May/2026 00:34:17] "GET / HTTP/1.1" 304 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 61575)
+Traceback (most recent call last):
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 1320, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                             directory=args.directory)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 424, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 881, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionResetError: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+----------------------------------------
+127.0.0.1 - - [26/May/2026 00:34:17] "GET /src/app.js?v=20260525-journey-progress HTTP/1.1" 304 -
+127.0.0.1 - - [26/May/2026 00:34:17] "GET /Assets/%E6%B2%99%E4%B8%98%E6%85%A2%E6%AD%A5-rebalanced.mp3 HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 65025)
+Traceback (most recent call last):
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 1320, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                             directory=args.directory)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 424, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 881, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionResetError: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+----------------------------------------
+127.0.0.1 - - [26/May/2026 00:34:29] "GET /Assets/%E6%B2%99%E4%B8%98%E6%85%A2%E6%AD%A5-rebalanced.mp3 HTTP/1.1" 200 -
+127.0.0.1 - - [26/May/2026 00:34:37] "GET / HTTP/1.1" 304 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 62158)
+Traceback (most recent call last):
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 1320, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                             directory=args.directory)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 424, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 881, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionResetError: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+----------------------------------------
+127.0.0.1 - - [26/May/2026 00:34:37] "GET /src/app.js?v=20260525-journey-progress HTTP/1.1" 304 -
+127.0.0.1 - - [26/May/2026 00:34:37] "GET /Assets/%E6%B2%99%E4%B8%98%E6%85%A2%E6%AD%A5-rebalanced.mp3 HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 56679)
+Traceback (most recent call last):
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 1320, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                             directory=args.directory)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 424, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 881, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionResetError: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+----------------------------------------
+127.0.0.1 - - [26/May/2026 00:39:23] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [26/May/2026 00:39:23] "GET /src/styles.css?v=20260525-journey-progress HTTP/1.1" 304 -
+127.0.0.1 - - [26/May/2026 00:39:23] "GET /src/app.js?v=20260525-journey-progress HTTP/1.1" 200 -
+127.0.0.1 - - [26/May/2026 00:39:23] "GET /src/data.js HTTP/1.1" 304 -
+127.0.0.1 - - [26/May/2026 00:39:23] "GET /Assets/%E6%B2%99%E4%B8%98%E6%85%A2%E6%AD%A5-rebalanced.mp3 HTTP/1.1" 200 -
+127.0.0.1 - - [26/May/2026 00:39:25] "GET / HTTP/1.1" 304 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 53661)
+Traceback (most recent call last):
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 1320, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                             directory=args.directory)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 424, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 881, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionResetError: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+----------------------------------------
+127.0.0.1 - - [26/May/2026 00:39:25] "GET /Assets/%E6%B2%99%E4%B8%98%E6%85%A2%E6%AD%A5-rebalanced.mp3 HTTP/1.1" 200 -
+127.0.0.1 - - [26/May/2026 00:39:34] code 404, message File not found
+127.0.0.1 - - [26/May/2026 00:39:34] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [26/May/2026 00:40:12] "GET / HTTP/1.1" 304 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 58314)
+Traceback (most recent call last):
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 1320, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                             directory=args.directory)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 424, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 881, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionResetError: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+----------------------------------------
+127.0.0.1 - - [26/May/2026 00:40:12] "GET /src/app.js?v=20260525-journey-progress HTTP/1.1" 304 -
+127.0.0.1 - - [26/May/2026 00:40:12] "GET /Assets/%E6%B2%99%E4%B8%98%E6%85%A2%E6%AD%A5-rebalanced.mp3 HTTP/1.1" 200 -
+127.0.0.1 - - [26/May/2026 00:40:20] "GET / HTTP/1.1" 304 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 58344)
+Traceback (most recent call last):
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 1320, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                             directory=args.directory)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 424, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 881, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionResetError: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+----------------------------------------
+127.0.0.1 - - [26/May/2026 00:40:21] "GET /Assets/%E6%B2%99%E4%B8%98%E6%85%A2%E6%AD%A5-rebalanced.mp3 HTTP/1.1" 200 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 60785)
+Traceback (most recent call last):
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 1320, in finish_request
+    self.RequestHandlerClass(request, client_address, self,
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                             directory=args.directory)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 424, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\http\server.py", line 881, in copyfile
+    shutil.copyfileobj(source, outputfile)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+    ~~~~~~~~~~^^^^^
+  File "C:\Users\Exile\AppData\Local\Programs\Python\Python313\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionResetError: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+----------------------------------------
+127.0.0.1 - - [26/May/2026 00:40:42] code 404, message File not found
+127.0.0.1 - - [26/May/2026 00:40:42] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [26/May/2026 00:40:42] "GET /Assets/%E6%B2%99%E4%B8%98%E6%85%A2%E6%AD%A5-rebalanced.mp3 HTTP/1.1" 200 -
+127.0.0.1 - - [26/May/2026 00:41:18] "GET /Page_View/%E5%BE%85%E5%8A%9E%E4%BA%8B%E9%A1%B9%E8%83%8C%E6%99%AF%E5%9B%BE1.png?v=20260525-journey-progress HTTP/1.1" 304 -
+127.0.0.1 - - [26/May/2026 00:42:12] code 501, message Unsupported method ('POST')
+127.0.0.1 - - [26/May/2026 00:42:12] "POST /api/decompose-task HTTP/1.1" 501 -
+127.0.0.1 - - [26/May/2026 00:42:12] "GET /Page_View/AI%E4%BB%BB%E5%8A%A1%E6%8B%86%E8%A7%A32.2-%E6%B1%AA%E5%AB%A3%E7%84%B6.png?v=20260525-journey-progress HTTP/1.1" 200 -
+127.0.0.1 - - [26/May/2026 00:42:23] "GET /Page_View/%E5%BE%85%E5%8A%9E%E4%BA%8B%E9%A1%B9%E8%83%8C%E6%99%AF%E5%9B%BE2.png?v=20260525-journey-progress HTTP/1.1" 200 -
+127.0.0.1 - - [26/May/2026 00:42:25] "GET /Page_View/%E5%BE%85%E5%8A%9E%E4%BA%8B%E9%A1%B9%E8%83%8C%E6%99%AF%E5%9B%BE3.png?v=20260525-journey-progress HTTP/1.1" 200 -
+127.0.0.1 - - [26/May/2026 00:42:34] "GET /Assets/%E9%80%8F%E6%98%8E%E5%8D%A1%E7%89%8C%E5%BA%95%E5%9B%BE.png HTTP/1.1" 200 -
+127.0.0.1 - - [26/May/2026 00:42:39] "GET /Page_View/%E4%BB%BB%E5%8A%A1%E6%89%A7%E8%A1%8C%E9%80%8F%E6%98%8E%E5%9B%BE.png?v=20260525-journey-progress HTTP/1.1" 304 -
+127.0.0.1 - - [26/May/2026 00:42:44] "GET /Page_View/%E4%BB%BB%E5%8A%A1%E6%89%A7%E8%A1%8C%E9%80%8F%E6%98%8E%E5%9B%BE2.png?v=20260525-journey-progress HTTP/1.1" 200 -
+127.0.0.1 - - [26/May/2026 00:45:24] "GET /src/styles.css?v=20260525-journey-progress HTTP/1.1" 304 -
+127.0.0.1 - - [26/May/2026 00:45:24] "GET /src/app.js?v=20260525-journey-progress HTTP/1.1" 304 -
+127.0.0.1 - - [26/May/2026 00:45:24] "GET /src/data.js HTTP/1.1" 304 -
+127.0.0.1 - - [26/May/2026 00:45:56] code 404, message File not found
+127.0.0.1 - - [26/May/2026 00:45:56] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [26/May/2026 00:46:06] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [26/May/2026 00:46:38] code 404, message File not found
+127.0.0.1 - - [26/May/2026 00:46:38] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [26/May/2026 00:46:52] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [26/May/2026 00:46:52] "GET /src/app.js?v=20260525-journey-progress HTTP/1.1" 304 -
+127.0.0.1 - - [26/May/2026 00:49:24] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [26/May/2026 00:49:24] "GET /src/styles.css?v=20260525-journey-progress HTTP/1.1" 304 -
+127.0.0.1 - - [26/May/2026 00:49:24] "GET /src/app.js?v=20260525-journey-progress HTTP/1.1" 200 -
+127.0.0.1 - - [26/May/2026 00:49:24] "GET /src/data.js HTTP/1.1" 304 -
+127.0.0.1 - - [26/May/2026 00:49:30] "GET / HTTP/1.1" 304 -
+127.0.0.1 - - [26/May/2026 00:49:36] code 404, message File not found
+127.0.0.1 - - [26/May/2026 00:49:36] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [26/May/2026 00:50:49] code 501, message Unsupported method ('POST')
+127.0.0.1 - - [26/May/2026 00:50:49] "POST /api/decompose-task HTTP/1.1" 501 -
+127.0.0.1 - - [26/May/2026 00:51:21] "GET /Assets/%E9%80%8F%E6%98%8E%E8%AF%BB%E4%B9%A6%E8%9E%82.png HTTP/1.1" 200 -
